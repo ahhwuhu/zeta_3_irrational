@@ -17,3 +17,4 @@ lean_decls
 *.bbl
 *.blg
 /blueprint/src/print.pdf
+*.pdf
