@@ -8,21 +8,73 @@
 
 \chapter{Introduction}
 
+证明一个实数$\xi$是无理数, 我们通常采用构造非零序列$\{a_n + b_n\xi\}$趋于$0$, 当$n \rightarrow \infty$时, 其中$a_n, b_n \in \mathbb{Z}$.
+
+因为如果$\xi$是有理数$\frac{p}{q}$, 则上述序列有下界$\frac{1}{q}$.
+
+\chapter{Proof}
+
 \section{What is Blueprint?}
 
-test test test
+\begin{lemma}\label{integral_zeta_3}
+    \[ -\int_{0}^{1}\int_{0}^{1} \frac{{\rm ln}(xy)}{1-xy} \, dx \, dy = 2\xi(3) \]
+\end{lemma}
 
-\begin{center}
-    \begin{tikzcd}
-    A \arrow[r, "f"] \arrow[d, "g"'] & B \arrow[d, "h"] \\
-    C \arrow[r, "i"'] & D
-    \end{tikzcd}
-\end{center}
+\begin{lemma}\label{I_rr}
+    for all integers $r > 0$
+    \[ -\int_{0}^{1}\int_{0}^{1} x^ry^r\frac{1}{1-xy} \, dx \, dy = \sum\limits_{m = 1}^{\infty}\frac{1}{(m+r)^2} \]
+\end{lemma}
 
-$\zeta(3)$ is irrational.
+\begin{lemma}\label{interchange_of_limits_sums_derivatives}
+    111
+\end{lemma}
 
-asasdasd
+\begin{lemma}\label{J_rr}
+    for all integers $r > 0$
+    \[ -\int_{0}^{1}\int_{0}^{1} x^ry^r\frac{{\rm ln}(xy)}{1-xy} \, dx \, dy = 2\xi(3) - 2 \sum\limits_{m = 1}^{r}\frac{1}{m^3} \]
+\end{lemma}
 
-阿达是的阿是 撒的
+\begin{lemma}\label{I_rs}
+    Let $r$ and $s$ be non-negative integers, with $r \neq s$, then
+    \[ -\int_{0}^{1}\int_{0}^{1} x^ry^s\frac{1}{1-xy} \, dx \, dy = \sum\limits_{m = 1}^{\infty}\frac{1}{m+r}\frac{1}{m+s} \]
+\end{lemma}
 
-中文中文中文
+\begin{lemma}\label{J_rs}
+    Let $r$ and $s$ be non-negative integers, with $r \neq s$, then
+    \[ -\int_{0}^{1}\int_{0}^{1} x^ry^s\frac{{\rm ln}(xy)}{1-xy} \, dx \, dy = \frac{\sum\limits_{m = 1}^{r}\frac{1}{m^2} - \sum\limits_{m = 1}^{s}\frac{1}{m^2}}{r - s} \]
+\end{lemma}
+
+\begin{lemma}\label{Jrr_linear_form}
+    For all $r \in \mathbb{N}^*$,
+    \[ J_rr = 2 \zeta(3) - \frac{z_r}{(d_r)^3} \]
+    for some $z_r \in \mathbb{N}^*$.
+\end{lemma}
+
+\begin{lemma}\label{d_r_3}
+    For all $r \in \mathbb{N}^*$,
+    \[ d_{r^3} = (d_r)^3 \]
+\end{lemma}
+
+\begin{lemma}\label{d_r_2}
+    For all $r \in \mathbb{N}^*$,
+    \[ d_{r^2} = (d_r)^2 \]
+\end{lemma}
+
+\begin{lemma}\label{Jrs_postive_rational}
+    For all $r \in \mathbb{N}, r \neq s$,
+    \[ J_rs = \frac{z_{rs}}{(d_r)^3}\]
+    for some $z_{rs} \in \mathbb{N}^*$.
+\end{lemma}
+
+\begin{lemma}\label{one_var_substitution}
+    \[ \int_{0}^{1} \frac{1}{1 - (1 - v)z} \, dz= -\frac{{\rm ln}v}{1 - v} \]
+\end{lemma}
+
+\begin{lemma}\label{two_var_substitution}
+    Given $s, t \in \mathbb{R}_{(0,1)}$, the following equality holds:
+    \[ \int_{0}^{1} \frac{1}{1 - [1 - (1 - s)t]u} \, du = \int_{0}^{1} \frac{1}{[1 - (1 - u)s][1 - (1 - t)u]} \, du \]
+\end{lemma}
+
+\begin{theorem}\label{zeta_3_irrational}
+    $\zeta(3)$ is irrational.
+\end{theorem}
