@@ -14,6 +14,23 @@
 
 \chapter{Proof}
 
+\begin{definition}\label{Legendre_poly}
+    \[ P_n(x):=\frac{1}{n!}\frac{d^n}{dx^n}[x^n(1-x)^n] \]
+\end{definition}
+
+\begin{lemma}\label{Legendre_poly_is_int}
+    \[ P_n(x)=\sum\limits_{k=0}^{n}(-1)^k\binom{n}{k}\binom{n+k}{n}x^k \]
+\end{lemma}
+
+\begin{lemma}\label{Legendre_poly_sym}
+    \[ P_n(1-x)=(-1)^nP_n(x) \]
+\end{lemma}
+
+\begin{lemma}\label{Legendre_poly_integral}
+    For all $n \in \mathbb{N}$ and $f : [0,1] \rightarrow \mathbb{R}$ of class $C^n$, one has
+    \[ \int_{0}^{1}P_n(x)f(x) \, dx =\frac{(-1)^n}{n!} \int_{0}^{1} x^n(1-x)^n\frac{d^nf}{dx^n} \, dx \]
+\end{lemma}
+
 \begin{lemma}\label{integral_zeta_3}
     \[ -\int_{0}^{1}\int_{0}^{1} \frac{{\rm ln}(xy)}{1-xy} \, dx \, dy = 2\xi(3) \]
 \end{lemma}
@@ -73,9 +90,24 @@
     \[ \int_{0}^{1} \frac{1}{1 - [1 - (1 - s)t]u} \, du = \int_{0}^{1} \frac{1}{[1 - (1 - u)s][1 - (1 - t)u]} \, du \]
 \end{lemma}
 
+\begin{lemma}\label{bound}
+    Let $D = \{(x,y,z)|x,y,z\in (0,1)\}$, then
+    \[ g(x,y,z) = \frac{x(1-x)y(1-y)z(1-z)}{} \]
+\end{lemma}
+
+\begin{definition}\label{J_n}
+    \[ J_n := \int_{0}^{1} P_n(x)P_n(y)\frac{{\rm ln}(xy)}{1-xy} \, dx \, dy \]
+\end{definition}
+
+\begin{lemma}\label{J_n_integers_an_bn}
+    For some integers $a_n$ and $b_n$,
+    \[ J_n = \frac{a_n}{d_n^3} + b_n\zeta(3) \]
+\end{lemma}
+
 \begin{lemma}
-    \[ \int_{0}^{1} R_n(x)S_n(x) \, dx = \]
-\end{lemma} 
+    For $a \in \mathbb{R}_{(0,1)}$,
+    \[ \frac{\partial^n}{\partial x^n}(\frac{1}{1-ax}) = \frac{n!a^n}{(1-ax)^n} \]
+\end{lemma}
 
 \begin{theorem}\label{zeta_3_irrational}
     $\zeta(3)$ is irrational.
