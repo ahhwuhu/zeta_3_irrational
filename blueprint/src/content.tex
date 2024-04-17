@@ -86,14 +86,41 @@
 \end{lemma}
 
 \begin{lemma}\label{one_var_substitution}
-    \[ \int_{0}^{1} \frac{1}{1 - (1 - v)z} \, dz= -\frac{{\rm ln}v}{1 - v} \]
+    \[ \int_{0}^{1} \frac{1}{1 - (1 - x)z} \, dz= -\frac{{\rm ln}x}{1 - x} \]
 \end{lemma}
+\begin{proof}
+    Substitute $y = (1 - x)z$ in the integral, and we also have $dy = (1-x)dz$. Then we deduce that
+    \begin{align*}
+        \int_{0}^{1} \frac{1}{1 - (1 - x)z} \, dz =& \int_{0}^{1-x} \frac{1}{(1 - y)(1-x)} \, dy \\
+        =&\frac{1}{1-x}\int_{0}^{1-x} \frac{1}{1 - y} \, dy\\
+        =&\frac{1}{1-x}[-{\rm ln}(1-y)]_0^{1-x} \\
+        =&\frac{1}{1-x}[-{\rm ln}(x) + {\rm ln}(1)] \\
+        =&-\frac{{\rm ln}x}{1 - x}
+    \end{align*}
+\end{proof}
 
 \begin{lemma}\label{two_var_substitution}
     \uses{one_var_substitution}
     Given $s, t \in \mathbb{R}_{(0,1)}$, the following equality holds:
     \[ \int_{0}^{1} \frac{1}{1 - [1 - (1 - s)t]u} \, du = \int_{0}^{1} \frac{1}{[1 - (1 - u)s][1 - (1 - t)u]} \, du \]
 \end{lemma}
+\begin{proof}
+    Let $x = (1 - s)t$ in the previous lemma, then we can get 
+    \[ \int_{0}^{1} \frac{1}{1 - [1 - (1 - s)t]u} \, du = -\frac{{\rm ln}[(1 - s)t]}{1 - (1 - s)t}\]
+    We can also find that
+    \[ \frac{1}{[1 - (1 - u)s][1 - (1 - t)u]} = \frac{1}{1 - (1 - s)t}\left[\frac{s}{1 - (1 - u)s} + \frac{1-t}{1 - (1 - t)u} \right] \]
+    Then we can see the integral on the right side of the equal:
+    \begin{align*}
+        &\int_{0}^{1} \frac{1}{[1 - (1 - u)s][1 - (1 - t)u]} \, du \\
+        =&\frac{1}{1 - (1 - s)t}\int_{0}^{1} \left[\frac{s}{1 - (1 - u)s} + \frac{1-t}{1 - (1 - t)u} \right] \, du \\
+        =&\frac{1}{1 - (1 - s)t}\int_{0}^{1} \left[\frac{s}{1 - us} + \frac{1-t}{1 - (1 - t)u} \right] \, du \\
+        =&\frac{1}{1 - (1 - s)t}\left[-{\rm ln}(1-su)-{\rm ln}(1-(1-t)u) \right]_{0}^{1}\\
+        =&\frac{1}{1 - (1 - s)t}\left[-{\rm ln}(1-s)-{\rm ln}(t)+{\rm ln}(1)-{\rm ln}(1) \right]\\
+        =&\frac{1}{1 - (1 - s)t}\left[-{\rm ln}(1-s)-{\rm ln}(t) \right]\\
+        =&-\frac{{\rm ln}[(1 - s)t]}{1 - (1 - s)t}
+    \end{align*}
+    Immediately we can see the lemma.
+\end{proof}
 
 \begin{definition}\label{J_n}
     \[ J_n := \int_{0}^{1} P_n(x)P_n(y)\frac{{\rm ln}(xy)}{1-xy} \, dx \, dy \]
@@ -114,6 +141,24 @@
     Let $D = \{(x,y,z)|x,y,z\in (0,1)\}$, then
     \[ \frac{x(1-x)y(1-y)z(1-z)}{[1-(1-z)x](1-yz)} < \frac{1}{30} \]
 \end{lemma}
+\begin{proof}
+    We have two inequalities
+    \[ 1-(1-z)x = 1-x+xz \geqslant 2\sqrt{1-x}\sqrt{xz} \]
+    and
+    \[ 1-yz= 1-y+y-yz = 1-y+(1-z)y \geqslant 2\sqrt{1-y}\sqrt{(1-z)y} \]
+    Then we can deduce that for $(x,y,z) \in D$,
+    \begin{align*}
+        \frac{x(1-x)y(1-y)z(1-z)}{[1-(1-z)x](1-yz)} \leqslant& \frac{x(1-x)y(1-y)z(1-z)}{2\sqrt{1-x}\sqrt{xz}\cdot2\sqrt{1-y}\sqrt{(1-z)y}}\\
+        =&\frac{x(1-x)y(1-y)z(1-z)}{4\sqrt{1-x}\sqrt{x}\sqrt{z}\sqrt{1-y}\sqrt{1-z}\sqrt{y}}\\
+        =&\frac{\sqrt{x}\sqrt{1-x}\sqrt{y}\sqrt{1-y}\sqrt{z}\sqrt{1-z}}{4}
+    \end{align*}
+    For $x\in (0,1)$, the max value of $\sqrt{x}\sqrt{1-x} = \sqrt{x(1-x)}$ is got at $x=\frac{1}{2}$. So do $y, z$.
+    Then we have
+    \begin{align*}
+        \frac{x(1-x)y(1-y)z(1-z)}{[1-(1-z)x](1-yz)} \leqslant& \frac{1}{4}\cdot\sqrt{\frac{1}{2}}\sqrt{1-\frac{1}{2}}\cdot\sqrt{\frac{1}{2}}\sqrt{1-\frac{1}{2}}\cdot\sqrt{\frac{1}{2}}\sqrt{1-\frac{1}{2}} \\
+        =& \frac{1}{32} < \frac{1}{30} 
+    \end{align*}
+\end{proof}
 
 \begin{theorem}\label{zeta_3_irrational}
     $\zeta(3)$ is irrational.
