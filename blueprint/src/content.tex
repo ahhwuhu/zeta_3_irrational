@@ -45,7 +45,7 @@
 \end{lemma}
 
 \begin{lemma}\label{J_rr}
-    \use{I_rr, interchange_of_limits_sums_derivatives}
+    \uses{I_rr, interchange_of_limits_sums_derivatives}
     for all integers $r > 0$
     \[ -\int_{0}^{1}\int_{0}^{1} x^ry^r\frac{{\rm ln}(xy)}{1-xy} \, dx \, dy = 2\xi(3) - 2 \sum\limits_{m = 1}^{r}\frac{1}{m^3} \]
 \end{lemma}
@@ -56,7 +56,7 @@
 \end{lemma}
 
 \begin{lemma}\label{J_rs}
-    \use{I_rs, interchange_of_limits_sums_derivatives}
+    \uses{I_rs, interchange_of_limits_sums_derivatives}
     Let $r$ and $s$ be non-negative integers, with $r \neq s$, then
     \[ -\int_{0}^{1}\int_{0}^{1} x^ry^s\frac{{\rm ln}(xy)}{1-xy} \, dx \, dy = \frac{\sum\limits_{m = 1}^{r}\frac{1}{m^2} - \sum\limits_{m = 1}^{s}\frac{1}{m^2}}{r - s} \]
 \end{lemma}
@@ -67,7 +67,7 @@
 \end{lemma}
 
 \begin{lemma}\label{Jrr_linear_form}
-    \use{J_rr, d_r_3}
+    \uses{J_rr, d_r_3}
     For all $r \in \mathbb{N}^*$,
     \[ J_rr = 2 \zeta(3) - \frac{z_r}{(d_r)^3} \]
     for some $z_r \in \mathbb{N}^*$.
@@ -79,7 +79,7 @@
 \end{lemma}
 
 \begin{lemma}\label{Jrs_postive_rational}
-    \use{J_rs, d_r_2, d_r_3}
+    \uses{J_rs, d_r_2, d_r_3}
     For all $r \in \mathbb{N}, r \neq s$,
     \[ J_rs = \frac{z_{rs}}{(d_r)^3}\]
     for some $z_{rs} \in \mathbb{N}^*$.
@@ -90,7 +90,7 @@
 \end{lemma}
 
 \begin{lemma}\label{two_var_substitution}
-    \use{one_var_substitution}
+    \uses{one_var_substitution}
     Given $s, t \in \mathbb{R}_{(0,1)}$, the following equality holds:
     \[ \int_{0}^{1} \frac{1}{1 - [1 - (1 - s)t]u} \, du = \int_{0}^{1} \frac{1}{[1 - (1 - u)s][1 - (1 - t)u]} \, du \]
 \end{lemma}
@@ -100,7 +100,7 @@
 \end{definition}
 
 \begin{lemma}\label{J_n_integers_an_bn}
-    \use{J_n, integral_zeta_3, Jrr_linear_form, Jrs_postive_rational}
+    \uses{J_n, integral_zeta_3, Jrr_linear_form, Jrs_postive_rational}
     For some integers $a_n$ and $b_n$,
     \[ J_n = \frac{a_n}{d_n^3} + b_n\zeta(3) \]
 \end{lemma}
