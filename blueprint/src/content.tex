@@ -32,12 +32,12 @@
 \end{lemma}
 
 \begin{lemma}\label{integral_zeta_3}
-    \[ -\int_{0}^{1}\int_{0}^{1} \frac{{\rm ln}(xy)}{1-xy} \, dx \, dy = 2\xi(3) \]
+    \[ J_{00} := -\int_{0}^{1}\int_{0}^{1} \frac{{\rm ln}(xy)}{1-xy} \, dx \, dy = 2\xi(3) \]
 \end{lemma}
 
 \begin{lemma}\label{I_rr}
     for all integers $r > 0$
-    \[ -\int_{0}^{1}\int_{0}^{1} x^ry^r\frac{1}{1-xy} \, dx \, dy = \sum\limits_{m = 1}^{\infty}\frac{1}{(m+r)^2} \]
+    \[ I_{rr} := -\int_{0}^{1}\int_{0}^{1} x^ry^r\frac{1}{1-xy} \, dx \, dy = \sum\limits_{m = 1}^{\infty}\frac{1}{(m+r)^2} \]
 \end{lemma}
 
 \begin{lemma}\label{interchange_of_limits_sums_derivatives}
@@ -47,41 +47,41 @@
 \begin{lemma}\label{J_rr}
     \uses{I_rr, interchange_of_limits_sums_derivatives}
     for all integers $r > 0$
-    \[ -\int_{0}^{1}\int_{0}^{1} x^ry^r\frac{{\rm ln}(xy)}{1-xy} \, dx \, dy = 2\xi(3) - 2 \sum\limits_{m = 1}^{r}\frac{1}{m^3} \]
+    \[ J_{rr} := -\int_{0}^{1}\int_{0}^{1} x^ry^r\frac{{\rm ln}(xy)}{1-xy} \, dx \, dy = 2\xi(3) - 2 \sum\limits_{m = 1}^{r}\frac{1}{m^3} \]
 \end{lemma}
 
 \begin{lemma}\label{I_rs}
     Let $r$ and $s$ be non-negative integers, with $r \neq s$, then
-    \[ -\int_{0}^{1}\int_{0}^{1} x^ry^s\frac{1}{1-xy} \, dx \, dy = \sum\limits_{m = 1}^{\infty}\frac{1}{m+r}\frac{1}{m+s} \]
+    \[ I_{rs} := -\int_{0}^{1}\int_{0}^{1} x^ry^s\frac{1}{1-xy} \, dx \, dy = \sum\limits_{m = 1}^{\infty}\frac{1}{m+r}\frac{1}{m+s} \]
 \end{lemma}
 
 \begin{lemma}\label{J_rs}
     \uses{I_rs, interchange_of_limits_sums_derivatives}
     Let $r$ and $s$ be non-negative integers, with $r \neq s$, then
-    \[ -\int_{0}^{1}\int_{0}^{1} x^ry^s\frac{{\rm ln}(xy)}{1-xy} \, dx \, dy = \frac{\sum\limits_{m = 1}^{r}\frac{1}{m^2} - \sum\limits_{m = 1}^{s}\frac{1}{m^2}}{r - s} \]
+    \[ J_{rs} := -\int_{0}^{1}\int_{0}^{1} x^ry^s\frac{{\rm ln}(xy)}{1-xy} \, dx \, dy = \frac{\sum\limits_{m = 1}^{r}\frac{1}{m^2} - \sum\limits_{m = 1}^{s}\frac{1}{m^2}}{r - s} \]
 \end{lemma}
 
 \begin{lemma}\label{d_r_3}
-    For all $r \in \mathbb{N}^*$,
+    For all $r \in \mathbb{N}^*, d_n$ is lcm of $\{1, 2, \ldots, n\}.$ 
     \[ d_{r^3} = (d_r)^3 \]
 \end{lemma}
 
 \begin{lemma}\label{Jrr_linear_form}
     \uses{J_rr, d_r_3}
     For all $r \in \mathbb{N}^*$,
-    \[ J_rr = 2 \zeta(3) - \frac{z_r}{(d_r)^3} \]
+    \[ J_{rr} = 2 \zeta(3) - \frac{z_r}{(d_r)^3} \]
     for some $z_r \in \mathbb{N}^*$.
 \end{lemma}
 
 \begin{lemma}\label{d_r_2}
-    For all $r \in \mathbb{N}^*$,
+    For all $r \in \mathbb{N}^*, d_n$ is lcm of $\{1, 2, \ldots, n\}.$ 
     \[ d_{r^2} = (d_r)^2 \]
 \end{lemma}
 
 \begin{lemma}\label{Jrs_postive_rational}
     \uses{J_rs, d_r_2, d_r_3}
     For all $r \in \mathbb{N}, r \neq s$,
-    \[ J_rs = \frac{z_{rs}}{(d_r)^3}\]
+    \[ J_{rs} = \frac{z_{rs}}{(d_r)^3}\]
     for some $z_{rs} \in \mathbb{N}^*$.
 \end{lemma}
 
