@@ -123,7 +123,7 @@
 \end{definition}
 
 \begin{lemma}\label{J_n_integers_an_bn}
-    \uses{J_n, integral_zeta_3, Jrr_linear_form, Jrs_postive_rational}
+    \uses{J_n, integral_zeta_3, Jrr_linear_form, Jrs_postive_rational, Legendre_poly_is_int}
     For some integers $a_n$ and $b_n$,
     \[ J_n = \frac{a_n}{d_n^3} + b_n\zeta(3) \]
 \end{lemma}
@@ -156,7 +156,12 @@
     \end{align*}
 \end{proof}
 
-\begin{lemma}
+\begin{lemma}\label{Jn_abs_upper}
+    \uses{bound, frac_partial_n, one_var_substitution, two_var_substitution, Legendre_poly_sym, Legendre_poly_integral}
+    \[ |J_n| \leqslant (\frac{1}{30})^n\cdot 2\zeta(3) \]
+\end{lemma}
+
+\begin{lemma}\label{dn_asymptotic}
     Let $n$ be a positive integer. Define $\pi(n)$ as the number of primes less than (or equal to) $n$. Then, $d_n \leqslant n^{\pi(n)} \sim e^n$.
 \end{lemma}
 \begin{proof}
@@ -167,6 +172,7 @@
     $\zeta(3)$ is irrational.
 \end{theorem}
 \begin{proof}
+    \uses{J_n_integers_an_bn, Jn_abs_upper, dn_asymptotic}
     \[ 0 \neq |J_n| \leqslant (\frac{1}{30})^n\cdot 2\zeta(3) \]
     Then 
     \[ 0 < |\frac{a_n}{d_n^3} + b_n\zeta(3)| \leqslant (\frac{1}{30})^n\cdot 2\zeta(3) \]
