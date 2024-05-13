@@ -40,12 +40,8 @@
     \[ I_{rr} := -\int_{0}^{1}\int_{0}^{1} x^ry^r\frac{1}{1-xy} \, dx \, dy = \sum\limits_{m = 1}^{\infty}\frac{1}{(m+r)^2} \]
 \end{lemma}
 
-\begin{lemma}\label{interchange_of_limits_sums_derivatives}
-    111
-\end{lemma}
-
 \begin{lemma}\label{J_rr}
-    \uses{I_rr, interchange_of_limits_sums_derivatives}
+    \uses{I_rr}
     for all integers $r > 0$
     \[ J_{rr} := -\int_{0}^{1}\int_{0}^{1} x^ry^r\frac{{\rm ln}(xy)}{1-xy} \, dx \, dy = 2\xi(3) - 2 \sum\limits_{m = 1}^{r}\frac{1}{m^3} \]
 \end{lemma}
@@ -56,7 +52,7 @@
 \end{lemma}
 
 \begin{lemma}\label{J_rs}
-    \uses{I_rs, interchange_of_limits_sums_derivatives}
+    \uses{I_rs}
     Let $r$ and $s$ be non-negative integers, with $r \neq s$, then
     \[ J_{rs} := -\int_{0}^{1}\int_{0}^{1} x^ry^s\frac{{\rm ln}(xy)}{1-xy} \, dx \, dy = \frac{\sum\limits_{m = 1}^{r}\frac{1}{m^2} - \sum\limits_{m = 1}^{s}\frac{1}{m^2}}{r - s} \]
 \end{lemma}
@@ -160,6 +156,27 @@
     \end{align*}
 \end{proof}
 
+\begin{lemma}
+    Let $n$ be a positive integer. Define $\pi(n)$ as the number of primes less than (or equal to) $n$. Then, $d_n \leqslant n^{\pi(n)} \sim e^n$.
+\end{lemma}
+\begin{proof}
+    use Prime Number Theorem. 
+\end{proof}
+
 \begin{theorem}\label{zeta_3_irrational}
     $\zeta(3)$ is irrational.
 \end{theorem}
+\begin{proof}
+    \[ 0 \neq |J_n| \leqslant (\frac{1}{30})^n\cdot 2\zeta(3) \]
+    Then 
+    \[ 0 < |\frac{a_n}{d_n^3} + b_n\zeta(3)| \leqslant (\frac{1}{30})^n\cdot 2\zeta(3) \]
+    which means that 
+    \[ 0 < |a_n + d_n^3 b_n\zeta(3)| \leqslant d_n^3(\frac{1}{30})^n\cdot 2\zeta(3) \] 
+    又$d_n \leqslant n^{\pi(n)} \sim e^n$ and $e^3 < 21$, we have
+    \[ 0 < |a_n + c_n\zeta(3)| < 21^n (\frac{1}{30})^n\cdot 2\zeta(3) = 2(\frac{7}{10})^n \zeta(3) \]
+    where$c_n = d_n^3 b_n$ is integer.\\
+    Assume $\zeta(3) = \frac{p}{q}, (p,q)=1$ and $p,q>0$. Then 
+    \[ 0 < |qa_n + pc_n| < 2p (\frac{7}{10})^n \]
+    So $n \rightarrow \infty, |qa_n + pc_n| \rightarrow 0$.\\
+    Since $|qa_n + pc_n|$ is a integer, so $|qa_n + pc_n| \geqslant 1$. Contradiction!
+\end{proof}
