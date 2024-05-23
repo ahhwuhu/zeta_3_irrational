@@ -61,22 +61,13 @@ lemma integral1 (a : ℝ) (ha : 0 < a) (ha1 : a < 1) : ∫ (z : ℝ) in (0)..1, 
 
 lemma integral_equality (s t : ℝ) (s0 : 0 < s) (s1 : s < 1) (t0 : 0 < t) (t1 : t < 1) :
      ∫ (u : ℝ) in (0)..1, 1 /(1 - (1 - (1 - s) * t) * u) = ∫ (u : ℝ) in (0)..1, 1 /((1 - (1 - u) * s) * (1 - (1 - t) * u)) := by
-    rw[← sub_pos] at s1
-    obtain h1 := mul_lt_of_lt_one_right s1 t1 
-    have h2 : (1 - s) * t < 1 := by linarith
-    have h3 := integral1 ((1 - s) * t) (Real.mul_pos s1 t0) h2
-    have eq1 (u : ℝ) : 1 / ((1 - (1 - u) * s) * (1 - (1 - t) * u)) 
-      = 1 / (1 - (1 - s) * t) * (s / (1 - (1 - u) * s) + (1 - t) / (1 - (1 - t) * u)) 
-      := by
-      field_simp
+    sorry
     
   
 
 
 
 lemma n_derivative {a : ℝ} (n : ℕ) : derivative^[n + 1] (1 / (1 - a * X)) = (n + 1) ! * (a ^ (n + 1)) / (1 - a * X) ^ (n + 2) := by
-  induction' n with d hd
-  field_simp
   sorry
 
 
