@@ -9,7 +9,6 @@ import Mathlib.Algebra.Order.Monoid.Lemmas
 import Mathlib.Algebra.Polynomial.Derivative
 import Mathlib.Analysis.SpecialFunctions.Log.Basic
 
-
 open scoped Nat
 open BigOperators
 
@@ -185,6 +184,7 @@ lemma integral_equality (s t: ℝ) (s0 : 0 < s) (s1 : s < 1) (t0 : 0 < t) (t1 : 
     · linarith
     · exact t0
     · exact t1
+
 
 
 lemma n_derivative {a : ℝ} (n : ℕ) : derivative^[n + 1] (1 / (1 - a * X)) = (n + 1) ! * (a ^ (n + 1)) / (1 - a * X) ^ (n + 2) := by
