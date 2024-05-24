@@ -59,9 +59,83 @@ lemma integral1 (a : ℝ) (ha : 0 < a) (ha1 : a < 1) : ∫ (z : ℝ) in (0)..1, 
   rw[eq3]
   simp
 
-lemma integral_equality (s t : ℝ) (s0 : 0 < s) (s1 : s < 1) (t0 : 0 < t) (t1 : t < 1) :
-     ∫ (u : ℝ) in (0)..1, 1 /(1 - (1 - (1 - s) * t) * u) = ∫ (u : ℝ) in (0)..1, 1 /((1 - (1 - u) * s) * (1 - (1 - t) * u)) := by
-    sorry
+lemma integral_equality (s t u : ℝ) (s0 : 0 < s) (s1 : s < 1) (t0 : 0 < t) (t1 : t < 1) (hu : 0 < u) (hu1 : u < 1) :
+    ∫ (u : ℝ) in (0)..1, 1 /(1 - (1 - (1 - s) * t) * u) = ∫ (u : ℝ) in (0)..1, 1 /((1 - (1 - u) * s) * (1 - (1 - t) * u)) := 
+    by
+    rw[← sub_pos] at s1
+    obtain h1 := mul_lt_of_lt_one_right s1 t1 
+    have h2 : (1 - s) * t < 1 := by linarith
+    have h3 := integral1 ((1 - s) * t) (Real.mul_pos s1 t0) h2
+    have eq1 : 1 / (1 - (1 - s) * t) * (s / (1 - (1 - u) * s) + (1 - t) / (1 - (1 - t) * u)) =
+        1 / ((1 - (1 - u) * s) * (1 - (1 - t) * u)) := by
+        have h4 : (1 - u) * s < 1 := by
+          rw[← sub_pos] at hu1
+          rw[sub_pos] at s1
+          obtain h11 := mul_lt_of_lt_one_right hu1 s1
+          linarith
+        have h5 : (1 - t) * u < 1 := by
+          rw[← sub_pos] at t1
+          obtain h11 := mul_lt_of_lt_one_right t1 hu1
+          linarith
+        rw[div_add_div]
+        · field_simp
+          rw[div_eq_div_iff]
+          · ring_nf
+          · have _ : 0 < (1 - (1 - s) * t) * ((1 - (1 - u) * s) * (1 - (1 - t) * u)) := by
+              rw[mul_pos_iff_of_pos_left, mul_pos_iff_of_pos_left] <;> linarith
+            positivity
+          · have _ : 0 < (1 - (1 - u) * s) * (1 - (1 - t) * u) := by
+              rw[mul_pos_iff_of_pos_left] <;> linarith
+            positivity
+        · linarith
+        · linarith
+    have eq2 : ∫ (u : ℝ) in (0)..1, 1 / ((1 - (1 - u) * s) * (1 - (1 - t) * u)) = ∫ (u : ℝ) in (0)..1, 1 / (1 - (1 - s) * t) * (s / (1 - (1 - u) * s) + (1 - t) / (1 - (1 - t) * u)) := by
+      sorry
+    have eq3 : ∫ (x : ℝ) in (0)..1, s / (1 - (1 - x) * s) = - (1 - s).log := by
+      have eq3_1 := intervalIntegral.integral_comp_sub_mul (a := 0) (b := 1) (c := 1) (d := 1) (f := fun z ↦ (s / (1 - z * s))) (by norm_num)
+      simp only [mul_zero, mul_one, smul_eq_mul] at eq3_1
+      field_simp at eq3_1
+      have eq3_2 := intervalIntegral.integral_comp_add_mul (a := 0) (b := 1) (c := s) (d := 0) (f := fun z ↦ (1 / (1 - z))) (by positivity)
+      simp only [mul_zero, mul_one, smul_eq_mul] at eq3_2
+      field_simp at eq3_2
+      rw[mul_comm, ← intervalIntegral.integral_const_mul] at eq3_2
+      simp only [mul_one_div, mul_comm] at eq3_2
+      have comm1 := intervalIntegral.integral_comp_mul_right (a := 0) (b := 1) (c := s) (f := fun z ↦ s / (1 - z)) (by positivity)
+      have comm2 := intervalIntegral.integral_comp_mul_left (a := 0) (b := 1) (c := s) (f := fun z ↦ s / (1 - z)) (by positivity)
+      simp only [mul_zero, zero_mul, mul_one, one_mul, smul_eq_mul] at comm1 comm2
+      rw[comm1, ← comm2, eq3_2] at eq3_1
+      have eq3_3 := intervalIntegral.mul_integral_comp_sub_mul (a := 0) (b := s) (f := fun x ↦ (x)⁻¹) (c := 1) (d := 1)
+      field_simp at eq3_3
+      rw [eq3_3] at eq3_1
+      have eq3_4 := integral_inv_of_pos (a := 1 - s) (b := 1) s1 (by norm_num)
+      field_simp at eq3_4 
+      rw[eq3_4] at eq3_1
+      rw[← Real.log_inv]
+      field_simp
+      exact eq3_1
+    have eq4 : ∫ (x : ℝ) in (0)..1, (1 - t) / (1 - (1 - t) * x) = - t.log := by
+      rw[← sub_pos] at t1
+      have eq4_1 := intervalIntegral.integral_comp_mul_left (a := 0) (b := 1) (c := 1 - t)
+        (f := fun z ↦ (1 - t) * (1 - z)⁻¹) (by positivity)
+      simp only [mul_zero, mul_one, smul_eq_mul] at eq4_1
+      nth_rewrite 2 [intervalIntegral.integral_const_mul] at eq4_1
+      rw[← mul_assoc] at eq4_1
+      field_simp at eq4_1
+      have eq4_2 := intervalIntegral.mul_integral_comp_sub_mul (a := 0) (b := 1 - t) (f := fun x ↦ (x)⁻¹) (c := 1) (d := 1)
+      field_simp at eq4_2
+      rw [eq4_2] at eq4_1
+      have eq4_3 := integral_inv_of_pos (a := t) (b := 1) t0 (by norm_num) 
+      field_simp at eq4_3
+      rw[eq4_3] at eq4_1
+      rw[← Real.log_inv]
+      field_simp
+      exact eq4_1
+    rw[eq2, intervalIntegral.integral_const_mul, h3, intervalIntegral.integral_add, eq3, eq4, ← neg_add, ← Real.log_mul]
+    · field_simp
+    · positivity
+    · positivity
+    · sorry
+    · sorry
     
   
 
