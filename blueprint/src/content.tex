@@ -21,6 +21,17 @@
 \begin{lemma}\label{Legendre_poly_is_int}
     \[ P_n(x)=\sum\limits_{k=0}^{n}(-1)^k\binom{n}{k}\binom{n+k}{n}x^k \]
 \end{lemma}
+\begin{proof}
+    \begin{align*}
+        \frac{1}{n!}\frac{d^n}{dx^n}[x^n(1-x)^n] &= \frac{1}{n!}\frac{d^n}{dx^n}[(x-x^2)^n]\\
+        &= \frac{1}{n!}\frac{d^n}{dx^n}[\sum\limits_{k=0}^{n} \binom{n}{k}(-1)^k x^{n-k}x^{2k}]\\
+        &= \frac{1}{n!}\frac{d^n}{dx^n}[\sum\limits_{k=0}^{n} \binom{n}{k}(-1)^k x^{n+k}]\\
+        &= \frac{1}{n!}\sum\limits_{k=0}^{n} \binom{n}{k}(-1)^k \frac{d^n}{dx^n}[x^{n+k}]\\
+        &= \frac{1}{n!}\sum\limits_{k=0}^{n} \binom{n}{k}(-1)^k \frac{(n+k)!}{k!}x^{k}\\
+        &= \sum\limits_{k=0}^{n} \binom{n}{k}(-1)^k \frac{1}{n!}\frac{(n+k)!}{k!}x^{k}\\
+        &= \sum\limits_{k=0}^{n} (-1)^k \binom{n}{k}\binom{n+k}{n}x^{k}
+    \end{align*}
+\end{proof}
 
 \begin{lemma}\label{Legendre_poly_sym}
     \[ P_n(1-x)=(-1)^nP_n(x) \]
