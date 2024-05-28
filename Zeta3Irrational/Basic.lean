@@ -1,13 +1,4 @@
-import Mathlib.Tactic
-import Mathlib.Analysis.MeanInequalities
-import Mathlib.NumberTheory.ZetaFunction
-import Mathlib.Data.Nat.Choose.Basic
 import Mathlib
-import Mathlib.Data.Real.Sqrt
-import Init.Data.Nat.Basic
-import Mathlib.Algebra.Order.Monoid.Lemmas
-import Mathlib.Algebra.Polynomial.Derivative
-import Mathlib.Analysis.SpecialFunctions.Log.Basic
 
 open scoped Nat
 open BigOperators
@@ -16,6 +7,13 @@ namespace Polynomial
 
 noncomputable def legendre (n : ℕ) : ℝ[X] :=
   C (1 / n ! : ℝ) * derivative^[n] (X ^ n * (1 - X) ^ n)
+
+
+lemma legendre_eq_sum (n : ℕ) :
+    legendre n =
+      ∑ k in Finset.range (n + 1),
+        C ((- 1) ^ k : ℝ) * (Nat.choose n k) * (Nat.choose (n + k) n) * X ^ k := by
+  sorry
 
 noncomputable def legendre' (n : ℕ) : ℝ[X] :=
   ∑ k in Finset.range (n + 1), C ((- 1) ^ k : ℝ) * (Nat.choose n k) • (Nat.choose (n + k) n) • X ^ k
@@ -61,7 +59,7 @@ lemma integral_fw_equality (s t: ℝ) (s0 : 0 < s) (s1 : s < 1) (t0 : 0 < t) (t1
       rw[← sub_pos] at s1
       obtain h1 := mul_lt_of_lt_one_right s1 t1
       have h2 : (1 - s) * t < 1 := by linarith
-      have eq1 (u : ℝ) (hu : 0 < u) (hu1 : u < 1) : 1 / (1 - (1 - s) * t) * (s / (1 - (1 - u) * s) + (1 - t) / (1 - (1 - t) * u)) = 1 / ((1 - (1 - u) * s) * (1 - (1 - t) * u)) := 
+      have eq1 (u : ℝ) (hu : 0 < u) (hu1 : u < 1) : 1 / (1 - (1 - s) * t) * (s / (1 - (1 - u) * s) + (1 - t) / (1 - (1 - t) * u)) = 1 / ((1 - (1 - u) * s) * (1 - (1 - t) * u)) :=
         by
         have h4 : (1 - u) * s < 1 := by
           rw[← sub_pos] at hu1
@@ -135,7 +133,7 @@ lemma integral_equality (s t: ℝ) (s0 : 0 < s) (s1 : s < 1) (t0 : 0 < t) (t1 : 
       rw[← Real.log_inv]
       field_simp
       exact eq3_1
-    have eq4 : ∫ (x : ℝ) in (0)..1, (1 - t) / (1 - (1 - t) * x) = - t.log := 
+    have eq4 : ∫ (x : ℝ) in (0)..1, (1 - t) / (1 - (1 - t) * x) = - t.log :=
       by
       rw[← sub_pos] at t1
       have eq4_1 := intervalIntegral.integral_comp_mul_left (a := 0) (b := 1) (c := 1 - t) (f := fun z ↦ (1 - t) * (1 - z)⁻¹) (by positivity)
@@ -395,4 +393,3 @@ lemma bound1 (x y z : ℝ) (x0 : 0 < x) (x1 : x < 1) (y0 : 0 < y) (y1 : y < 1) (
 
 theorem zeta_3_irratoinal : ¬ ∃ q : ℚ , q = ∑' n : ℕ , 1 / ((n : ℚ) + 1) ^ 3:= by
   sorry
-
