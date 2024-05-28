@@ -8,15 +8,11 @@ namespace Polynomial
 noncomputable def legendre (n : ℕ) : ℝ[X] :=
   C (1 / n ! : ℝ) * derivative^[n] (X ^ n * (1 - X) ^ n)
 
-
 lemma legendre_eq_sum (n : ℕ) :
     legendre n =
       ∑ k in Finset.range (n + 1),
-        C ((- 1) ^ k : ℝ) * (Nat.choose n k) * (Nat.choose (n + k) n) * X ^ k := by
-  sorry
+        C ((- 1) ^ k : ℝ) • (Nat.choose n k) * (Nat.choose (n + k) n) * X ^ k := by sorry
 
-noncomputable def legendre' (n : ℕ) : ℝ[X] :=
-  ∑ k in Finset.range (n + 1), C ((- 1) ^ k : ℝ) * (Nat.choose n k) • (Nat.choose (n + k) n) • X ^ k
 
 end Polynomial
 
