@@ -5,36 +5,80 @@ open BigOperators
 
 namespace Polynomial
 
-noncomputable def legendre (n : ℕ) : ℝ[X] :=
+noncomputable abbrev legendre (n : ℕ) : ℝ[X] :=
   C (1 / n ! : ℝ) * derivative^[n] (X ^ n * (1 - X) ^ n)
+
+
+lemma sub_pow{R : Type u_1} [CommRing R] (x : R) (y : R) (n : ℕ) :
+    (x - y) ^ n = (Finset.range (n + 1)).sum fun (m : ℕ) => (n.choose m) • x ^ m * (- 1) ^ (n - m) * y ^ (n - m) := by
+    rw[← Mathlib.Tactic.RingNF.add_neg, add_pow]
+    apply Finset.sum_congr rfl
+    intro m _
+    field_simp
+    have eq1 : (-y) ^ (n - m) = (-1) ^ (n - m) * y ^ (n - m) := by
+      rw[neg_pow]
+    rw[eq1]
+    ring_nf
+
+lemma sub_pow_special{R : Type u_1} [CommRing R] (x : R) (n : ℕ) :
+    (x - x ^ 2) ^ n = (Finset.range (n + 1)).sum fun (m : ℕ) => (n.choose m) • (- 1) ^ m * x ^ (n + m) := by
+    rw[← Mathlib.Tactic.RingNF.add_neg, add_comm, add_pow]
+    apply Finset.sum_congr rfl
+    intro m hm
+    rw[neg_pow, pow_two, mul_pow,← mul_assoc, mul_comm, mul_assoc, pow_mul_pow_sub, mul_assoc,← pow_add, ← mul_assoc, nsmul_eq_mul, add_comm]
+    rw[Finset.mem_range] at hm
+    linarith
+
+lemma Finsum_iterate_deriv {R : Type u_1} [CommRing R] {k : ℕ} {h : ℕ → ℕ} :
+    derivative^[k] (∑ m in Finset.range (k + 1), (h m) • ((- 1) ^ m : R[X]) * X ^ (k + m)) = ∑ m in Finset.range (k + 1), (h m) • (- 1) ^ m * derivative^[k] (X ^ (k + m)) := by
+    induction' k + 1 with n hn
+    · simp only [Nat.zero_eq, Finset.range_zero, Finset.sum_empty, iterate_map_zero]
+    · rw[Finset.sum_range, Finset.sum_range, Fin.sum_univ_castSucc, Fin.sum_univ_castSucc] at *
+      simp only [Fin.coe_castSucc, Fin.val_last, iterate_map_add, hn, add_right_inj]
+      rw [nsmul_eq_mul, mul_assoc, ← nsmul_eq_mul, Polynomial.iterate_derivative_smul]
+      sorry
 
 lemma legendre_eq_sum (n : ℕ) :
     legendre n =
       ∑ k in Finset.range (n + 1),
-        C ((- 1) ^ k : ℝ) • (Nat.choose n k) * (Nat.choose (n + k) n) * X ^ k := by sorry
+        C ((- 1) ^ k : ℝ) • (Nat.choose n k) • (Nat.choose (n + k) n) * X ^ k := by
+      rw[legendre]
+      induction' n with n hn
+      · simp
+      · rw [Nat.succ_eq_add_one, show n + 1 + 1 = n + 2 by ring, ← mul_pow, mul_one_sub, ← pow_two, sub_pow_special, Finsum_iterate_deriv, Finset.mul_sum]
+        apply Finset.sum_congr rfl
+        intro x hx
+        rw [← mul_assoc, Polynomial.iterate_derivative_X_pow_eq_smul, Nat.descFactorial_eq_div (show n + 1 ≤ n + 1 + x by omega), show n + 1 + x - (n + 1) = x by omega, smul_eq_mul, nsmul_eq_mul, nsmul_eq_mul, ← mul_assoc, ← mul_assoc]
+        sorry
+
 
 
 end Polynomial
 
-/-
-lemma J_00 : - ∫ x in 0..1, ∫ y in 0..1 , ln (x * y) / (1 - x * y) dy dx =  2 * ∑' i : ℕ , 1 / (n + 1) ^ 3  := by
-  sorry
--/
+namespace Integral
 
-lemma zeta_3 : - ∫ (x : ℝ) in (0)..1, (∫ (y : ℝ) in (0)..1, (x * y).log / (1 - x * y)) = 2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
-  sorry
+noncomputable abbrev I (r s : ℕ) : ℝ := - ∫ (x : ℝ) in (0)..1, (∫ (y : ℝ) in (0)..1, x ^ r * y ^ s / (1 - x * y))
 
-lemma I_rr (r : ℕ) (h : 0 < r) : - ∫ (x : ℝ) in (0)..1, (∫ (y : ℝ) in (0)..1, x ^ r * y ^ r / (1 - x * y)) = ∑' m : ℕ+ , 1 / ((m : ℝ) + r) ^ 3 := by
+noncomputable abbrev J (r s : ℕ) : ℝ := - ∫ (x : ℝ) in (0)..1, (∫ (y : ℝ) in (0)..1, x ^ r * y ^ s * (x * y).log / (1 - x * y))
+
+lemma zeta_3 : J 0 0 = 2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
   sorry
 
-lemma J_rr (r : ℕ) (h : 0 < r) : - ∫ (x : ℝ) in (0)..1, (∫ (y : ℝ) in (0)..1, x ^ r * y ^ r * (x * y).log / (1 - x * y)) = 2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 - 2 * ∑ m in Finset.range (r), 1 / ((m : ℝ) + 1) ^ 3 := by
+lemma I_rr (h : 0 < r) : I r r = ∑' m : ℕ+ , 1 / ((m : ℝ) + r) ^ 3 := by
   sorry
 
-lemma I_rs (r s : ℕ) (h : r ≠ s) : - ∫ (x : ℝ) in (0)..1, (∫ (y : ℝ) in (0)..1, x ^ r * y ^ s / (1 - x * y)) = ∑' m : ℕ , 1 / ((m : ℝ) + 1 + r) * 1 / ((m : ℝ) + 1 + s) := by
+lemma J_rr (r : ℕ) (h : 0 < r) : J r r= 2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 - 2 * ∑ m in Finset.range (r), 1 / ((m : ℝ) + 1) ^ 3 := by
   sorry
 
-lemma J_rs (r s : ℕ) (h : r ≠ s) : - ∫ (x : ℝ) in (0)..1, (∫ (y : ℝ) in (0)..1, x ^ r * y ^ s * (x * y).log / (1 - x * y)) = (∑ m in Finset.range (r), 1 / ((m : ℝ) + 1) ^ 2 - ∑ m in Finset.range (s), 1 / ((m : ℝ) + 1) ^ 2) / (r - s) := by
+lemma I_rs (r s : ℕ) (h : r ≠ s) : I r s = ∑' m : ℕ , 1 / ((m : ℝ) + 1 + r) * 1 / ((m : ℝ) + 1 + s) := by
   sorry
+
+lemma J_rs (r s : ℕ) (h : r ≠ s) : J r s = (∑ m in Finset.range (r), 1 / ((m : ℝ) + 1) ^ 2 - ∑ m in Finset.range (s), 1 / ((m : ℝ) + 1) ^ 2) / (r - s) := by
+  sorry
+
+end Integral
+
+namespace Equality
 
 lemma integral1 (a : ℝ) (ha : 0 < a) (ha1 : a < 1) : ∫ (z : ℝ) in (0)..1, 1 / (1 - (1 - a) * z) = - a.log / (1 - a) := by
   rw[← sub_pos] at ha1
@@ -42,15 +86,15 @@ lemma integral1 (a : ℝ) (ha : 0 < a) (ha1 : a < 1) : ∫ (z : ℝ) in (0)..1, 
   have eq2 := intervalIntegral.mul_integral_comp_sub_mul (a := 0) (b := 1 - a) (f := fun x ↦ (x)⁻¹) (c := 1) (d := 1)
   have eq3 := integral_inv_of_pos (a := a) (b := 1) ha (by norm_num)
   simp only [mul_zero, mul_one, smul_eq_mul] at eq1
-  simp
+  simp only [one_div]
   rw [eq1, inv_mul_eq_div]
   field_simp
-  simp
-  simp at eq2
+  simp only [one_div]
+  simp only [one_mul, sub_sub_cancel, mul_zero, sub_zero] at eq2
   rw[eq2,eq3]
   simp
 
-lemma integral_fw_equality (s t: ℝ) (s0 : 0 < s) (s1 : s < 1) (t0 : 0 < t) (t1 : t < 1) : ∫ (u : ℝ) in (0)..1, 1 / ((1 - (1 - u) * s) * (1 - (1 - t) * u)) = ∫ (u : ℝ) in (0)..1, 1 / (1 - (1 - s) * t) * (s / (1 - (1 - u) * s) + (1 - t) / (1 - (1 - t) * u)) :=
+lemma integral_equality_help (s t: ℝ) (s0 : 0 < s) (s1 : s < 1) (t0 : 0 < t) (t1 : t < 1) : ∫ (u : ℝ) in (0)..1, 1 / ((1 - (1 - u) * s) * (1 - (1 - t) * u)) = ∫ (u : ℝ) in (0)..1, 1 / (1 - (1 - s) * t) * (s / (1 - (1 - u) * s) + (1 - t) / (1 - (1 - t) * u)) :=
       by
       rw[← sub_pos] at s1
       obtain h1 := mul_lt_of_lt_one_right s1 t1
@@ -143,7 +187,7 @@ lemma integral_equality (s t: ℝ) (s0 : 0 < s) (s1 : s < 1) (t0 : 0 < t) (t1 : 
       rw[← Real.log_inv]
       field_simp
       exact eq4_1
-    rw[integral_fw_equality , intervalIntegral.integral_const_mul, h3, intervalIntegral.integral_add, eq3, eq4, ← neg_add, ← Real.log_mul]
+    rw[integral_equality_help , intervalIntegral.integral_const_mul, h3, intervalIntegral.integral_add, eq3, eq4, ← neg_add, ← Real.log_mul]
     · field_simp
     · positivity
     · positivity
@@ -181,10 +225,16 @@ lemma integral_equality (s t: ℝ) (s0 : 0 < s) (s1 : s < 1) (t0 : 0 < t) (t1 : 
 
 
 
-lemma n_derivative {a : ℝ} (n : ℕ) : derivative^[n + 1] (1 / (1 - a * X)) = (n + 1) ! * (a ^ (n + 1)) / (1 - a * X) ^ (n + 2) := by
-  sorry
+--- lemma n_derivative {a : ℝ} (n : ℕ) : derivative^[n + 1] (1 / (1 - a * X)) = (n + 1) ! * (a ^ (n + 1)) / (1 - a * X) ^ (n + 2) := by
+---  rw [show n + 2 = (n + 1) + 1 by omega]
+---  induction' n + 1 with n hn
+---  · simp only [Nat.zero_eq, one_div, Function.iterate_zero, id_eq, Nat.factorial_zero,
+---    Nat.cast_one, pow_zero, mul_one, zero_add, pow_one]
+---  · rw[Function.iterate_succ_apply', hn]
 
+end Equality
 
+namespace Bound
 
 lemma max_value {x : ℝ} (x0 : 0 < x) (x1 : x < 1) : √x * √(1 - x) ≤ ((1 / 2) : ℝ) := by
   rw [← Real.sqrt_mul, le_div_iff', ← show √4 = 2 by rw [Real.sqrt_eq_iff_sq_eq] <;> linarith,
@@ -193,148 +243,6 @@ lemma max_value {x : ℝ} (x0 : 0 < x) (x1 : x < 1) : √x * √(1 - x) ≤ ((1 
 
 lemma nonneg {x : ℝ} (_ : 0 < x) (_ : x < 1) : (0 : ℝ) ≤ √x * √(1 -x) :=
   mul_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)
-
-lemma bound (x y z : ℝ) (x0 : 0 < x) (x1 : x < 1) (y0 : 0 < y) (y1 : y < 1) (z0 : 0 < z) (z1 : z < 1) : x * (1 -x) * y * (1 - y) * z * (1 - z) / ((1 - (1 - z) * x) * (1 - y * z)) < (1 / 30 : ℝ) := by
-  have h1 : 2 * √(1 - x) * √(x * z) ≤ 1 - (1 - z) * x := by
-    have a : 1 - (1 - z) * x = 1 - x + x * z := by ring_nf
-    rw[a]
-    rw[← sub_pos] at x1
-    let p := √(1 - x) - √(x * z)
-    calc
-      2 * √(1 - x) * √(x * z) ≤ p * p + 2 * √(1 - x) * √(x * z) := by linarith [mul_self_nonneg p]
-      _ ≤ (√(1 - x) - √(x * z)) * (√(1 - x) - √(x * z)) + 2 * √(1 - x) * √(x * z) := by simp [p]
-      _ = √(1 - x) * √(1 - x) + √(x * z) * √(x * z) := by ring_nf
-      _ = 1 - x + √(x * z) * √(x * z) := by
-        obtain _ := LT.lt.le x1
-        rwa[Real.mul_self_sqrt]
-      _ = 1 - x + x * z := by
-        obtain _ := LT.lt.le (Right.mul_pos x0 z0)
-        rwa[Real.mul_self_sqrt]
-  have h2 : 2 * √(1 - y) * √((1 - z) * y) ≤ 1 - y * z := by
-    have b : 1 - y * z  = 1 - y + (1 - z) * y:= by ring_nf
-    rw[b]
-    rw[← sub_pos] at y1 z1
-    let p := √(1 - y) - √((1 - z) * y)
-    calc
-      2 * √(1 - y) * √((1 - z) * y) ≤ p * p + 2 * √(1 - y) * √((1 - z) * y) := by linarith [mul_self_nonneg p]
-      _ ≤ (√(1 - y) - √((1 - z) * y)) * (√(1 - y) - √((1 - z) * y)) + 2 * √(1 - y) * √((1 - z) * y) := by simp [p]
-      _ = √(1 - y) * √(1 - y) + √((1 - z) * y) * √((1 - z) * y) := by ring_nf
-      _ = 1 - y + √((1 - z) * y) * √((1 - z) * y) := by
-        obtain _ := LT.lt.le y1
-        rwa[Real.mul_self_sqrt]
-      _ = 1 - y + (1 - z) * y := by
-        obtain _ := LT.lt.le (Right.mul_pos z1 y0)
-        rwa[Real.mul_self_sqrt]
-  calc
-    x * (1 -x) * y * (1 - y) * z * (1 - z) / ((1 - (1 - z) * x) * (1 - y * z)) ≤ x * (1 -x) * y * (1 - y) * z * (1 - z) / (2 * √(1 - x) * √(x * z) * (1 - y * z)) := by
-      apply div_le_div
-      · rw [mul_assoc, mul_assoc, mul_assoc, mul_assoc, mul_nonneg_iff_of_pos_left, mul_nonneg_iff_of_pos_left, mul_nonneg_iff_of_pos_left, mul_nonneg_iff_of_pos_left, mul_nonneg_iff_of_pos_left]
-        rw[← sub_pos] at z1
-        exact LT.lt.le z1
-        exact z0
-        rw[← sub_pos] at y1
-        exact y1
-        exact y0
-        rw[← sub_pos] at x1
-        exact x1
-        exact x0
-      · rfl
-      · rw [mul_assoc, mul_assoc]
-        apply Real.mul_pos
-        norm_num
-        apply Real.mul_pos
-        rw[← sub_pos] at x1
-        rwa[Real.sqrt_pos]
-        apply Real.mul_pos
-        rw[Real.sqrt_mul']
-        apply Real.mul_pos
-        rwa[Real.sqrt_pos]
-        rwa[Real.sqrt_pos]
-        exact LT.lt.le z0
-        obtain g := mul_lt_of_lt_one_right y0 z1
-        rw[sub_pos]
-        exact lt_trans g y1
-      · obtain g := lt_trans (mul_lt_of_lt_one_right y0 z1) y1
-        rw[← sub_pos] at g
-        rwa[mul_le_mul_iff_of_pos_right]
-        exact g
-    _ ≤ x * (1 -x) * y * (1 - y) * z * (1 - z) / (2 * √(1 - x) * √(x * z) * 2 * √(1 - y) * √((1 - z) * y)) := by
-      apply div_le_div
-      · rw [mul_assoc, mul_assoc, mul_assoc, mul_assoc, mul_nonneg_iff_of_pos_left, mul_nonneg_iff_of_pos_left, mul_nonneg_iff_of_pos_left, mul_nonneg_iff_of_pos_left, mul_nonneg_iff_of_pos_left]
-        rw[← sub_pos] at z1
-        exact LT.lt.le z1
-        exact z0
-        rw[← sub_pos] at y1
-        exact y1
-        exact y0
-        rw[← sub_pos] at x1
-        exact x1
-        exact x0
-      · rfl
-      · rw [mul_assoc, mul_assoc, mul_assoc, mul_assoc]
-        apply Real.mul_pos
-        norm_num
-        apply Real.mul_pos
-        rw[← sub_pos] at x1
-        rwa[Real.sqrt_pos]
-        apply Real.mul_pos
-        rw[Real.sqrt_mul']
-        apply Real.mul_pos
-        rwa[Real.sqrt_pos]
-        rwa[Real.sqrt_pos]
-        exact LT.lt.le z0
-        apply Real.mul_pos
-        norm_num
-        apply Real.mul_pos
-        rw[← sub_pos] at y1
-        rwa[Real.sqrt_pos]
-        rw[Real.sqrt_mul']
-        apply Real.mul_pos
-        rw[← sub_pos] at z1
-        rwa[Real.sqrt_pos]
-        rwa[Real.sqrt_pos]
-        exact LT.lt.le y0
-      · have g : 2 * √(1 - x) * √(x * z) > 0 := by
-          rw[mul_assoc]
-          apply Real.mul_pos
-          norm_num
-          apply Real.mul_pos
-          rw[← sub_pos] at x1
-          rwa[Real.sqrt_pos]
-          rw[Real.sqrt_mul']
-          apply Real.mul_pos
-          rwa[Real.sqrt_pos]
-          rwa[Real.sqrt_pos]
-          exact LT.lt.le z0
-        rw [mul_assoc, mul_assoc]
-        rw [mul_assoc] at h2
-        exact mul_le_mul_of_nonneg_left h2 (LT.lt.le g)
-    _ = √x * √(1 -x) * √y * √(1 - y) * √z * √(1 - z) / 4 := by
-        field_simp
-        rw[← sub_pos] at x1
-        rw[← sub_pos] at y1
-        rw[← sub_pos] at z1
-        rw [show x * (1 - x) * y * (1 - y) * z * (1 - z) * 4 = 4 * ((x * (1 - x)) * (y * (1 - y)) * (z * (1 - z))) by ring]
-        rw [show (2 * (1 - x).sqrt * (x.sqrt * z.sqrt) * 2 * (1 - y).sqrt * ((1 - z).sqrt * y.sqrt)) =
-          4 * ((√x * √(1 - x)) * (√y * √(1 - y)) * (√z * √(1 - z))) by ring]
-        calc _
-          _ = ((x * (1 - x)) * (y * (1 - y)) * (z * (1 - z))) / ((√x * √(1 - x)) * (√y * √(1 - y)) * (√z * √(1 - z))) := by ring
-          _ = (x / √x) * ((1 - x) / √(1 - x)) * (y / √y) * ((1 - y) / √(1 -y)) * (z / √z) * ((1 - z) / √(1 - z)) := by ring
-          _ = √x * √(1 - x) * √y * √(1 -y) * √z * √(1 - z) := by
-            simp only [Real.div_sqrt]
-    _ ≤ (1 / 2) * (1 / 2) * (1 / 2) / 4 := by
-      apply div_le_div
-      · norm_num
-      · have d0 : 0 ≤ (1 / 2 : ℝ) := by norm_num
-        have d1 : 0 ≤ (1 / 2 : ℝ) * (1 / 2) := by norm_num
-        obtain d2 := mul_le_mul_of_le_of_le (max_value x0 x1) (mul_le_mul_of_le_of_le (max_value y0 y1) (max_value z0 z1) (nonneg y0 y1) d0) (nonneg x0 x1) d1
-        rw [← mul_assoc, ← mul_assoc, ← mul_assoc] at d2
-        field_simp at *
-        ring_nf at *
-        exact d2
-      · norm_num
-      · norm_num
-    _ < (1 / 30 : ℝ) := by norm_num
 
 lemma bound_aux (x z : ℝ) (x0 : 0 < x) (x1 : x < 1) (z0 : 0 < z) (z1 : z < 1) :
     2 * √(1 - x) * √(x * z) ≤ 1 - (1 - z) * x := by
@@ -347,7 +255,7 @@ lemma bound_aux (x z : ℝ) (x0 : 0 < x) (x1 : x < 1) (z0 : 0 < z) (z1 : z < 1) 
     _ = √(1 - x) * √(1 - x) + √(x * z) * √(x * z) := by ring
     _ = 1 - x + x * z := by rw [Real.mul_self_sqrt, Real.mul_self_sqrt] <;> linarith
 
-lemma bound1 (x y z : ℝ) (x0 : 0 < x) (x1 : x < 1) (y0 : 0 < y) (y1 : y < 1) (z0 : 0 < z) (z1 : z < 1) :
+lemma bound (x y z : ℝ) (x0 : 0 < x) (x1 : x < 1) (y0 : 0 < y) (y1 : y < 1) (z0 : 0 < z) (z1 : z < 1) :
     x * (1 -x) * y * (1 - y) * z * (1 - z) / ((1 - (1 - z) * x) * (1 - y * z)) < (1 / 30 : ℝ) := by
   have := mul_pos x0 z0
   have h1 : 2 * √(1 - x) * √(x * z) ≤ 1 - (1 - z) * x := by apply bound_aux <;> assumption
@@ -386,6 +294,35 @@ lemma bound1 (x y z : ℝ) (x0 : 0 < x) (x1 : x < 1) (y0 : 0 < y) (y1 : y < 1) (
       linarith
     _ < (1 / 30 : ℝ) := by norm_num
 
+end Bound
 
-theorem zeta_3_irratoinal : ¬ ∃ q : ℚ , q = ∑' n : ℕ , 1 / ((n : ℚ) + 1) ^ 3:= by
+open Polynomial Integral Equality Bound
+
+noncomputable abbrev JJ (n : ℕ) : ℝ := - ∫ (x : ℝ) in (0)..1, (∫ (y : ℝ) in (0)..1, (legendre n).eval x * (legendre n).eval y * (x * y).log / (1 - x * y))
+
+def d (s : Finset ℕ) : ℕ := s.lcm id
+
+lemma JJ_pos (n : ℕ) : 0 < JJ n := by
+  sorry
+
+lemma JJ_int (n : ℕ) {a b: ℕ → ℤ} : JJ n * (d (Finset.range (n))) ^ 3 = a n + b n * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 * (d (Finset.range (n))) ^ 3 := by
+  sorry
+
+lemma JJ_upper (n : ℕ) : JJ n < 2 * (1 / 30) ^ n * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
+  sorry
+
+def TendsTo (a : ℕ → ℝ) (t : ℝ) : Prop :=
+  ∀ ε > 0, ∃ B : ℕ, ∀ n, B ≤ n → |a n - t| < ε
+
+theorem zeta_3_irratoinal : ¬ ∃ r : ℚ , (r : ℝ) = ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
+  by_contra! r
+  cases' r with r hr
+  let p := r.num
+  let q := r.den
+  let hq := Rat.den_nz r
+  let fun1 := fun n => JJ n
+  have JJ_inf {n : ℕ} (hn : n > 0) : 0 < JJ n * (d (Finset.range (n))) ^ 3 * q := by
+    rw[mul_assoc]
+    apply mul_pos (JJ_pos n)
+    exact
   sorry
