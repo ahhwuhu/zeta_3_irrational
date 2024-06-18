@@ -11,7 +11,7 @@ noncomputable abbrev legendre (n : ℕ) : ℝ[X] :=
 
 lemma sub_pow{R : Type u_1} [CommRing R] (x : R) (y : R) (n : ℕ) :
     (x - y) ^ n = (Finset.range (n + 1)).sum fun (m : ℕ) => (n.choose m) • x ^ m * (- 1) ^ (n - m) * y ^ (n - m) := by
-    rw[← Mathlib.Tactic.RingNF.add_neg, add_pow]
+    rw [← Mathlib.Tactic.RingNF.add_neg, add_pow]
     apply Finset.sum_congr rfl
     intro m _
     field_simp
@@ -45,7 +45,7 @@ lemma legendre_eq_sum (n : ℕ) :
       rw[legendre]
       induction' n with n hn
       · simp
-      · rw [Nat.succ_eq_add_one, show n + 1 + 1 = n + 2 by ring, ← mul_pow, mul_one_sub, ← pow_two, sub_pow_special, Finsum_iterate_deriv, Finset.mul_sum]
+      · rw [ show n + 1 + 1 = n + 2 by ring, ← mul_pow, mul_one_sub, ← pow_two, sub_pow_special, Finsum_iterate_deriv, Finset.mul_sum]
         apply Finset.sum_congr rfl
         intro x hx
         rw [← mul_assoc, Polynomial.iterate_derivative_X_pow_eq_smul, Nat.descFactorial_eq_div (show n + 1 ≤ n + 1 + x by omega), show n + 1 + x - (n + 1) = x by omega, smul_eq_mul, nsmul_eq_mul, nsmul_eq_mul, ← mul_assoc, ← mul_assoc]
@@ -67,7 +67,7 @@ lemma zeta_3 : J 0 0 = 2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
 lemma I_rr (h : 0 < r) : I r r = ∑' m : ℕ+ , 1 / ((m : ℝ) + r) ^ 3 := by
   sorry
 
-lemma J_rr (r : ℕ) (h : 0 < r) : J r r= 2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 - 2 * ∑ m in Finset.range (r), 1 / ((m : ℝ) + 1) ^ 3 := by
+lemma J_rr (r : ℕ) (h : 0 < r) : J r r = 2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 - 2 * ∑ m in Finset.range (r), 1 / ((m : ℝ) + 1) ^ 3 := by
   sorry
 
 lemma I_rs (r s : ℕ) (h : r ≠ s) : I r s = ∑' m : ℕ , 1 / ((m : ℝ) + 1 + r) * 1 / ((m : ℝ) + 1 + s) := by
@@ -302,17 +302,19 @@ noncomputable abbrev JJ (n : ℕ) : ℝ := - ∫ (x : ℝ) in (0)..1, (∫ (y : 
 
 def d (s : Finset ℕ) : ℕ := s.lcm id
 
+noncomputable abbrev fun1 (n : ℕ) : ℝ := (d (Finset.range (n))) ^ 3 * JJ n
+
 lemma JJ_pos (n : ℕ) : 0 < JJ n := by
   sorry
 
-lemma JJ_int (n : ℕ) {a b: ℕ → ℤ} : JJ n * (d (Finset.range (n))) ^ 3 = a n + b n * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 * (d (Finset.range (n))) ^ 3 := by
+lemma linear_int (n : ℕ) : ∃ a b : ℕ → ℤ, fun1 n = a n + b n * (d (Finset.range (n))) ^ 3  * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
   sorry
 
 lemma JJ_upper (n : ℕ) : JJ n < 2 * (1 / 30) ^ n * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
   sorry
 
-def TendsTo (a : ℕ → ℝ) (t : ℝ) : Prop :=
-  ∀ ε > 0, ∃ B : ℕ, ∀ n, B ≤ n → |a n - t| < ε
+lemma fun1_tendsto_zero : Filter.Tendsto (fun n ↦ fun1 n) ⊤ (nhds 0) := by
+  sorry
 
 theorem zeta_3_irratoinal : ¬ ∃ r : ℚ , (r : ℝ) = ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
   by_contra! r
@@ -320,9 +322,23 @@ theorem zeta_3_irratoinal : ¬ ∃ r : ℚ , (r : ℝ) = ∑' n : ℕ , 1 / ((n 
   let p := r.num
   let q := r.den
   let hq := Rat.den_nz r
-  let fun1 := fun n => JJ n
-  have JJ_inf {n : ℕ} (hn : n > 0) : 0 < JJ n * (d (Finset.range (n))) ^ 3 * q := by
-    rw[mul_assoc]
-    apply mul_pos (JJ_pos n)
-    exact
-  sorry
+  have prop1 := Filter.Tendsto.mul_const (b := (q : ℝ)) (c := 0) (f := fun1) (l := ⊤) (fun1_tendsto_zero)
+  rw [zero_mul] at prop1
+  have prop2 : ∀ n : ℕ, fun1 n * q ≥ 1 := by
+    intro n
+    obtain ⟨a, b, h⟩ := linear_int n
+    rw [h, add_mul, mul_assoc, ← hr]
+    sorry
+  rw [Filter.tendsto_iff_forall_eventually_mem] at prop1
+  specialize prop1 (Set.Ico (-1/2) (1/2))
+  simp only [one_div, Ico_mem_nhds_iff, Set.mem_Ioo, inv_pos, Nat.ofNat_pos, and_true, Set.mem_Ico,
+    Filter.eventually_top] at prop1
+  rw [← one_div] at prop1
+  have prop : (-1/2 : ℝ) < 0 := by
+    rw [div_neg_iff]; right
+    simp only [Left.neg_neg_iff, zero_lt_one, Nat.ofNat_pos, and_self]
+  apply prop1 at prop
+  specialize prop 0
+  specialize prop2 0
+  cases' prop with h1 h2
+  linarith
