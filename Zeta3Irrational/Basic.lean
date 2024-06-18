@@ -1,4 +1,5 @@
 import Mathlib
+import Zeta3Irrational.d
 
 open scoped Nat
 open BigOperators
@@ -7,7 +8,6 @@ namespace Polynomial
 
 noncomputable abbrev legendre (n : ℕ) : ℝ[X] :=
   C (1 / n ! : ℝ) * derivative^[n] (X ^ n * (1 - X) ^ n)
-
 
 lemma sub_pow{R : Type u_1} [CommRing R] (x : R) (y : R) (n : ℕ) :
     (x - y) ^ n = (Finset.range (n + 1)).sum fun (m : ℕ) => (n.choose m) • x ^ m * (- 1) ^ (n - m) * y ^ (n - m) := by
@@ -49,9 +49,8 @@ lemma legendre_eq_sum (n : ℕ) :
         apply Finset.sum_congr rfl
         intro x hx
         rw [← mul_assoc, Polynomial.iterate_derivative_X_pow_eq_smul, Nat.descFactorial_eq_div (show n + 1 ≤ n + 1 + x by omega), show n + 1 + x - (n + 1) = x by omega, smul_eq_mul, nsmul_eq_mul, nsmul_eq_mul, ← mul_assoc, ← mul_assoc]
+        simp only [one_div, Algebra.mul_smul_comm, map_pow, map_neg, map_one]
         sorry
-
-
 
 end Polynomial
 
@@ -300,14 +299,12 @@ open Polynomial Integral Equality Bound
 
 noncomputable abbrev JJ (n : ℕ) : ℝ := - ∫ (x : ℝ) in (0)..1, (∫ (y : ℝ) in (0)..1, (legendre n).eval x * (legendre n).eval y * (x * y).log / (1 - x * y))
 
-def d (s : Finset ℕ) : ℕ := s.lcm id
-
-noncomputable abbrev fun1 (n : ℕ) : ℝ := (d (Finset.range (n))) ^ 3 * JJ n
+noncomputable abbrev fun1 (n : ℕ) : ℝ := (d (Finset.Icc 1 n)) ^ 3 * JJ n
 
 lemma JJ_pos (n : ℕ) : 0 < JJ n := by
   sorry
 
-lemma linear_int (n : ℕ) : ∃ a b : ℕ → ℤ, fun1 n = a n + b n * (d (Finset.range (n))) ^ 3  * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
+lemma linear_int (n : ℕ) : ∃ a b : ℕ → ℤ, fun1 n = a n + b n * (d (Finset.Icc 1 n)) ^ 3  * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
   sorry
 
 lemma JJ_upper (n : ℕ) : JJ n < 2 * (1 / 30) ^ n * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
@@ -316,10 +313,14 @@ lemma JJ_upper (n : ℕ) : JJ n < 2 * (1 / 30) ^ n * ∑' n : ℕ , 1 / ((n : �
 lemma fun1_tendsto_zero : Filter.Tendsto (fun n ↦ fun1 n) ⊤ (nhds 0) := by
   sorry
 
+lemma fin_d_neq_zero (n : ℕ) : d (Finset.Icc 1 n) > 0 := by
+  suffices d (Finset.Icc 1 n) ≠ 0 by omega
+  apply d_ne_zero
+  simp only [Finset.mem_Icc, nonpos_iff_eq_zero, one_ne_zero, zero_le, and_true, not_false_eq_true]
+
 theorem zeta_3_irratoinal : ¬ ∃ r : ℚ , (r : ℝ) = ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
   by_contra! r
   cases' r with r hr
-  let p := r.num
   let q := r.den
   let hq := Rat.den_nz r
   have prop1 := Filter.Tendsto.mul_const (b := (q : ℝ)) (c := 0) (f := fun1) (l := ⊤) (fun1_tendsto_zero)
@@ -327,8 +328,22 @@ theorem zeta_3_irratoinal : ¬ ∃ r : ℚ , (r : ℝ) = ∑' n : ℕ , 1 / ((n 
   have prop2 : ∀ n : ℕ, fun1 n * q ≥ 1 := by
     intro n
     obtain ⟨a, b, h⟩ := linear_int n
-    rw [h, add_mul, mul_assoc, ← hr]
-    sorry
+    have : fun1 n * q > 0 := by
+      simp only [fun1]
+      rw [mul_comm, ← mul_assoc]
+      apply mul_pos
+      · norm_cast
+        simp only [CanonicallyOrderedCommSemiring.mul_pos]
+        refine ⟨by omega, ?_⟩
+        have := fin_d_neq_zero n
+        apply pow_pos
+        exact fin_d_neq_zero n
+      · exact JJ_pos n
+    rw [h, add_mul, mul_assoc, ← hr] at this ⊢
+    simp only [ge_iff_le, q] at this ⊢
+    norm_cast at this ⊢
+    rw [Rat.mul_den_eq_num] at this ⊢
+    norm_cast at this ⊢
   rw [Filter.tendsto_iff_forall_eventually_mem] at prop1
   specialize prop1 (Set.Ico (-1/2) (1/2))
   simp only [one_div, Ico_mem_nhds_iff, Set.mem_Ioo, inv_pos, Nat.ofNat_pos, and_true, Set.mem_Ico,
