@@ -202,5 +202,123 @@ lemma d_sq (s : Finset ℕ) : (d s)^2 = d (s.image (· ^ 2)) := by
       exact ⟨pow_dvd_pow_of_dvd (Nat.dvd_lcm_left _ _) 2,
         pow_dvd_pow_of_dvd (Nat.dvd_lcm_right _ _) 2⟩
 
+lemma d_cube (s : Finset ℕ) : (d s)^3 = d (s.image (· ^ 3)) := by
+  induction s using Finset.induction_on with
+  | empty => simp [d]
+  | @insert i s hi ih =>
+    rw [d_insert, Finset.image_insert, d_insert, ← ih]
+    refine dvd_antisymm ?_ ?_
+    · if hi : i = 0
+      then
+        subst hi
+        simp
+      else
+      if hs' : 0 ∈ s
+      then
+        rw [d_eq_zero _ hs']
+        simp
+      else
+      have hds : d s ≠ 0 := d_ne_zero s hs'
+      have hi' : i^3 ≠ 0 := by simpa using hi
+      have hds' : (d s)^3 ≠ 0 := by simpa using hds
+      rw [← Nat.factorizationLCMLeft_mul_factorizationLCMRight,
+        ← Nat.factorizationLCMLeft_mul_factorizationLCMRight, mul_pow] <;> try assumption
+
+      apply mul_dvd_mul
+      · delta Nat.factorizationLCMLeft
+        erw [← Finset.prod_pow]
+        dsimp only
+        have eq1 :=
+            calc ∏ x ∈ (i.lcm (d s)).factorization.support,
+              (if (d s).factorization x ≤ i.factorization x
+                then x ^ (i.lcm (d s)).factorization x else 1) ^ 3
+          _ = ∏ x ∈ (i.primeFactors ∪ (d s).primeFactors),
+            (if (d s).factorization x ≤ i.factorization x
+              then x ^ (i.lcm (d s)).factorization x else 1) ^ 3 := by
+              apply Finset.prod_congr ?_ (fun _ _ => rfl)
+              rw [Nat.support_factorization, Nat.primeFactors_lcm] <;> assumption
+          _ = ∏ x ∈ (i.primeFactors ∪ (d s).primeFactors),
+              if (d s).factorization x ≤ i.factorization x
+              then (x ^ (i.lcm (d s)).factorization x) ^ 3 else 1 := by
+              refine Finset.prod_congr rfl fun x _ => ?_
+              split_ifs <;> simp
+        rw [eq1]
+        have eq2 := calc ((i ^ 3).lcm (d s ^ 3)).factorization.prod fun p n ↦
+            if (d s ^ 3).factorization p ≤ (i ^ 3).factorization p then p ^ n else 1
+          _ = ∏ i ∈ ((i ^ 3).lcm (d s ^ 3)).factorization.support, _ := rfl
+          _ = ∏ i ∈ (i.primeFactors ∪ (d s).primeFactors), _ := by
+            apply Finset.prod_congr ?_ (fun _ _ => rfl)
+            rw [Nat.support_factorization, Nat.primeFactors_lcm] <;> try assumption
+            congr 1 <;>
+            · rw [show 3 = 2 + 1 by omega, pow_add, pow_two, pow_one, Nat.primeFactors_mul,
+              Nat.primeFactors_mul] <;> aesop
+
+        simp_rw [eq2, Nat.factorization_pow]
+        simp only [Finsupp.coe_smul, Pi.smul_apply, smul_eq_mul, gt_iff_lt, Nat.ofNat_pos,
+          mul_le_mul_left]
+        apply Finset.prod_dvd_prod_of_dvd
+        intro p _
+        split_ifs
+        · rw [← pow_mul]
+          apply pow_dvd_pow
+          rw [Nat.factorization_lcm, Nat.factorization_lcm] <;> try assumption
+
+          simp only [Finsupp.sup_apply, Nat.factorization_pow, Finsupp.coe_smul, Pi.smul_apply,
+            smul_eq_mul]
+          have eq : 3 * i.factorization p ⊔ 3 * (d s).factorization p =
+            3 * (i.factorization p ⊔ (d s).factorization p) := by
+            change Nat.max _ _ = 3 * Nat.max _ _
+            rw [mul_max_of_nonneg]
+            norm_num
+          rw [eq, mul_comm]
+        · exact one_dvd _
+
+      · delta Nat.factorizationLCMRight
+        erw [← Finset.prod_pow]
+        simp only [Nat.support_factorization, ite_pow, one_pow, Nat.factorization_pow,
+          Finsupp.coe_smul, Pi.smul_apply, smul_eq_mul, gt_iff_lt, Nat.ofNat_pos, mul_le_mul_left]
+        have eq1 :=
+            calc ∏ x ∈ (i.lcm (d s)).primeFactors,
+              if (d s).factorization x ≤ i.factorization x
+                then 1 else (x ^ (i.lcm (d s)).factorization x) ^ 3
+          _ = ∏ x ∈ (i.primeFactors ∪ (d s).primeFactors),
+              if (d s).factorization x ≤ i.factorization x
+                then 1 else (x ^ (i.lcm (d s)).factorization x) ^ 3 := by
+                apply Finset.prod_congr ?_ fun _ _ => rfl
+                rw [Nat.primeFactors_lcm] <;> assumption
+        rw [eq1]
+        have eq2 := calc ((i ^ 3).lcm (d s ^ 3)).factorization.prod fun p n ↦
+            if (d s).factorization p ≤ i.factorization p then 1 else p ^ n
+          _ = ∏ i ∈ ((i ^ 3).lcm (d s ^ 3)).factorization.support, _ := rfl
+          _ = ∏ i ∈ (i.primeFactors ∪ (d s).primeFactors), _ := by
+            apply Finset.prod_congr ?_ fun _ _ => rfl
+            rw [Nat.support_factorization, Nat.primeFactors_lcm] <;> try assumption
+            congr 1 <;>
+            · rw [show 3 = 2 + 1 by omega, pow_add, pow_two, pow_one, Nat.primeFactors_mul,
+              Nat.primeFactors_mul] <;> aesop
+        rw [eq2]
+        apply Finset.prod_dvd_prod_of_dvd
+        intro p _
+        simp only
+        split_ifs
+        · simp
+        · rw [← pow_mul]
+          apply pow_dvd_pow
+          rw [Nat.factorization_lcm, Nat.factorization_lcm] <;> try assumption
+          simp only [Finsupp.sup_apply, Nat.factorization_pow, Finsupp.coe_smul, Pi.smul_apply,
+            smul_eq_mul]
+          have eq : 3 * i.factorization p ⊔ 3 * (d s).factorization p =
+            3 * (i.factorization p ⊔ (d s).factorization p) := by
+            change Nat.max _ _ = 3 * Nat.max _ _
+            rw [mul_max_of_nonneg]
+            norm_num
+          rw [eq, mul_comm]
+    · rw [Nat.lcm_dvd_iff]
+      exact ⟨pow_dvd_pow_of_dvd (Nat.dvd_lcm_left _ _) 3,
+        pow_dvd_pow_of_dvd (Nat.dvd_lcm_right _ _) 3⟩
+
 lemma d_sq' (n : ℕ) :
     d (Finset.Icc 1 n)^2 = d (Finset.Icc 1 n |>.image (· ^ 2))  := d_sq _
+
+lemma d_cube' (n : ℕ) :
+    d (Finset.Icc 1 n)^3 = d (Finset.Icc 1 n |>.image (· ^ 3))  := d_cube _
