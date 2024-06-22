@@ -314,7 +314,8 @@ end Bound
 open Polynomial Integral Equality Bound
 
 noncomputable abbrev JJ (n : ℕ) : ℝ :=
-  - ∫ (x : ℝ) in (0)..1, (∫ (y : ℝ) in (0)..1, (legendre n).eval x * (legendre n).eval y * (x * y).log / (1 - x * y))
+  - ∫ (x : ℝ) in (0)..1, (∫ (y : ℝ) in (0)..1,
+    (legendre n).eval x * (legendre n).eval y * (x * y).log / (1 - x * y))
 
 noncomputable abbrev fun1 (n : ℕ) : ℝ := (d (Finset.Icc 1 n)) ^ 3 * JJ n
 
@@ -341,22 +342,18 @@ theorem zeta_3_irratoinal : ¬ ∃ r : ℚ , (r : ℝ) = ∑' n : ℕ , 1 / ((n 
   cases' r with r hr
   let q := r.den
   let hq := Rat.den_nz r
-  have prop1 := Filter.Tendsto.mul_const (b := (q : ℝ)) (c := 0) (f := fun1) (l := ⊤) (fun1_tendsto_zero)
+  have prop1 := Filter.Tendsto.mul_const (b := (q : ℝ)) (fun1_tendsto_zero)
   rw [zero_mul] at prop1
   have prop2 : ∀ n : ℕ, fun1 n * q ≥ 1 := by
     intro n
     obtain ⟨a, b, h⟩ := linear_int n
     have : fun1 n * q > 0 := by
-      simp only [fun1]
+      delta fun1
       rw [mul_comm, ← mul_assoc]
-      apply mul_pos
-      · norm_cast
-        simp only [CanonicallyOrderedCommSemiring.mul_pos]
-        refine ⟨by omega, ?_⟩
-        have := fin_d_neq_zero n
-        apply pow_pos
-        exact fin_d_neq_zero n
-      · exact JJ_pos n
+      refine mul_pos ?_ (JJ_pos n)
+      norm_cast
+      simp only [CanonicallyOrderedCommSemiring.mul_pos]
+      exact ⟨by omega, pow_pos (fin_d_neq_zero n) 3⟩
     rw [h, add_mul, mul_assoc, ← hr] at this ⊢
     simp only [ge_iff_le, q] at this ⊢
     norm_cast at this ⊢
@@ -370,8 +367,6 @@ theorem zeta_3_irratoinal : ¬ ∃ r : ℚ , (r : ℝ) = ∑' n : ℕ , 1 / ((n 
   have prop : (-1/2 : ℝ) < 0 := by
     rw [div_neg_iff]; right
     simp only [Left.neg_neg_iff, zero_lt_one, Nat.ofNat_pos, and_self]
-  apply prop1 at prop
-  specialize prop 0
   specialize prop2 0
-  cases' prop with h1 h2
+  cases' ((prop1 prop) 0) with h1 h2
   linarith
