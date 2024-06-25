@@ -41,23 +41,45 @@ lemma Finsum_iterate_deriv {R : Type u_1} [CommRing R] {k : ℕ} {h : ℕ → �
   · simp only [Nat.zero_eq, Finset.range_zero, Finset.sum_empty, iterate_map_zero]
   · rw[Finset.sum_range, Finset.sum_range, Fin.sum_univ_castSucc, Fin.sum_univ_castSucc] at *
     simp only [Fin.coe_castSucc, Fin.val_last, iterate_map_add, hn, add_right_inj]
-    rw [nsmul_eq_mul, mul_assoc, ← nsmul_eq_mul, Polynomial.iterate_derivative_smul]
-    sorry
+    rw [nsmul_eq_mul, mul_assoc, ← nsmul_eq_mul, Polynomial.iterate_derivative_smul, nsmul_eq_mul,
+      mul_assoc]
+    have := Int.even_or_odd n
+    rcases this with (hn1 | hn2)
+    · simp_all only [nsmul_eq_mul, Int.even_coe_nat, Even.neg_pow, one_pow, one_mul]
+    · simp_all only [nsmul_eq_mul, Int.odd_iff_not_even, Int.even_coe_nat, Nat.odd_iff_not_even,
+      not_false_eq_true, Odd.neg_one_pow, neg_mul, one_mul, iterate_map_neg]
 
 lemma legendre_eq_sum (n : ℕ) : legendre n = ∑ k in Finset.range (n + 1),
-    C ((- 1) ^ k : ℝ) • (Nat.choose n k) • (Nat.choose (n + k) n) * X ^ k := by
-  rw[legendre]
-  induction' n with n hn
-  · simp
-  · rw [ show n + 1 + 1 = n + 2 by ring, ← mul_pow, mul_one_sub, ← pow_two, sub_pow_special,
-      Finsum_iterate_deriv, Finset.mul_sum]
-    apply Finset.sum_congr rfl
-    intro x hx
-    rw [← mul_assoc, Polynomial.iterate_derivative_X_pow_eq_smul, Nat.descFactorial_eq_div
-      (show n + 1 ≤ n + 1 + x by omega), show n + 1 + x - (n + 1) = x by omega, smul_eq_mul,
-      nsmul_eq_mul, nsmul_eq_mul, ← mul_assoc, ← mul_assoc]
-    simp only [one_div, Algebra.mul_smul_comm, map_pow, map_neg, map_one]
-    sorry
+    C ((- 1) ^ k : ℝ) • (Nat.choose n k) * (Nat.choose (n + k) n) * X ^ k := by
+  rw [legendre, ← mul_pow, mul_one_sub, ← pow_two, sub_pow_special, Finsum_iterate_deriv,
+    Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro x hx
+  rw [← mul_assoc, Polynomial.iterate_derivative_X_pow_eq_smul, Nat.descFactorial_eq_div
+    (show n  ≤ n + x by omega), show n + x - n = x by omega, smul_eq_mul,
+    nsmul_eq_mul, ← mul_assoc, mul_assoc, mul_comm]
+  simp only [Int.reduceNeg, map_pow, map_neg, map_one]
+  rw [Algebra.smul_def, algebraMap_eq, map_natCast, ← mul_assoc, ← mul_assoc, add_comm,
+    Nat.add_choose]
+  rw [mul_assoc, mul_assoc, mul_assoc, mul_assoc, mul_assoc, mul_comm]
+  nth_rewrite 5 [mul_comm]
+  congr 1
+  nth_rewrite 2 [mul_comm]
+  rw [← mul_assoc, ← mul_assoc, ← mul_assoc]
+  congr 1
+  nth_rewrite 3 [mul_comm]
+  congr 1
+  -- have : (↑((x + n)! / (x ! * n !)) : ℝ[X]) = (↑((x + n)! / (x !))) * (↑(1 / n !) : ℝ[X]) := by
+  --   push_cast
+  --   sorry
+  -- rw [this]
+  -- congr 1
+  -- rw [← algebraMap_eq, ← map_natCast (algebraMap ℝ ℝ[X])]
+  sorry
+
+lemma legendre_pos {n : ℕ} {x : ℝ} (hx : 0 < x ∧ x < 1) : eval x (legendre n) > 0 := by
+  sorry
+
 
 end Polynomial
 
@@ -319,14 +341,57 @@ noncomputable abbrev JJ (n : ℕ) : ℝ :=
 
 noncomputable abbrev fun1 (n : ℕ) : ℝ := (d (Finset.Icc 1 n)) ^ 3 * JJ n
 
+lemma mul_lt_one_aux {x y : ℝ} (hx : x ∈ Set.Ioo 0 1) (hy : y ∈ Set.Ioo 0 1) : x * y < 1 := by
+  simp_all only [Set.mem_Ioo]
+  obtain ⟨hx1, hx2⟩ := hx
+  obtain ⟨_, hy2⟩ := hy
+  calc x * y < x := by exact mul_lt_of_lt_one_right hx1 hy2
+    _ < 1 := by exact hx2
+
 lemma JJ_pos (n : ℕ) : 0 < JJ n := by
-  sorry
+  simp only [JJ]
+  rw [← intervalIntegral.integral_neg]
+  apply intervalIntegral.intervalIntegral_pos_of_pos_on
+  · apply IntervalIntegrable.neg
+    sorry
+  · intro x hx
+    rw [← intervalIntegral.integral_neg]
+    apply intervalIntegral.intervalIntegral_pos_of_pos_on
+    · apply IntervalIntegrable.neg
+      apply IntervalIntegrable.continuousOn_mul
+      · apply intervalIntegral.intervalIntegrable_inv
+        · intro y hy
+          have : x * y < 1 := by
+            obtain ⟨hx1, hx2⟩ := hx
+            simp_all only [ge_iff_le, zero_le_one, Set.uIcc_of_le, Set.mem_Icc]
+            obtain ⟨hy1, hy2⟩ := hy
+            calc x * y ≤ x := by rwa [mul_le_iff_le_one_right hx1]
+              _ < 1 := by exact hx2
+          linarith
+        · apply ContinuousOn.sub continuousOn_const
+          apply ContinuousOn.mul continuousOn_const continuousOn_id
+      · apply ContinuousOn.mul
+        · sorry
+        · sorry
+    · intro y hy
+      simp only [Left.neg_pos_iff]
+      apply mul_neg_of_neg_of_pos
+      · apply mul_neg_of_pos_of_neg
+        · simp only [Set.mem_Ioo] at hx hy
+          exact mul_pos (legendre_pos hx) (legendre_pos hy)
+        · refine Real.log_neg ?_ (mul_lt_one_aux hx hy)
+          simp_all
+      · rw [inv_pos, sub_pos]
+        exact mul_lt_one_aux hx hy
+    · norm_num
+  · norm_num
 
 lemma linear_int (n : ℕ) : ∃ a b : ℕ → ℤ,
     fun1 n = a n + b n * (d (Finset.Icc 1 n)) ^ 3  * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
   sorry
 
 lemma JJ_upper (n : ℕ) : JJ n < 2 * (1 / 30) ^ n * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
+  simp only [JJ]
   sorry
 
 lemma fun1_tendsto_zero : Filter.Tendsto (fun n ↦ fun1 n) ⊤ (nhds 0) := by
