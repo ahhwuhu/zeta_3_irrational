@@ -77,9 +77,69 @@ lemma legendre_eq_sum (n : ℕ) : legendre n = ∑ k in Finset.range (n + 1),
   -- rw [← algebraMap_eq, ← map_natCast (algebraMap ℝ ℝ[X])]
   sorry
 
-lemma legendre_pos {n : ℕ} {x : ℝ} (hx : 0 < x ∧ x < 1) : eval x (legendre n) > 0 := by
-  sorry
+lemma deriv_one_sub_X {n i : ℕ} : (⇑derivative)^[i] ((1 - X) ^ n : ℝ[X]) =
+    (-1) ^ i * (n.descFactorial i) • ((1 - X) ^ (n - i)) := by
+  rw [show (1 - X : ℝ[X]) ^ n = (X ^ n : ℝ[X]).comp (1 - X) by simp,
+    Polynomial.iterate_derivative_comp_one_sub_X (p := X ^ n),
+    Polynomial.iterate_derivative_X_pow_eq_smul]
+  rw [Algebra.smul_def, algebraMap_eq, map_natCast]
+  simp
 
+lemma legendre_pos {n : ℕ} {x : ℝ} (hx : 0 < x ∧ x < 1) : eval x (legendre n) > 0 := by
+  simp_all only [eval_mul, one_div, eval_C, gt_iff_lt]
+  apply mul_pos
+  · simp only [inv_pos, Nat.cast_pos]
+    exact Nat.factorial_pos n
+  · rw [Polynomial.iterate_derivative_mul]
+    simp only [Nat.succ_eq_add_one, nsmul_eq_mul]
+    rw [Polynomial.eval_finset_sum]
+    sorry
+    -- apply Finset.sum_pos _ (by simp)
+    -- intro i hi
+    -- simp only [Polynomial.iterate_derivative_X_pow_eq_smul, eval_mul, eval_natCast,
+    --   Algebra.smul_mul_assoc, eval_smul, eval_mul, eval_pow, eval_X, smul_eq_mul]
+    -- apply mul_pos
+    -- · simp_all only [Finset.mem_range, Nat.cast_pos, Nat.lt_add_one_iff]
+    --   exact Nat.choose_pos hi
+    -- · apply mul_pos
+    --   · rw [Nat.descFactorial_eq_div (by simp)]
+    --     simp only [Finset.mem_range] at hi
+    --     rw [show n - (n - i) = i by omega]
+    --     sorry
+    --   · simp_all only [Finset.mem_range, gt_iff_lt, pow_pos, mul_pos_iff_of_pos_left]
+    --     rw [deriv_one_sub_X]
+    --     simp only [nsmul_eq_mul, eval_mul, eval_natCast, eval_pow, eval_X]
+    --     apply mul_pos
+    --     · sorry
+    --     · simp_all
+
+lemma legendre_eval_symm {n : ℕ} {x : ℝ} (hx : 0 < x ∧ x < 1) : eval x (legendre n) =
+    (-1) ^ n * eval (1 - x) (legendre n) := by
+  rw [mul_comm]
+  simp only [eval_mul, one_div, eval_C]
+  rw [mul_assoc]
+  simp only [mul_eq_mul_left_iff, inv_eq_zero, Nat.cast_eq_zero]; left
+  rw [Polynomial.iterate_derivative_mul]
+  simp only [Nat.succ_eq_add_one, nsmul_eq_mul]
+  rw [Polynomial.eval_finset_sum, Polynomial.eval_finset_sum, ← Finset.sum_flip, Finset.sum_mul]
+  apply Finset.sum_congr rfl
+  intro i hi
+  simp only [Polynomial.iterate_derivative_X_pow_eq_smul, eval_mul, eval_natCast,
+    Algebra.smul_mul_assoc, eval_smul, eval_mul, eval_pow, eval_X, smul_eq_mul]
+  simp only [Finset.mem_range, Nat.lt_add_one_iff] at hi
+  rw [Nat.choose_symm hi, deriv_one_sub_X, deriv_one_sub_X]
+  simp only [nsmul_eq_mul, eval_mul, eval_pow, eval_neg, eval_one, eval_natCast, eval_sub, eval_X,
+    sub_sub_cancel]
+  rw [mul_assoc]
+  simp only [mul_eq_mul_left_iff, Nat.cast_eq_zero]; left
+  rw [show n - (n - i) = i by omega, ← mul_assoc, ← mul_assoc, mul_comm, ← mul_assoc]
+  symm
+  rw [← mul_assoc]
+  nth_rewrite 4 [mul_comm]
+  rw [← mul_assoc, ← mul_assoc, mul_assoc]
+  congr 1
+  rw [← pow_add, show i + n = n - i + 2 * i by omega, pow_add]
+  simp
 
 end Polynomial
 
