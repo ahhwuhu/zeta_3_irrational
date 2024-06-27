@@ -54,10 +54,10 @@ lemma legendre_eq_sum (n : ℕ) : legendre n = ∑ k in Finset.range (n + 1),
   rw [legendre, ← mul_pow, mul_one_sub, ← pow_two, sub_pow_special, Finsum_iterate_deriv,
     Finset.mul_sum]
   apply Finset.sum_congr rfl
-  intro x hx
+  intro x _
   rw [← mul_assoc, Polynomial.iterate_derivative_X_pow_eq_smul, Nat.descFactorial_eq_div
-    (show n  ≤ n + x by omega), show n + x - n = x by omega, smul_eq_mul,
-    nsmul_eq_mul, ← mul_assoc, mul_assoc, mul_comm]
+    (by omega), show n + x - n = x by omega, smul_eq_mul, nsmul_eq_mul, ← mul_assoc, mul_assoc,
+    mul_comm]
   simp only [Int.reduceNeg, map_pow, map_neg, map_one]
   rw [Algebra.smul_def, algebraMap_eq, map_natCast, ← mul_assoc, ← mul_assoc, add_comm,
     Nat.add_choose]
@@ -69,13 +69,23 @@ lemma legendre_eq_sum (n : ℕ) : legendre n = ∑ k in Finset.range (n + 1),
   congr 1
   nth_rewrite 3 [mul_comm]
   congr 1
-  -- have : (↑((x + n)! / (x ! * n !)) : ℝ[X]) = (↑((x + n)! / (x !))) * (↑(1 / n !) : ℝ[X]) := by
-  --   push_cast
-  --   sorry
-  -- rw [this]
-  -- congr 1
-  -- rw [← algebraMap_eq, ← map_natCast (algebraMap ℝ ℝ[X])]
-  sorry
+  apply Polynomial.ext
+  intro m
+  simp only [one_div, coeff_mul_C, coeff_natCast_ite, Nat.cast_ite, CharP.cast_eq_zero, ite_mul,
+    zero_mul]
+  if h : m = 0 then
+    simp [h]
+    rw [Nat.cast_div]
+    · rw [← one_div, ← div_mul_eq_div_mul_one_div]
+      norm_cast
+      rw [Nat.cast_div]
+      · exact Nat.factorial_mul_factorial_dvd_factorial_add x n
+      · norm_cast
+        apply mul_ne_zero (Nat.factorial_ne_zero x) (Nat.factorial_ne_zero n)
+    · exact Nat.factorial_dvd_factorial (by omega)
+    · norm_cast; exact Nat.factorial_ne_zero x
+  else
+    simp [h]
 
 lemma deriv_one_sub_X {n i : ℕ} : (⇑derivative)^[i] ((1 - X) ^ n : ℝ[X]) =
     (-1) ^ i * (n.descFactorial i) • ((1 - X) ^ (n - i)) := by
@@ -85,35 +95,7 @@ lemma deriv_one_sub_X {n i : ℕ} : (⇑derivative)^[i] ((1 - X) ^ n : ℝ[X]) =
   rw [Algebra.smul_def, algebraMap_eq, map_natCast]
   simp
 
-lemma legendre_pos {n : ℕ} {x : ℝ} (hx : 0 < x ∧ x < 1) : eval x (legendre n) > 0 := by
-  simp_all only [eval_mul, one_div, eval_C, gt_iff_lt]
-  apply mul_pos
-  · simp only [inv_pos, Nat.cast_pos]
-    exact Nat.factorial_pos n
-  · rw [Polynomial.iterate_derivative_mul]
-    simp only [Nat.succ_eq_add_one, nsmul_eq_mul]
-    rw [Polynomial.eval_finset_sum]
-    sorry
-    -- apply Finset.sum_pos _ (by simp)
-    -- intro i hi
-    -- simp only [Polynomial.iterate_derivative_X_pow_eq_smul, eval_mul, eval_natCast,
-    --   Algebra.smul_mul_assoc, eval_smul, eval_mul, eval_pow, eval_X, smul_eq_mul]
-    -- apply mul_pos
-    -- · simp_all only [Finset.mem_range, Nat.cast_pos, Nat.lt_add_one_iff]
-    --   exact Nat.choose_pos hi
-    -- · apply mul_pos
-    --   · rw [Nat.descFactorial_eq_div (by simp)]
-    --     simp only [Finset.mem_range] at hi
-    --     rw [show n - (n - i) = i by omega]
-    --     sorry
-    --   · simp_all only [Finset.mem_range, gt_iff_lt, pow_pos, mul_pos_iff_of_pos_left]
-    --     rw [deriv_one_sub_X]
-    --     simp only [nsmul_eq_mul, eval_mul, eval_natCast, eval_pow, eval_X]
-    --     apply mul_pos
-    --     · sorry
-    --     · simp_all
-
-lemma legendre_eval_symm {n : ℕ} {x : ℝ} (hx : 0 < x ∧ x < 1) : eval x (legendre n) =
+lemma legendre_eval_symm {n : ℕ} {x : ℝ} : eval x (legendre n) =
     (-1) ^ n * eval (1 - x) (legendre n) := by
   rw [mul_comm]
   simp only [eval_mul, one_div, eval_C]
@@ -409,42 +391,42 @@ lemma mul_lt_one_aux {x y : ℝ} (hx : x ∈ Set.Ioo 0 1) (hy : y ∈ Set.Ioo 0 
     _ < 1 := by exact hx2
 
 lemma JJ_pos (n : ℕ) : 0 < JJ n := by
-  simp only [JJ]
-  rw [← intervalIntegral.integral_neg]
-  apply intervalIntegral.intervalIntegral_pos_of_pos_on
-  · apply IntervalIntegrable.neg
-    sorry
-  · intro x hx
-    rw [← intervalIntegral.integral_neg]
-    apply intervalIntegral.intervalIntegral_pos_of_pos_on
-    · apply IntervalIntegrable.neg
-      apply IntervalIntegrable.continuousOn_mul
-      · apply intervalIntegral.intervalIntegrable_inv
-        · intro y hy
-          have : x * y < 1 := by
-            obtain ⟨hx1, hx2⟩ := hx
-            simp_all only [ge_iff_le, zero_le_one, Set.uIcc_of_le, Set.mem_Icc]
-            obtain ⟨hy1, hy2⟩ := hy
-            calc x * y ≤ x := by rwa [mul_le_iff_le_one_right hx1]
-              _ < 1 := by exact hx2
-          linarith
-        · apply ContinuousOn.sub continuousOn_const
-          apply ContinuousOn.mul continuousOn_const continuousOn_id
-      · apply ContinuousOn.mul
-        · sorry
-        · sorry
-    · intro y hy
-      simp only [Left.neg_pos_iff]
-      apply mul_neg_of_neg_of_pos
-      · apply mul_neg_of_pos_of_neg
-        · simp only [Set.mem_Ioo] at hx hy
-          exact mul_pos (legendre_pos hx) (legendre_pos hy)
-        · refine Real.log_neg ?_ (mul_lt_one_aux hx hy)
-          simp_all
-      · rw [inv_pos, sub_pos]
-        exact mul_lt_one_aux hx hy
-    · norm_num
-  · norm_num
+  sorry
+  -- simp only [JJ]
+  -- rw [← intervalIntegral.integral_neg]
+  -- apply intervalIntegral.intervalIntegral_pos_of_pos_on
+  -- · apply IntervalIntegrable.neg
+  --   sorry
+  -- · intro x hx
+  --   rw [← intervalIntegral.integral_neg]
+  --   apply intervalIntegral.intervalIntegral_pos_of_pos_on
+  --   · apply IntervalIntegrable.neg
+  --     apply IntervalIntegrable.continuousOn_mul
+  --     · apply intervalIntegral.intervalIntegrable_inv
+  --       · intro y hy
+  --         have : x * y < 1 := by
+  --           obtain ⟨hx1, hx2⟩ := hx
+  --           simp_all only [ge_iff_le, zero_le_one, Set.uIcc_of_le, Set.mem_Icc]
+  --           obtain ⟨hy1, hy2⟩ := hy
+  --           calc x * y ≤ x := by rwa [mul_le_iff_le_one_right hx1]
+  --             _ < 1 := by exact hx2
+  --         linarith
+  --       · apply ContinuousOn.sub continuousOn_const
+  --         apply ContinuousOn.mul continuousOn_const continuousOn_id
+  --     · apply ContinuousOn.mul
+  --       · sorry
+  --       · sorry
+  --   · intro y hy
+  --     simp only [Left.neg_pos_iff]
+  --     apply mul_neg_of_neg_of_pos
+  --     · apply mul_neg_of_pos_of_neg
+  --       · sorry
+  --       · refine Real.log_neg ?_ (mul_lt_one_aux hx hy)
+  --         simp_all
+  --     · rw [inv_pos, sub_pos]
+  --       exact mul_lt_one_aux hx hy
+  --   · norm_num
+  -- · norm_num
 
 lemma linear_int (n : ℕ) : ∃ a b : ℕ → ℤ,
     fun1 n = a n + b n * (d (Finset.Icc 1 n)) ^ 3  * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
