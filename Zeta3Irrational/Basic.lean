@@ -123,6 +123,15 @@ lemma legendre_eval_symm {n : ℕ} {x : ℝ} : eval x (legendre n) =
   rw [← pow_add, show i + n = n - i + 2 * i by omega, pow_add]
   simp
 
+lemma integral_legendre_mul_smooth_eq {n : ℕ} (f : ℝ → ℝ) :
+  ∫ (x : ℝ) in (0)..1, eval x (legendre n) * f x =
+  (- 1) ^ n / n ! * ∫ (x : ℝ) in (0)..1, x ^ n * (1 - x) ^ n * (Fderivative^[n] f) x := by
+  simp only [eval_mul, one_div, eval_C]
+  induction' n with n hn
+  · simp
+  · rw [← intervalIntegral.integral_const_mul]
+    sorry
+
 end Polynomial
 
 namespace Integral
@@ -139,23 +148,67 @@ lemma zeta_3 : J 0 0 = 2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
 lemma I_rr (h : 0 < r) : I r r = ∑' m : ℕ+ , 1 / ((m : ℝ) + r) ^ 3 := by
   sorry
 
-lemma J_rr (r : ℕ) (h : 0 < r) :
-    J r r = 2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 - 2 * ∑ m in Finset.range (r), 1 / ((m : ℝ) + 1) ^ 3 := by
+lemma J_rr {r : ℕ} (h : 0 < r) :
+    J r r = 2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 - 2 * ∑ m in Finset.Icc 1 r, 1 / (m : ℝ) ^ 3 := by
   sorry
 
-lemma I_rs (r s : ℕ) (h : r ≠ s) :
+lemma I_rs {r s : ℕ} (h : r ≠ s) :
     I r s = ∑' m : ℕ , 1 / ((m : ℝ) + 1 + r) * 1 / ((m : ℝ) + 1 + s) := by
   sorry
 
-lemma J_rs (r s : ℕ) (h : r ≠ s) :
-    J r s = (∑ m in Finset.range (r), 1 / ((m : ℝ) + 1) ^ 2 - ∑ m in Finset.range (s), 1 / ((m : ℝ) + 1) ^ 2) / (r - s) := by
+lemma J_rs {r s : ℕ} (h : r ≠ s) :
+    J r s = (∑ m in Finset.Icc 1 r, 1 / (m : ℝ) ^ 2 - ∑ m in Finset.Icc 1 s, 1 / (m : ℝ) ^ 2) / (r - s) := by
+  sorry
+
+
+instance Nat_Int (r : ℕ) : OfNat ℤ (d (Finset.Icc 1 r) ^ 3) where
+  ofNat := Int.ofNat (d (Finset.Icc 1 r)^ 3)
+
+lemma d_cube_ne_zero {r : ℕ} : ((d (Finset.Icc 1 r) ^ 3) : ℝ) ≠ (0 : ℝ) := by
+  simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, pow_eq_zero_iff, Nat.cast_eq_zero]
+  apply d_ne_zero; simp
+
+lemma J_rr_linear {r : ℕ} :
+    ∃ a : ℤ, J r r = 2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 - a / (d (Finset.Icc 1 r)) ^ 3 := by
+  if h : r = 0 then
+    rw [h, zeta_3]; use 0; simp
+  else
+    rw [J_rr (by omega)]
+    simp only [sub_right_inj]
+    simp_rw [eq_div_iff d_cube_ne_zero, Finset.mul_sum, Finset.sum_mul]
+    use ∑ i ∈ Finset.Icc 1 r, 2 * (1 / ↑i ^ 3) * ↑(d (Finset.Icc 1 r)) ^ 3
+    simp only [Int.cast_sum, Int.cast_mul, Int.cast_ofNat, Int.cast_pow, Int.cast_natCast]
+    apply Finset.sum_congr rfl
+    intro x hx
+    rw [mul_assoc, mul_assoc, mul_right_inj']
+    · rw [mul_comm, mul_one_div, mul_comm, ← Nat.cast_pow, ← Nat.cast_pow, ← Nat.cast_div]
+      · sorry
+      · rw [d_cube']
+        apply dvd_d_of_mem
+        simp_all
+      · simp_all only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, pow_eq_zero_iff,
+        Nat.cast_eq_zero, Finset.mem_Icc, Nat.cast_pow]
+        linarith
+    · simp
+
+lemma one_div_sum_eq {r s : ℕ} (h : r > s) :
+    ∑ m ∈ Finset.Icc 1 r, (1 / m ^ 2 : ℝ)- ∑ m ∈ Finset.Icc 1 s, (1 / m ^ 2 : ℝ) =
+    ∑ m ∈ Finset.Icc 1 (r - s), (1 / (s + m) ^ 2 : ℝ) := by
+  sorry
+
+lemma J_rs_linear {r s : ℕ} (h : r > s) : ∃ a : ℤ, J r s = a / (d (Finset.Icc 1 r)) ^ 3 := by
+  rw [J_rs (by linarith)]
+  simp_rw [eq_div_iff d_cube_ne_zero, one_div_sum_eq h]
+  use (∑ m ∈ Finset.Icc 1 (r - s), 1 / (s + m) ^ 2 : ℤ) / (↑r - ↑s) * ↑(d (Finset.Icc 1 r)) ^ 3
+  rw [show 3 = 1 + 2 by omega, pow_add, pow_add, pow_one, pow_one, ← mul_assoc, ← mul_assoc,
+  mul_comm_div]
   sorry
 
 end Integral
 
 namespace Equality
 
-lemma integral1 (a : ℝ) (ha : 0 < a) (ha1 : a < 1) :
+lemma integral1 {a : ℝ} (ha : 0 < a) (ha1 : a < 1) :
     ∫ (z : ℝ) in (0)..1, 1 / (1 - (1 - a) * z) = - a.log / (1 - a) := by
   rw[← sub_pos] at ha1
   have eq1 := intervalIntegral.integral_comp_mul_left (a := 0) (b := 1) (c := 1 - a)
@@ -172,7 +225,7 @@ lemma integral1 (a : ℝ) (ha : 0 < a) (ha1 : a < 1) :
   rw[eq2,eq3]
   simp
 
-lemma integral_equality_help (s t: ℝ) (s0 : 0 < s) (s1 : s < 1) (t0 : 0 < t) (t1 : t < 1) :
+lemma integral_equality_help (s t : ℝ) (s0 : 0 < s) (s1 : s < 1) (t0 : 0 < t) (t1 : t < 1) :
     ∫ (u : ℝ) in (0)..1, 1 / ((1 - (1 - u) * s) * (1 - (1 - t) * u)) =
     ∫ (u : ℝ) in (0)..1, 1 / (1 - (1 - s) * t) * (s / (1 - (1 - u) * s) + (1 - t) / (1 - (1 - t) * u)) := by
   rw[← sub_pos] at s1
@@ -226,13 +279,13 @@ lemma integral_equality_help (s t: ℝ) (s0 : 0 < s) (s1 : s < 1) (t0 : 0 < t) (
     · obtain b00 := eq1 a b12 b22
       rw[b00, mul_comm]
 
-lemma integral_equality (s t: ℝ) (s0 : 0 < s) (s1 : s < 1) (t0 : 0 < t) (t1 : t < 1) :
+lemma integral_equality (s t : ℝ) (s0 : 0 < s) (s1 : s < 1) (t0 : 0 < t) (t1 : t < 1) :
     ∫ (u : ℝ) in (0)..1, 1 /(1 - (1 - (1 - s) * t) * u) =
     ∫ (u : ℝ) in (0)..1, 1 /((1 - (1 - u) * s) * (1 - (1 - t) * u)) := by
   rw[← sub_pos] at s1
   obtain h1 := mul_lt_of_lt_one_right s1 t1
   have h2 : (1 - s) * t < 1 := by linarith
-  have h3 := integral1 ((1 - s) * t) (Real.mul_pos s1 t0) h2
+  have h3 := integral1 (Real.mul_pos s1 t0) h2
   have eq3 : ∫ (x : ℝ) in (0)..1, s / (1 - (1 - x) * s) = - (1 - s).log :=
     by
     have eq3_1 := intervalIntegral.integral_comp_sub_mul (a := 0) (b := 1) (c := 1) (d := 1) (f := fun z ↦ (s / (1 - z * s))) (by norm_num)
@@ -432,11 +485,30 @@ lemma linear_int (n : ℕ) : ∃ a b : ℕ → ℤ,
     fun1 n = a n + b n * (d (Finset.Icc 1 n)) ^ 3  * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
   sorry
 
+lemma JJ_upper_1 (n : ℕ) :
+    ∫ (x : ℝ) (y : ℝ) in (0)..1, eval x (legendre n) * eval y (legendre n) * -(x * y).log / (1 - x * y) =
+    ∫ (x : ℝ) (y : ℝ) in (0)..1, eval x (legendre n) * eval y (legendre n) * ∫ (z : ℝ) in (0)..1, 1 / (1 - (1 - x * y) * z)
+    := by
+  apply intervalIntegral.integral_congr
+  intro x hx
+  apply intervalIntegral.integral_congr
+  intro y hy
+  simp only
+
+  sorry
+
 lemma JJ_upper (n : ℕ) : JJ n < 2 * (1 / 30) ^ n * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
   simp only [JJ]
+  simp_rw [← intervalIntegral.integral_neg, ← neg_div, neg_mul_eq_mul_neg]
+
+  sorry
+
+lemma upper_tendsto_zero : Filter.Tendsto (fun n ↦ 2 * (21 / 30) ^ n * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3) ⊤ (nhds 0) := by
   sorry
 
 lemma fun1_tendsto_zero : Filter.Tendsto (fun n ↦ fun1 n) ⊤ (nhds 0) := by
+  intro x hx
+  delta fun1
   sorry
 
 lemma fin_d_neq_zero (n : ℕ) : d (Finset.Icc 1 n) > 0 := by
