@@ -87,6 +87,14 @@ lemma legendre_eq_sum (n : ℕ) : legendre n = ∑ k in Finset.range (n + 1),
   else
     simp [h]
 
+lemma legendre_eq_intpoly (n : ℕ) : ∃ a : ℕ → ℤ, legendre n = ∑ k in Finset.range (n + 1),
+    (a k) • X ^ k := by
+  simp_rw [legendre_eq_sum]
+  use fun k => (- 1) ^ k * (Nat.choose n k) * (Nat.choose (n + k) n)
+  apply Finset.sum_congr rfl
+  intro x _
+  simp
+
 lemma deriv_one_sub_X {n i : ℕ} : (⇑derivative)^[i] ((1 - X) ^ n : ℝ[X]) =
     (-1) ^ i * (n.descFactorial i) • ((1 - X) ^ (n - i)) := by
   rw [show (1 - X : ℝ[X]) ^ n = (X ^ n : ℝ[X]).comp (1 - X) by simp,
@@ -507,8 +515,25 @@ lemma JJ_pos (n : ℕ) : 0 < JJ n := by
   --   · norm_num
   -- · norm_num
 
+lemma multi_integral_sum_comm (c : ℕ → ℤ) : ∫ (x : ℝ) (y : ℝ) in (0)..1, ∑ x_1 ∈ Finset.range (n + 1),
+    ∑ x_2 ∈ Finset.range (n + 1), ↑(c x_1) * x ^ x_1 * ↑(c x_2) * y ^ x_2 * (x * y).log / (1 - x * y)
+    = ∑ x_1 ∈ Finset.range (n + 1), ∑ x_2 ∈ Finset.range (n + 1), ∫ (x : ℝ) (y : ℝ) in (0)..1,
+    ↑(c x_1) * x ^ x_1 * ↑(c x_2) * y ^ x_2 * (x * y).log / (1 - x * y) := by
+  sorry
+
+lemma multi_integral_mul_const (c d : ℕ) (p q : ℝ): ∫ (x : ℝ) (y : ℝ) in (0)..1,
+    p * x ^ c * q * y ^ d * (x * y).log / (1 - x * y) = p * q * - J c d := by
+  sorry
+
 lemma linear_int (n : ℕ) : ∃ a b : ℕ → ℤ,
     fun1 n = a n + b n * (d (Finset.Icc 1 n)) ^ 3  * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
+  delta fun1 JJ
+  obtain ⟨c, hc⟩ := legendre_eq_intpoly n
+  simp_rw [hc, Polynomial.eval_finset_sum, Finset.sum_mul_sum, Finset.sum_mul, Finset.sum_div]
+  simp only [zsmul_eq_mul, eval_mul, eval_intCast, eval_pow, eval_X]
+  simp_rw [← mul_assoc, multi_integral_sum_comm, multi_integral_mul_const]
+  simp only [← Finset.sum_neg_distrib, Finset.mul_sum]
+  use
   sorry
 
 lemma JJ_upper_1 (n : ℕ) :
@@ -520,7 +545,6 @@ lemma JJ_upper_1 (n : ℕ) :
   apply intervalIntegral.integral_congr
   intro y hy
   simp only
-
   sorry
 
 lemma JJ_upper (n : ℕ) : JJ n < 2 * (1 / 30) ^ n * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
