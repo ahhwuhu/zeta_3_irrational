@@ -160,10 +160,6 @@ lemma J_rs {r s : ℕ} (h : r ≠ s) :
     J r s = (∑ m in Finset.Icc 1 r, 1 / (m : ℝ) ^ 2 - ∑ m in Finset.Icc 1 s, 1 / (m : ℝ) ^ 2) / (r - s) := by
   sorry
 
-
-instance Nat_Int (r : ℕ) : OfNat ℤ (d (Finset.Icc 1 r) ^ 3) where
-  ofNat := Int.ofNat (d (Finset.Icc 1 r)^ 3)
-
 lemma d_cube_ne_zero {r : ℕ} : ((d (Finset.Icc 1 r) ^ 3) : ℝ) ≠ (0 : ℝ) := by
   simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, pow_eq_zero_iff, Nat.cast_eq_zero]
   apply d_ne_zero; simp
@@ -176,20 +172,23 @@ lemma J_rr_linear {r : ℕ} :
     rw [J_rr (by omega)]
     simp only [sub_right_inj]
     simp_rw [eq_div_iff d_cube_ne_zero, Finset.mul_sum, Finset.sum_mul]
-    use ∑ i ∈ Finset.Icc 1 r, 2 * (1 / ↑i ^ 3) * ↑(d (Finset.Icc 1 r)) ^ 3
+    use ∑ i ∈ Finset.Icc 1 r, 2 * ↑(d (Finset.Icc 1 r)) ^ 3 / ↑i ^ 3
     simp only [Int.cast_sum, Int.cast_mul, Int.cast_ofNat, Int.cast_pow, Int.cast_natCast]
     apply Finset.sum_congr rfl
     intro x hx
-    rw [mul_assoc, mul_assoc, mul_right_inj']
-    · rw [mul_comm, mul_one_div, mul_comm, ← Nat.cast_pow, ← Nat.cast_pow, ← Nat.cast_div]
-      · sorry
-      · rw [d_cube']
+    rw [mul_assoc]
+    nth_rewrite 2 [mul_comm]
+    rw [mul_one_div, Int.cast_div]
+    · simp only [Int.cast_mul, Int.cast_ofNat, Int.cast_pow, Int.cast_natCast, mul_div_assoc']
+    · rw [← Nat.cast_pow, ← Nat.cast_pow, d_cube', Nat.cast_pow]
+      have : (x ^ 3 : ℤ) ∣ (d (Finset.image (fun x ↦ x ^ 3) (Finset.Icc 1 r))) := by
+        norm_cast
         apply dvd_d_of_mem
         simp_all
-      · simp_all only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, pow_eq_zero_iff,
-        Nat.cast_eq_zero, Finset.mem_Icc, Nat.cast_pow]
-        linarith
-    · simp
+      exact Dvd.dvd.mul_left this 2
+    · simp_all only [Finset.mem_Icc, Int.cast_pow, Int.cast_natCast, ne_eq, OfNat.ofNat_ne_zero,
+      not_false_eq_true, pow_eq_zero_iff, Nat.cast_eq_zero]
+      linarith
 
 lemma one_div_sum_eq {r s : ℕ} (h : r > s) :
     ∑ m ∈ Finset.Icc 1 r, (1 / m ^ 2 : ℝ)- ∑ m ∈ Finset.Icc 1 s, (1 / m ^ 2 : ℝ) =
