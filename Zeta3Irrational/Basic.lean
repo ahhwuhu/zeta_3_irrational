@@ -181,11 +181,10 @@ lemma J_rr_linear {r : ℕ} :
     rw [mul_one_div, Int.cast_div]
     · simp only [Int.cast_mul, Int.cast_ofNat, Int.cast_pow, Int.cast_natCast, mul_div_assoc']
     · rw [← Nat.cast_pow, ← Nat.cast_pow, d_cube', Nat.cast_pow]
-      have : (x ^ 3 : ℤ) ∣ (d (Finset.image (fun x ↦ x ^ 3) (Finset.Icc 1 r))) := by
-        norm_cast
-        apply dvd_d_of_mem
-        simp_all
-      exact Dvd.dvd.mul_left this 2
+      apply Dvd.dvd.mul_left
+      norm_cast
+      apply dvd_d_of_mem
+      simp_all
     · simp_all only [Finset.mem_Icc, Int.cast_pow, Int.cast_natCast, ne_eq, OfNat.ofNat_ne_zero,
       not_false_eq_true, pow_eq_zero_iff, Nat.cast_eq_zero]
       linarith
@@ -198,10 +197,38 @@ lemma one_div_sum_eq {r s : ℕ} (h : r > s) :
 lemma J_rs_linear {r s : ℕ} (h : r > s) : ∃ a : ℤ, J r s = a / (d (Finset.Icc 1 r)) ^ 3 := by
   rw [J_rs (by linarith)]
   simp_rw [eq_div_iff d_cube_ne_zero, one_div_sum_eq h]
-  use (∑ m ∈ Finset.Icc 1 (r - s), 1 / (s + m) ^ 2 : ℤ) / (↑r - ↑s) * ↑(d (Finset.Icc 1 r)) ^ 3
-  rw [show 3 = 1 + 2 by omega, pow_add, pow_add, pow_one, pow_one, ← mul_assoc, ← mul_assoc,
-  mul_comm_div]
-  sorry
+  use (∑ m ∈ Finset.Icc 1 (r - s), (d (Finset.Icc 1 r)) ^ 2 / (s + m) ^ 2 *
+    (d (Finset.Icc 1 r)) / (r - s))
+  rw [Finset.sum_div, Finset.sum_mul, Int.cast_sum]
+  apply Finset.sum_congr rfl
+  intro i hi
+  rw [show 3 = 1 + 2 by omega, pow_add, pow_one, mul_comm, mul_assoc, mul_div_assoc', mul_one_div,
+    mul_div_assoc', mul_comm, ← mul_div_assoc', Int.cast_div]
+  · rw [Int.cast_mul, Int.cast_div]
+    · simp_all only [gt_iff_lt, Finset.mem_Icc, Int.cast_pow, Int.cast_natCast, Int.cast_add,
+      Int.cast_sub]
+      rw [mul_div_assoc']
+    · norm_cast
+      rw [d_sq']
+      apply dvd_d_of_mem
+      simp_all only [gt_iff_lt, Finset.mem_Icc, Finset.mem_image, ge_iff_le, zero_le, ne_eq,
+        OfNat.ofNat_ne_zero, not_false_eq_true, pow_left_inj, exists_eq_right]
+      omega
+    · simp_all only [gt_iff_lt, Finset.mem_Icc, Int.cast_pow, Int.cast_add, Int.cast_natCast,
+      ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, pow_eq_zero_iff]
+      rw [← Nat.cast_add]
+      norm_cast
+      omega
+  · apply Dvd.dvd.mul_left
+    rw [← Nat.cast_sub (by linarith)]
+    norm_cast
+    apply dvd_d_of_mem
+    simp_all only [gt_iff_lt, Finset.mem_Icc, tsub_le_iff_right, le_add_iff_nonneg_right, zero_le,
+      and_true]
+    linarith
+  · simp_all only [gt_iff_lt, Finset.mem_Icc, Int.cast_sub, Int.cast_natCast]
+    rw [← Nat.cast_sub (by linarith)]
+    norm_cast; linarith
 
 end Integral
 
