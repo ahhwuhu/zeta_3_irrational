@@ -322,3 +322,8 @@ lemma d_sq' (n : ℕ) :
 
 lemma d_cube' (n : ℕ) :
     d (Finset.Icc 1 n)^3 = d (Finset.Icc 1 n |>.image (· ^ 3))  := d_cube _
+
+lemma d_cube_ne_zero (n : ℕ) : d (Finset.Icc 1 n) ^ 3 ≠ 0 := by
+  simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, pow_eq_zero_iff]
+  apply d_ne_zero
+  simp

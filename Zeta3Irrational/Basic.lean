@@ -172,7 +172,7 @@ lemma d_cube_ne_zero {r : ℕ} : ((d (Finset.Icc 1 r) ^ 3) : ℝ) ≠ (0 : ℝ) 
   simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, pow_eq_zero_iff, Nat.cast_eq_zero]
   apply d_ne_zero; simp
 
-lemma J_rr_linear {r : ℕ} :
+lemma J_rr_linear (r : ℕ) :
     ∃ a : ℤ, J r r = 2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 - a / (d (Finset.Icc 1 r)) ^ 3 := by
   if h : r = 0 then
     rw [h, zeta_3]; use 0; simp
@@ -525,16 +525,77 @@ lemma multi_integral_mul_const (c d : ℕ) (p q : ℝ): ∫ (x : ℝ) (y : ℝ) 
     p * x ^ c * q * y ^ d * (x * y).log / (1 - x * y) = p * q * - J c d := by
   sorry
 
+def q (r s : ℕ) : ℤ :=
+  if h1 : r > s then sorry
+  else if r < s then sorry
+  else sorry
+
+def p (r s : ℕ) : ℤ :=
+  if h1 : r > s then sorry
+  else if r < s then sorry
+  else sorry
+
+lemma linear_int_aux : ∃ a b : ℕ → ℕ → ℤ, ∀ r s : ℕ, J r s =
+    b r s * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 + a r s / (d (Finset.Icc 1 r)) ^ 3 := by
+  -- if h : x > y then
+  --   sorry
+  -- else if h : x < y then
+  --   obtain := J_rs_linear h
+  --   sorry
+  -- else
+  --   have h : x = y := by linarith
+  --   sorry
+  sorry
+
 lemma linear_int (n : ℕ) : ∃ a b : ℕ → ℤ,
-    fun1 n = a n + b n * (d (Finset.Icc 1 n)) ^ 3  * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
+    fun1 n = a n + b n * (d (Finset.Icc 1 n) : ℤ) ^ 3  * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
   delta fun1 JJ
   obtain ⟨c, hc⟩ := legendre_eq_intpoly n
   simp_rw [hc, Polynomial.eval_finset_sum, Finset.sum_mul_sum, Finset.sum_mul, Finset.sum_div]
   simp only [zsmul_eq_mul, eval_mul, eval_intCast, eval_pow, eval_X]
   simp_rw [← mul_assoc, multi_integral_sum_comm, multi_integral_mul_const]
   simp only [← Finset.sum_neg_distrib, Finset.mul_sum]
-  use
-  sorry
+  obtain ⟨qq', ⟨pp', hqq'⟩⟩ := linear_int_aux
+  use fun n => ∑ x ∈ Finset.range (n + 1), ∑ i ∈ Finset.range (n + 1),
+    d (Finset.Icc 1 n) ^ 3 * c x * c i * qq' x i / d (Finset.Icc 1 x) ^ 3
+  use fun n => ∑ x ∈ Finset.range (n + 1), ∑ i ∈ Finset.range (n + 1), c x * c i * pp' x i
+  rw [← Nat.cast_pow, ← Int.cast_pow , ← Int.cast_mul, Finset.sum_mul]
+  simp only [Nat.cast_pow, Int.cast_sum, Int.cast_mul, Int.cast_pow, Int.cast_natCast]
+  rw [Finset.sum_mul, ← Finset.sum_add_distrib]
+  apply Finset.sum_congr rfl
+  intro x hx
+  rw [Finset.sum_mul, Finset.sum_mul, ← Finset.sum_add_distrib]
+  apply Finset.sum_congr rfl
+  intro y hy
+  specialize hqq' x y
+  rw [hqq', ← mul_neg, neg_neg, mul_add, mul_add, add_comm]
+  congr 1
+  · rw [Int.cast_div]
+    · rw [mul_div_assoc', ← mul_div_assoc, div_eq_div_iff]
+      · norm_cast
+        rw [← mul_assoc, ← mul_assoc]
+      · simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, pow_eq_zero_iff,
+        Nat.cast_eq_zero]
+        apply d_ne_zero
+        simp
+      · simp only [Int.cast_pow, Int.cast_natCast, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
+        pow_eq_zero_iff, Nat.cast_eq_zero]
+        apply d_ne_zero
+        simp
+    · rw [mul_assoc, mul_assoc]
+      apply Dvd.dvd.mul_right
+      simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, IsIntegrallyClosed.pow_dvd_pow_iff]
+      norm_cast
+      apply d_dvd_d_of_le
+      simp_all only [zsmul_eq_mul, Finset.mem_range, Finset.le_eq_subset]
+      intro a b
+      simp_all only [Finset.mem_Icc, true_and]
+      linarith
+    · simp only [Int.cast_pow, Int.cast_natCast, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
+      pow_eq_zero_iff, Nat.cast_eq_zero]
+      apply d_ne_zero
+      simp
+  · ring
 
 lemma JJ_upper_1 (n : ℕ) :
     ∫ (x : ℝ) (y : ℝ) in (0)..1, eval x (legendre n) * eval y (legendre n) * -(x * y).log / (1 - x * y) =
