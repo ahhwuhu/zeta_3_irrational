@@ -1,3 +1,7 @@
+/-
+A formal proof of the irrationality of Riemann-Zeta(3).
+Author: Junqi Liu and Jujian Zhang.
+-/
 import Mathlib
 
 open scoped Nat
