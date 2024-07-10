@@ -4,6 +4,7 @@ Author: Junqi Liu and Jujian Zhang.
 -/
 import Mathlib
 import Zeta3Irrational.d
+import Zeta3Irrational.Integral
 
 open scoped Nat
 open BigOperators
@@ -142,31 +143,7 @@ lemma integral_legendre_mul_smooth_eq {n : ℕ} (f : ℝ → ℝ) :
 
 end Polynomial
 
-namespace Integral
-
-noncomputable abbrev I (r s : ℕ) : ℝ :=
-  - ∫ (x : ℝ) in (0)..1, (∫ (y : ℝ) in (0)..1, x ^ r * y ^ s / (1 - x * y))
-
-noncomputable abbrev J (r s : ℕ) : ℝ :=
-  - ∫ (x : ℝ) in (0)..1, (∫ (y : ℝ) in (0)..1, x ^ r * y ^ s * (x * y).log / (1 - x * y))
-
-lemma zeta_3 : J 0 0 = 2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
-  sorry
-
-lemma I_rr (h : 0 < r) : I r r = ∑' m : ℕ+ , 1 / ((m : ℝ) + r) ^ 3 := by
-  sorry
-
-lemma J_rr {r : ℕ} (h : 0 < r) :
-    J r r = 2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 - 2 * ∑ m in Finset.Icc 1 r, 1 / (m : ℝ) ^ 3 := by
-  sorry
-
-lemma I_rs {r s : ℕ} (h : r ≠ s) :
-    I r s = ∑' m : ℕ , 1 / ((m : ℝ) + 1 + r) * 1 / ((m : ℝ) + 1 + s) := by
-  sorry
-
-lemma J_rs {r s : ℕ} (h : r ≠ s) :
-    J r s = (∑ m in Finset.Icc 1 r, 1 / (m : ℝ) ^ 2 - ∑ m in Finset.Icc 1 s, 1 / (m : ℝ) ^ 2) / (r - s) := by
-  sorry
+namespace LinearForm
 
 lemma d_cube_ne_zero {r : ℕ} : ((d (Finset.Icc 1 r) ^ 3) : ℝ) ≠ (0 : ℝ) := by
   simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, pow_eq_zero_iff, Nat.cast_eq_zero]
@@ -238,7 +215,39 @@ lemma J_rs_linear {r s : ℕ} (h : r > s) : ∃ a : ℤ, J r s = a / (d (Finset.
     rw [← Nat.cast_sub (by linarith)]
     norm_cast; linarith
 
-end Integral
+lemma multi_integral_sum_comm (c : ℕ → ℤ) : ∫ (x : ℝ) (y : ℝ) in (0)..1, ∑ x_1 ∈ Finset.range (n + 1),
+    ∑ x_2 ∈ Finset.range (n + 1), ↑(c x_1) * x ^ x_1 * ↑(c x_2) * y ^ x_2 * (x * y).log / (1 - x * y)
+    = ∑ x_1 ∈ Finset.range (n + 1), ∑ x_2 ∈ Finset.range (n + 1), ∫ (x : ℝ) (y : ℝ) in (0)..1,
+    ↑(c x_1) * x ^ x_1 * ↑(c x_2) * y ^ x_2 * (x * y).log / (1 - x * y) := by
+  sorry
+
+lemma multi_integral_mul_const (c d : ℕ) (p q : ℝ): ∫ (x : ℝ) (y : ℝ) in (0)..1,
+    p * x ^ c * q * y ^ d * (x * y).log / (1 - x * y) = p * q * - J c d := by
+  sorry
+
+def q (r s : ℕ) : ℤ :=
+  if h1 : r > s then sorry
+  else if r < s then sorry
+  else sorry
+
+def p (r s : ℕ) : ℤ :=
+  if h1 : r > s then sorry
+  else if r < s then sorry
+  else sorry
+
+lemma linear_int_aux : ∃ a b : ℕ → ℕ → ℤ, ∀ r s : ℕ, J r s =
+    b r s * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 + a r s / (d (Finset.Icc 1 r)) ^ 3 := by
+  -- if h : x > y then
+  --   sorry
+  -- else if h : x < y then
+  --   obtain := J_rs_linear h
+  --   sorry
+  -- else
+  --   have h : x = y := by linarith
+  --   sorry
+  sorry
+
+end LinearForm
 
 namespace Equality
 
@@ -265,8 +274,9 @@ lemma integral_equality_help (s t : ℝ) (s0 : 0 < s) (s1 : s < 1) (t0 : 0 < t) 
   rw[← sub_pos] at s1
   obtain h1 := mul_lt_of_lt_one_right s1 t1
   have h2 : (1 - s) * t < 1 := by linarith
-  have eq1 (u : ℝ) (hu : 0 < u) (hu1 : u < 1) : 1 / (1 - (1 - s) * t) * (s / (1 - (1 - u) * s) + (1 - t) / (1 - (1 - t) * u)) = 1 / ((1 - (1 - u) * s) * (1 - (1 - t) * u)) :=
-    by
+  have eq1 (u : ℝ) (hu : 0 < u) (hu1 : u < 1) :
+      1 / (1 - (1 - s) * t) * (s / (1 - (1 - u) * s) + (1 - t) / (1 - (1 - t) * u)) =
+      1 / ((1 - (1 - u) * s) * (1 - (1 - t) * u)) := by
     have h4 : (1 - u) * s < 1 := by
       rw[← sub_pos] at hu1
       rw[sub_pos] at s1
@@ -389,8 +399,6 @@ lemma integral_equality (s t : ℝ) (s0 : 0 < s) (s1 : s < 1) (t0 : 0 < t) (t1 :
   · exact t0
   · exact t1
 
-
-
 --- lemma n_derivative {a : ℝ} (n : ℕ) : derivative^[n + 1] (1 / (1 - a * X)) = (n + 1) ! * (a ^ (n + 1)) / (1 - a * X) ^ (n + 2) := by
 ---  rw [show n + 2 = (n + 1) + 1 by omega]
 ---  induction' n + 1 with n hn
@@ -462,7 +470,7 @@ lemma bound (x y z : ℝ) (x0 : 0 < x) (x1 : x < 1) (y0 : 0 < y) (y1 : y < 1) (z
 
 end Bound
 
-open Polynomial Integral Equality Bound
+open Polynomial LinearForm Equality Bound
 
 noncomputable abbrev JJ (n : ℕ) : ℝ :=
   - ∫ (x : ℝ) in (0)..1, (∫ (y : ℝ) in (0)..1,
@@ -514,38 +522,6 @@ lemma JJ_pos (n : ℕ) : 0 < JJ n := by
   --       exact mul_lt_one_aux hx hy
   --   · norm_num
   -- · norm_num
-
-lemma multi_integral_sum_comm (c : ℕ → ℤ) : ∫ (x : ℝ) (y : ℝ) in (0)..1, ∑ x_1 ∈ Finset.range (n + 1),
-    ∑ x_2 ∈ Finset.range (n + 1), ↑(c x_1) * x ^ x_1 * ↑(c x_2) * y ^ x_2 * (x * y).log / (1 - x * y)
-    = ∑ x_1 ∈ Finset.range (n + 1), ∑ x_2 ∈ Finset.range (n + 1), ∫ (x : ℝ) (y : ℝ) in (0)..1,
-    ↑(c x_1) * x ^ x_1 * ↑(c x_2) * y ^ x_2 * (x * y).log / (1 - x * y) := by
-  sorry
-
-lemma multi_integral_mul_const (c d : ℕ) (p q : ℝ): ∫ (x : ℝ) (y : ℝ) in (0)..1,
-    p * x ^ c * q * y ^ d * (x * y).log / (1 - x * y) = p * q * - J c d := by
-  sorry
-
-def q (r s : ℕ) : ℤ :=
-  if h1 : r > s then sorry
-  else if r < s then sorry
-  else sorry
-
-def p (r s : ℕ) : ℤ :=
-  if h1 : r > s then sorry
-  else if r < s then sorry
-  else sorry
-
-lemma linear_int_aux : ∃ a b : ℕ → ℕ → ℤ, ∀ r s : ℕ, J r s =
-    b r s * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 + a r s / (d (Finset.Icc 1 r)) ^ 3 := by
-  -- if h : x > y then
-  --   sorry
-  -- else if h : x < y then
-  --   obtain := J_rs_linear h
-  --   sorry
-  -- else
-  --   have h : x = y := by linarith
-  --   sorry
-  sorry
 
 lemma linear_int (n : ℕ) : ∃ a b : ℕ → ℤ,
     fun1 n = a n + b n * (d (Finset.Icc 1 n) : ℤ) ^ 3  * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
@@ -611,7 +587,6 @@ lemma JJ_upper_1 (n : ℕ) :
 lemma JJ_upper (n : ℕ) : JJ n < 2 * (1 / 30) ^ n * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
   simp only [JJ]
   simp_rw [← intervalIntegral.integral_neg, ← neg_div, neg_mul_eq_mul_neg]
-
   sorry
 
 lemma upper_tendsto_zero : Filter.Tendsto (fun n ↦ 2 * (21 / 30) ^ n * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3) ⊤ (nhds 0) := by
