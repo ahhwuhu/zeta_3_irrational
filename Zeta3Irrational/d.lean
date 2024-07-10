@@ -8,6 +8,7 @@ import Mathlib.Data.Nat.Lattice
 import Mathlib.Algebra.Ring.Nat
 import Mathlib.Data.Nat.Factorization.Basic
 
+open scoped Nat
 open BigOperators
 
 instance : NormalizedGCDMonoid ℕ where
@@ -327,7 +328,7 @@ lemma d_sq' (n : ℕ) :
 lemma d_cube' (n : ℕ) :
     d (Finset.Icc 1 n)^3 = d (Finset.Icc 1 n |>.image (· ^ 3))  := d_cube _
 
-lemma d_cube_ne_zero (n : ℕ) : d (Finset.Icc 1 n) ^ 3 ≠ 0 := by
-  simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, pow_eq_zero_iff]
+lemma fin_d_neq_zero (n : ℕ) : d (Finset.Icc 1 n) > 0 := by
+  suffices d (Finset.Icc 1 n) ≠ 0 by omega
   apply d_ne_zero
-  simp
+  simp only [Finset.mem_Icc, nonpos_iff_eq_zero, one_ne_zero, zero_le, and_true, not_false_eq_true]
