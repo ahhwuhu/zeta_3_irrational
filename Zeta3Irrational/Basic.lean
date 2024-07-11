@@ -43,10 +43,31 @@ lemma J_rr_linear (r : ℕ) :
       not_false_eq_true, pow_eq_zero_iff, Nat.cast_eq_zero]
       linarith
 
+lemma Icc_diff_Icc {r s : ℕ} (h : r > s) (g : ¬s = 0) : Finset.Icc 1 r \ Finset.Icc 1 s = Finset.Icc (s + 1) r := by
+  ext x
+  constructor
+  · intro hx
+    simp_all only [gt_iff_lt, Finset.mem_sdiff, Finset.mem_Icc, not_and, not_le, and_true]
+    exact LT.lt.nat_succ_le (hx.2 hx.1.1)
+  · intro hx
+    simp_all only [gt_iff_lt, Finset.mem_Icc, Finset.mem_sdiff, and_true, not_and, not_le]
+    constructor
+    · linarith
+    · intro
+      linarith
+
 lemma one_div_sum_eq {r s : ℕ} (h : r > s) :
-    ∑ m ∈ Finset.Icc 1 r, (1 / m ^ 2 : ℝ)- ∑ m ∈ Finset.Icc 1 s, (1 / m ^ 2 : ℝ) =
+    ∑ m ∈ Finset.Icc 1 r, (1 / m ^ 2 : ℝ) - ∑ m ∈ Finset.Icc 1 s, (1 / m ^ 2 : ℝ) =
     ∑ m ∈ Finset.Icc 1 (r - s), (1 / (s + m) ^ 2 : ℝ) := by
-  sorry
+  rw [← Finset.sum_sdiff_eq_sub]
+  · if h1 : s = 0 then
+      simp_all
+    else
+      simp_rw [← Nat.cast_add]
+      rw [Icc_diff_Icc h h1, ← Nat.Ico_succ_right, ← Nat.Ico_succ_right,
+        Finset.sum_Ico_add (f := fun (x : ℕ) => 1 / ((x ^ 2) : ℝ)) (c := s), Nat.succ_eq_add_one,
+        Nat.succ_eq_add_one, add_comm, show r - s + 1 + s = r + 1 by omega]
+  · exact Finset.Icc_subset_Icc_right (LT.lt.le (gt_iff_lt.1 h))
 
 lemma J_rs_linear {r s : ℕ} (h : r > s) : ∃ a : ℤ, J r s = a / (d (Finset.Icc 1 r)) ^ 3 := by
   rw [J_rs (by linarith)]
@@ -100,27 +121,51 @@ lemma multi_integral_mul_const (c d : ℕ) (p q : ℝ): ∫ (x : ℝ) (y : ℝ) 
   intro y _
   ring
 
-def q (r s : ℕ) : ℤ :=
-  if h1 : r > s then sorry
-  else if r < s then sorry
-  else sorry
+noncomputable def p (r s : ℕ) : ℤ :=
+  if h : r > s then (J_rs_linear h).choose
+  else if h : r < s then (J_rs_linear h).choose
+  else -(J_rr_linear r).choose
 
-def p (r s : ℕ) : ℤ :=
-  if h1 : r > s then sorry
-  else if r < s then sorry
-  else sorry
+noncomputable def q (r s : ℕ) : ℤ :=
+  if r > s then 0
+  else if r < s then 0
+  else 2
+
+lemma J_symm (r s : ℕ) : J r s = J s r := by
+  rw [neg_inj]
+  sorry
 
 lemma linear_int_aux : ∃ a b : ℕ → ℕ → ℤ, ∀ r s : ℕ, J r s =
-    b r s * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 + a r s / (d (Finset.Icc 1 r)) ^ 3 := by
-  -- if h : x > y then
-  --   sorry
-  -- else if h : x < y then
-  --   obtain := J_rs_linear h
-  --   sorry
-  -- else
-  --   have h : x = y := by linarith
-  --   sorry
-  sorry
+    b r s * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 + a r s / (d (Finset.Icc 1 (Nat.max r s))) ^ 3 := by
+  use p
+  use q
+  intro x y
+  if h : x > y then
+    cases' (J_rs_linear h) with a ha
+    simp only [p, q]
+    simp_all only [gt_iff_lt, one_div, dite_eq_ite, ite_true, Int.cast_zero, zero_mul, dite_true,
+      zero_add]
+    rw [(J_rs_linear h).choose_spec] at ha
+    rw [show x.max y = x by exact max_eq_left_iff.2 (LT.lt.le h)]
+    simp_all
+  else if h1 : x < y then
+    cases' (J_rs_linear h1) with a ha
+    simp only [p, q]
+    obtain h2 := J_symm x y
+    simp_all only [gt_iff_lt, one_div, dite_eq_ite, ite_true, ite_self, Int.cast_zero,
+      zero_mul, dite_true, zero_add, not_false_eq_true, dite_false]
+    rw [(J_rs_linear h1).choose_spec] at ha
+    simp only [not_lt] at h
+    simp_all
+  else
+    have h : x = y := by linarith
+    cases' (J_rr_linear y) with a ha
+    simp only [p, q]
+    simp_all only [gt_iff_lt, lt_self_iff_false, not_false_eq_true, dite_eq_ite, ite_false,
+      Int.cast_ofNat, not_isEmpty_of_nonempty, tsum_empty, mul_zero, zero_sub, sub_right_inj,
+      dite_false, Int.cast_neg, max_self]
+    rw [(J_rr_linear y).choose_spec, ← Mathlib.Tactic.RingNF.add_neg, ← neg_div] at ha
+    simp_all
 
 end LinearForm
 
@@ -189,7 +234,7 @@ lemma linear_int (n : ℕ) : ∃ a b : ℕ → ℤ,
   simp only [← Finset.sum_neg_distrib, Finset.mul_sum]
   obtain ⟨qq', ⟨pp', hqq'⟩⟩ := linear_int_aux
   use fun n => ∑ x ∈ Finset.range (n + 1), ∑ i ∈ Finset.range (n + 1),
-    d (Finset.Icc 1 n) ^ 3 * c x * c i * qq' x i / d (Finset.Icc 1 x) ^ 3
+    d (Finset.Icc 1 n) ^ 3 * c x * c i * qq' x i / d (Finset.Icc 1 (Nat.max x i)) ^ 3
   use fun n => ∑ x ∈ Finset.range (n + 1), ∑ i ∈ Finset.range (n + 1), c x * c i * pp' x i
   rw [← Nat.cast_pow, ← Int.cast_pow , ← Int.cast_mul, Finset.sum_mul]
   simp only [Nat.cast_pow, Int.cast_sum, Int.cast_mul, Int.cast_pow, Int.cast_natCast]
@@ -222,6 +267,9 @@ lemma linear_int (n : ℕ) : ∃ a b : ℕ → ℤ,
       simp_all only [zsmul_eq_mul, Finset.mem_range, Finset.le_eq_subset]
       intro a b
       simp_all only [Finset.mem_Icc, true_and]
+      simp only [one_div, le_max_iff] at b
+      rcases b with ⟨_ ,(c | c)⟩
+      <;>
       linarith
     · simp only [Int.cast_pow, Int.cast_natCast, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
       pow_eq_zero_iff, Nat.cast_eq_zero]
