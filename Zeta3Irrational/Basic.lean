@@ -132,7 +132,18 @@ noncomputable def q (r s : ℕ) : ℤ :=
   else 2
 
 lemma J_symm (r s : ℕ) : J r s = J s r := by
-  rw [neg_inj]
+  -- rw [neg_inj]
+  -- have : ∫ (x : ℝ) in (0)..1, ∫ (y : ℝ) in (0)..1, x ^ r * y ^ s * (x * y).log / (1 - x * y) =
+  --   ∫ (y : ℝ) in (0)..1, ∫ (x : ℝ) in (0)..1, x ^ r * y ^ s * (x * y).log / (1 - x * y) := by
+  --   sorry
+  -- rw [this]
+  -- apply intervalIntegral.integral_congr
+  -- intro _ _
+  -- simp
+  -- apply intervalIntegral.integral_congr
+  -- intro _ _
+  -- simp
+  -- ring_nf
   sorry
 
 lemma linear_int_aux : ∃ a b : ℕ → ℕ → ℤ, ∀ r s : ℕ, J r s =
@@ -291,7 +302,11 @@ lemma fun1_tendsto_zero : Filter.Tendsto (fun n ↦ fun1 n) ⊤ (nhds 0) := by
   delta fun1
   sorry
 
-theorem zeta_3_irratoinal : ¬ ∃ r : ℚ , (r : ℝ) = ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
+theorem zeta_3_irratoinal : ¬ ∃ r : ℚ , (r : ℝ) = riemannZeta 3 := by
+  rw [zeta_eq_tsum_one_div_nat_add_one_cpow (by simp)]
+  simp_rw [← Complex.ofReal_natCast]
+  norm_cast
+  simp_rw [Nat.cast_pow, Nat.cast_add, Nat.cast_one]
   by_contra! r
   cases' r with r hr
   let q := r.den
