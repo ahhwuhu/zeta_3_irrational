@@ -1,5 +1,6 @@
 import Mathlib
 import Zeta3Irrational.LegendrePoly
+import Zeta3Irrational.Integral
 
 open scoped Nat
 open BigOperators Polynomial
@@ -168,6 +169,57 @@ lemma JJ_upper_aux (n : ℕ) :
   · ring
   · aesop
   · apply mul_lt_of_lt_one_of_lt_of_pos <;> linarith
+
+lemma zeta_3_eq_form : ∫ (x : ℝ) (y : ℝ) (z : ℝ) in (0)..1, 1 / ((1 - (1 - z) * x) * (1 - y * z)) =
+    2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
+  calc
+  _ = ∫ (x : ℝ) (y : ℝ) (z : ℝ) in (0)..1, 1 / ((1 - (1 - z) * x) * (1 - (1 - y) * z)) := by
+    apply intervalIntegral.integral_congr
+    intro x _
+    simp only
+    have eq := intervalIntegral.mul_integral_comp_sub_mul (a := 0) (b := 1)
+      (f := fun y ↦ ∫ (z : ℝ) in (0)..1, 1 / ((1 - (1 - z) * x) * (1 - y * z)))
+      (c := 1) (d := 1)
+    ring_nf at eq
+    simp_rw [one_mul] at eq
+    rw [← eq]
+  _ = ∫ (x : ℝ) (y : ℝ) (z : ℝ) in (0)..1, 1 / (1 - (1 - (1 - x) * y) * z) := by
+    rw [intervalIntegral.integral_of_le (by norm_num), intervalIntegral.integral_of_le (by norm_num),
+    MeasureTheory.integral_Ioc_eq_integral_Ioo, MeasureTheory.integral_Ioc_eq_integral_Ioo]
+    apply MeasureTheory.setIntegral_congr (by simp)
+    intro x hx
+    simp only
+    rw [intervalIntegral.integral_of_le (by norm_num), intervalIntegral.integral_of_le (by norm_num),
+    MeasureTheory.integral_Ioc_eq_integral_Ioo, MeasureTheory.integral_Ioc_eq_integral_Ioo]
+    apply MeasureTheory.setIntegral_congr (by simp)
+    intro y hy
+    simp only
+    exact (integral_equality x y hx.1 hx.2 hy.1 hy.2).symm
+  _ = ∫ (x : ℝ) (y : ℝ) (z : ℝ) in (0)..1, 1 / (1 - (1 - x * y) * z) := by
+    have eq := intervalIntegral.mul_integral_comp_sub_mul (a := 0) (b := 1)
+      (f := fun x ↦ ∫ (y : ℝ) (z : ℝ) in (0)..1, 1 / (1 - (1 - x * y) * z))
+      (c := 1) (d := 1)
+    ring_nf at eq
+    simp_rw [one_mul] at eq
+    exact eq
+  _ = ∫ (x : ℝ) in (0)..1, (∫ (y : ℝ) in (0)..1, - (x * y).log / (1 - x * y)) := by
+    rw [intervalIntegral.integral_of_le (by norm_num), intervalIntegral.integral_of_le (by norm_num),
+    MeasureTheory.integral_Ioc_eq_integral_Ioo, MeasureTheory.integral_Ioc_eq_integral_Ioo]
+    apply MeasureTheory.setIntegral_congr (by simp)
+    intro x hx
+    simp only
+    rw [intervalIntegral.integral_of_le (by norm_num), intervalIntegral.integral_of_le (by norm_num),
+    MeasureTheory.integral_Ioc_eq_integral_Ioo, MeasureTheory.integral_Ioc_eq_integral_Ioo]
+    apply MeasureTheory.setIntegral_congr (by simp)
+    intro y hy
+    simp_all only [Set.mem_Ioo]
+    apply integral1 <;> nlinarith
+  _ = 2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
+    obtain h := zeta_3
+    simp only [J, pow_zero, one_mul] at h
+    simp_rw [neg_div]
+    rw [← h, neg_eq_neg_one_mul, ← intervalIntegral.integral_const_mul]
+    simp_rw [← intervalIntegral.integral_const_mul, ← neg_eq_neg_one_mul]
 
 --- lemma n_derivative {a : ℝ} (n : ℕ) : derivative^[n + 1] (1 / (1 - a * X)) = (n + 1) ! * (a ^ (n + 1)) / (1 - a * X) ^ (n + 2) := by
 ---  rw [show n + 2 = (n + 1) + 1 by omega]

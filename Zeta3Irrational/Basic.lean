@@ -132,7 +132,7 @@ noncomputable def q (r s : ℕ) : ℤ :=
   else 2
 
 lemma J_symm (r s : ℕ) : J r s = J s r := by
-  -- rw [neg_inj]
+  rw [neg_inj]
   -- have : ∫ (x : ℝ) in (0)..1, ∫ (y : ℝ) in (0)..1, x ^ r * y ^ s * (x * y).log / (1 - x * y) =
   --   ∫ (y : ℝ) in (0)..1, ∫ (x : ℝ) in (0)..1, x ^ r * y ^ s * (x * y).log / (1 - x * y) := by
   --   sorry
@@ -188,53 +188,6 @@ noncomputable abbrev JJ (n : ℕ) : ℝ :=
 
 noncomputable abbrev fun1 (n : ℕ) : ℝ := (d (Finset.Icc 1 n)) ^ 3 * JJ n
 
-lemma mul_lt_one_aux {x y : ℝ} (hx : x ∈ Set.Ioo 0 1) (hy : y ∈ Set.Ioo 0 1) : x * y < 1 := by
-  simp_all only [Set.mem_Ioo]
-  obtain ⟨hx1, hx2⟩ := hx
-  obtain ⟨_, hy2⟩ := hy
-  calc x * y < x := by exact mul_lt_of_lt_one_right hx1 hy2
-    _ < 1 := by exact hx2
-
-lemma JJ_pos (n : ℕ) : 0 < JJ n := by
-  delta JJ
-  simp only [Left.neg_pos_iff]
-  sorry
-  -- simp only [JJ]
-  -- rw [← intervalIntegral.integral_neg]
-  -- apply intervalIntegral.intervalIntegral_pos_of_pos_on
-  -- · apply IntervalIntegrable.neg
-  --   sorry
-  -- · intro x hx
-  --   rw [← intervalIntegral.integral_neg]
-  --   apply intervalIntegral.intervalIntegral_pos_of_pos_on
-  --   · apply IntervalIntegrable.neg
-  --     apply IntervalIntegrable.continuousOn_mul
-  --     · apply intervalIntegral.intervalIntegrable_inv
-  --       · intro y hy
-  --         have : x * y < 1 := by
-  --           obtain ⟨hx1, hx2⟩ := hx
-  --           simp_all only [ge_iff_le, zero_le_one, Set.uIcc_of_le, Set.mem_Icc]
-  --           obtain ⟨hy1, hy2⟩ := hy
-  --           calc x * y ≤ x := by rwa [mul_le_iff_le_one_right hx1]
-  --             _ < 1 := by exact hx2
-  --         linarith
-  --       · apply ContinuousOn.sub continuousOn_const
-  --         apply ContinuousOn.mul continuousOn_const continuousOn_id
-  --     · apply ContinuousOn.mul
-  --       · sorry
-  --       · sorry
-  --   · intro y hy
-  --     simp only [Left.neg_pos_iff]
-  --     apply mul_neg_of_neg_of_pos
-  --     · apply mul_neg_of_pos_of_neg
-  --       · sorry
-  --       · refine Real.log_neg ?_ (mul_lt_one_aux hx hy)
-  --         simp_all
-  --     · rw [inv_pos, sub_pos]
-  --       exact mul_lt_one_aux hx hy
-  --   · norm_num
-  -- · norm_num
-
 lemma linear_int (n : ℕ) : ∃ a b : ℕ → ℤ,
     fun1 n = a n + b n * (d (Finset.Icc 1 n) : ℤ) ^ 3  * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
   delta fun1 JJ
@@ -288,10 +241,96 @@ lemma linear_int (n : ℕ) : ∃ a b : ℕ → ℤ,
       simp
   · ring
 
+lemma JJ_eq_form (n : ℕ) : JJ n = ∫ (x : ℝ) (y : ℝ) (z : ℝ) in (0)..1,
+    ( x * (1 - x) * y * (1 - y) * z * (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n / ((1 - (1 - z) * x) * (1 - y * z)) := by
+  calc
+  _ = ∫ (x : ℝ) (y : ℝ) in (0)..1, eval x (legendre n) * eval y (legendre n) * (∫ (z : ℝ) in (0)..1, (1 / (1 - (1 - x * y) * z))):= by
+    simp_rw [← intervalIntegral.integral_neg, ← neg_div, neg_mul_eq_mul_neg, JJ_upper_aux]
+  _ = ∫ (x : ℝ) (y : ℝ) in (0)..1, eval (1 - x) (legendre n) * eval y (legendre n) * (∫ (z : ℝ) in (0)..1, (1 / (1 - (1 - (1 - x) * y) * z))) := by
+    sorry
+  _ = ∫ (x : ℝ) (y : ℝ) in (0)..1, (-1) ^ n * eval x (legendre n) * eval y (legendre n) *
+      ∫ (z : ℝ) in (0)..1, 1 /((1 - (1 - z) * x) * (1 - (1 - y) * z)):= by
+    sorry
+  _ = ∫ (x : ℝ) (y : ℝ) in (0)..1, eval x (legendre n) * (-1) ^ n * eval y (legendre n) *
+      ∫ (z : ℝ) in (0)..1, 1 /((1 - (1 - z) * x) * (1 - (1 - y) * z)):= by
+    sorry
+  _ = ∫ (x : ℝ) (y : ℝ) (z : ℝ) in (0)..1, eval x (legendre n) * eval (1 - y) (legendre n) *
+      1 /((1 - (1 - z) * x) * (1 - (1 - y) * z)):= by
+    sorry
+  _ = ∫ (x : ℝ) (y : ℝ) (z : ℝ) in (0)..1, eval x (legendre n) * eval y (legendre n) *
+      1 /((1 - (1 - z) * x) * (1 - y * z)):= by
+    sorry
+  _ = ∫ (z : ℝ) in (0)..1, (∫ (x : ℝ) in (0)..1, eval x (legendre n) / ((1 - (1 - z) * x))) *
+      (∫ (y : ℝ) in (0)..1, eval y (legendre n) / ((1 - y * z))) := by
+    sorry
+  _ =  ∫ (x : ℝ) (y : ℝ) (z : ℝ) in (0)..1,
+    ( x * (1 - x) * y * (1 - y) * z * (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n / ((1 - (1 - z) * x) * (1 - y * z)) := by
+    sorry
+
+lemma IntervalIntegrable1 {x y : ℝ} (hx : x ∈ Set.Ioo 0 1) (hy : y ∈ Set.Ioo 0 1): IntervalIntegrable
+  (fun z ↦ (x * (1 - x) * y * (1 - y) * z * (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n /
+      ((1 - (1 - z) * x) * (1 - y * z)))
+  MeasureTheory.volume 0 1 := by
+  apply IntervalIntegrable.continuousOn_mul
+  · apply intervalIntegral.intervalIntegrable_inv
+    · intro z hz
+      suffices (1 - (1 - z) * x) * (1 - y * z) > 0 by linarith
+      apply mul_pos <;> simp_all only [Set.mem_Ioo, ge_iff_le, zero_le_one, Set.uIcc_of_le,
+        Set.mem_Icc, sub_pos] <;> nlinarith
+    · apply ContinuousOn.mul
+      · apply ContinuousOn.sub continuousOn_const
+        apply ContinuousOn.mul
+        · apply ContinuousOn.sub continuousOn_const continuousOn_id
+        · exact continuousOn_const
+      · apply ContinuousOn.sub continuousOn_const
+        apply ContinuousOn.mul continuousOn_const continuousOn_id
+  · apply ContinuousOn.pow
+    apply ContinuousOn.div
+    · apply ContinuousOn.mul _ (ContinuousOn.sub continuousOn_const continuousOn_id)
+      apply ContinuousOn.mul continuousOn_const continuousOn_id
+    · apply ContinuousOn.mul
+      · apply ContinuousOn.sub continuousOn_const
+        apply ContinuousOn.mul _ continuousOn_const
+        apply ContinuousOn.sub continuousOn_const continuousOn_id
+      · apply ContinuousOn.sub continuousOn_const
+        apply ContinuousOn.mul continuousOn_const continuousOn_id
+    · intro z hz
+      suffices (1 - (1 - z) * x) * (1 - y * z) > 0 by linarith
+      apply mul_pos <;>
+      simp_all only [Set.mem_Ioo, ge_iff_le, zero_le_one, Set.uIcc_of_le, Set.mem_Icc, sub_pos] <;>
+      nlinarith
+
+lemma JJ_pos (n : ℕ) : 0 < JJ n := by
+  rw [JJ_eq_form]
+  apply intervalIntegral.intervalIntegral_pos_of_pos_on _ _ (by simp)
+  · sorry
+  · intro x hx
+    apply intervalIntegral.intervalIntegral_pos_of_pos_on _ _ (by simp)
+    · sorry
+    · intro y hy
+      apply intervalIntegral.intervalIntegral_pos_of_pos_on (IntervalIntegrable1 hx hy) _ (by simp)
+      · intro z hz
+        simp_all only [Set.mem_Ioo]
+        cases' hx with hx1 hx2
+        cases' hy with hy1 hy2
+        cases' hz with hz1 hz2
+        rw [← sub_pos] at hx2 hy2 hz2
+        apply div_pos
+        · rw [div_pow]
+          apply div_pos
+          · apply pow_pos; positivity
+          · apply pow_pos
+            apply mul_pos <;> nlinarith
+        · apply mul_pos <;> nlinarith
+
 lemma JJ_upper (n : ℕ) : JJ n < 2 * (1 / 30) ^ n * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
-  simp only [JJ]
-  simp_rw [← intervalIntegral.integral_neg, ← neg_div, neg_mul_eq_mul_neg, JJ_upper_aux,
-    ← intervalIntegral.integral_const_mul]
+  rw [JJ_eq_form, mul_rotate, mul_assoc]
+  nth_rewrite 2 [mul_comm]
+  rw [← zeta_3_eq_form]
+  rw [← intervalIntegral.integral_const_mul]
+  simp_rw [← intervalIntegral.integral_const_mul]
+  rw [intervalIntegral.integral_of_le (by norm_num), intervalIntegral.integral_of_le (by norm_num),
+  MeasureTheory.integral_Ioc_eq_integral_Ioo, MeasureTheory.integral_Ioc_eq_integral_Ioo]
   sorry
 
 lemma upper_tendsto_zero : Filter.Tendsto (fun n ↦ 2 * (21 / 30) ^ n * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3) ⊤ (nhds 0) := by
