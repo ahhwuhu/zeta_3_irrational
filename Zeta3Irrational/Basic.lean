@@ -157,7 +157,9 @@ lemma IntervalIntegrable2 {x : ℝ} (hx : x ∈ Set.Ioo 0 1) : IntervalIntegrabl
   apply Continuous.intervalIntegrable
   simp_rw [intervalIntegral.integral_of_le (show 0 ≤ 1 by norm_num), ← MeasureTheory.integral_Icc_eq_integral_Ioc]
   apply continuous_parametric_integral_of_continuous
-  · rw [Function.uncurry_def]
+  · rw [continuous_iff_continuousAt]
+    intro y Y hy
+
     sorry
   · rw [← Set.uIcc_of_le (by norm_num)]
     exact isCompact_uIcc
