@@ -15,6 +15,7 @@
 \chapter{Proof}
 
 \begin{definition}\label{Legendre_poly}
+    \leanok
     \[ P_n(x):=\frac{1}{n!}\frac{d^n}{dx^n}[x^n(1-x)^n] \]
 \end{definition}
 
@@ -78,7 +79,6 @@
 \end{lemma}
 
 \begin{lemma}\label{d_r_3}
-    \leanok
     For all $r \in \mathbb{N}^*, d_n$ is lcm of $\{1, 2, \ldots, n\}.$ 
     \[ d_{r^3} = (d_r)^3 \]
 \end{lemma}
@@ -99,11 +99,11 @@
 \end{proof}
 
 \begin{lemma}\label{d_r_2}
-    \leanok
     For all $r \in \mathbb{N}^*, d_n$ is lcm of $\{1, 2, \ldots, n\}.$ 
     \[ d_{r^2} = (d_r)^2 \]
 \end{lemma}
 \begin{proof}
+    \leanok
     By prime factor expand.
 \end{proof}
 
@@ -158,6 +158,7 @@
 \end{proof}
 
 \begin{definition}\label{J_n}
+    \leanok
     \[ J_n := - \int_{0}^{1}\int_{0}^{1} P_n(x)P_n(y)\frac{{\rm ln}(xy)}{1-xy} \, dx \, dy \]
 \end{definition}
 
