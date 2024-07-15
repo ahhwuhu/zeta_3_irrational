@@ -44,6 +44,7 @@
 \end{proof}
 
 \begin{lemma}\label{Legendre_poly_mul_frac_integral}
+    \uses{frac_partial_n}
     For all $ 0 < a < 1$, one has
     \[ \int_{0}^{1}\frac{P_n(x)}{1 - ax} \, dx =(-1)^n \int_{0}^{1} x^n(1-x)^n\frac{a^n}{(1 - ax)^{n+1}} \, dx \]
 \end{lemma}
@@ -215,7 +216,7 @@
 \end{proof}
 
 \begin{lemma}\label{Jn_abs_upper}
-    \uses{bound, frac_partial_n, one_var_substitution, two_var_substitution, Legendre_poly_sym, Legendre_poly_mul_frac_integral}
+    \uses{bound, one_var_substitution, two_var_substitution, Legendre_poly_sym, Legendre_poly_mul_frac_integral}
     \[ J_n \leqslant (\frac{1}{30})^n\cdot 2\zeta(3) \]
 \end{lemma}
 \begin{proof}
