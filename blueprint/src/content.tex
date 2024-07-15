@@ -42,12 +42,13 @@
     By definition.
 \end{proof}
 
-\begin{lemma}\label{Legendre_poly_integral}
-    For all $n \in \mathbb{N}$ and $f : [0,1] \rightarrow \mathbb{R}$ of class $C^n$, one has
-    \[ \int_{0}^{1}P_n(x)f(x) \, dx =\frac{(-1)^n}{n!} \int_{0}^{1} x^n(1-x)^n\frac{d^nf}{dx^n} \, dx \]
+\begin{lemma}\label{Legendre_poly_mul_frac_integral}
+    For all $ 0 < a < 1$, one has
+    \[ \int_{0}^{1}\frac{P_n(x)}{1 - ax} \, dx =(-1)^n \int_{0}^{1} x^n(1-x)^n\frac{a^n}{(1 - ax)^{n+1}} \, dx \]
 \end{lemma}
 \begin{proof}
-    ...
+    \leanok
+    By induction.
 \end{proof}
 
 \begin{lemma}\label{integral_zeta_3}
@@ -82,6 +83,7 @@
     \[ d_{r^3} = (d_r)^3 \]
 \end{lemma}
 \begin{proof}
+    \leanok
     By prime factor expand.
 \end{proof}
 
@@ -89,8 +91,12 @@
     \uses{J_rr, d_r_3}
     For all $r \in \mathbb{N}^*$,
     \[ J_{rr} = 2 \zeta(3) - \frac{z_r}{(d_r)^3} \]
-    for some $z_r \in \mathbb{N}^*$.
+    for some $z_r \in \mathbb{Z}$.
 \end{lemma}
+\begin{proof}
+    \leanok
+    By computing.
+\end{proof}
 
 \begin{lemma}\label{d_r_2}
     \leanok
@@ -105,8 +111,12 @@
     \uses{J_rs, d_r_2, d_r_3}
     For all $r \in \mathbb{N}, r \neq s$,
     \[ J_{rs} = \frac{z_{rs}}{(d_r)^3}\]
-    for some $z_{rs} \in \mathbb{N}^*$.
+    for some $z_{rs} \in \mathbb{Z}$.
 \end{lemma}
+\begin{proof}
+    \leanok
+    By computing.
+\end{proof}
 
 \begin{lemma}\label{one_var_substitution}
     \[ \int_{0}^{1} \frac{1}{1 - (1 - x)z} \, dz= -\frac{{\rm ln}x}{1 - x} \]
@@ -157,6 +167,7 @@
     \[ J_n = \frac{a_n}{d_n^3} + b_n\zeta(3) \]
 \end{lemma}
 \begin{proof}
+    \leanok
     Since $P_n(x) \in \mathbb{Z}[x]$. Suppose $P_n(x) = \sum\limits_{k=0}^{n}a_kx^k$, where $a_k \in \mathbb{Z}$.\\
     Then 
     \begin{align*}
@@ -170,10 +181,11 @@
 \end{proof}
 
 \begin{lemma}\label{frac_partial_n}
-    For $a \in \mathbb{R}_{(0,1)}$,
+    For $a \in \mathbb{R}_{>0}$,
     \[ \frac{\partial^n}{\partial x^n}(\frac{1}{1-ax}) = \frac{n!a^n}{(1-ax)^n} \]
 \end{lemma}
 \begin{proof}
+    \leanok
     By definition.
 \end{proof}
 
@@ -202,7 +214,7 @@
 \end{proof}
 
 \begin{lemma}\label{Jn_abs_upper}
-    \uses{bound, frac_partial_n, one_var_substitution, two_var_substitution, Legendre_poly_sym, Legendre_poly_integral}
+    \uses{bound, frac_partial_n, one_var_substitution, two_var_substitution, Legendre_poly_sym, Legendre_poly_mul_frac_integral}
     \[ J_n \leqslant (\frac{1}{30})^n\cdot 2\zeta(3) \]
 \end{lemma}
 \begin{proof}
