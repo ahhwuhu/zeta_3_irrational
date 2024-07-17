@@ -220,10 +220,3 @@ lemma zeta_3_eq_form : ∫ (x : ℝ) (y : ℝ) (z : ℝ) in (0)..1, 1 / ((1 - (1
     simp_rw [neg_div]
     rw [← h, neg_eq_neg_one_mul, ← intervalIntegral.integral_const_mul]
     simp_rw [← intervalIntegral.integral_const_mul, ← neg_eq_neg_one_mul]
-
---- lemma n_derivative {a : ℝ} (n : ℕ) : derivative^[n + 1] (1 / (1 - a * X)) = (n + 1) ! * (a ^ (n + 1)) / (1 - a * X) ^ (n + 2) := by
----  rw [show n + 2 = (n + 1) + 1 by omega]
----  induction' n + 1 with n hn
----  · simp only [Nat.zero_eq, one_div, Function.iterate_zero, id_eq, Nat.factorial_zero,
----    Nat.cast_one, pow_zero, mul_one, zero_add, pow_one]
----  · rw[Function.iterate_succ_apply', hn]

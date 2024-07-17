@@ -72,13 +72,19 @@ lemma linear_int (n : ℕ) : ∃ a b : ℕ → ℤ,
       simp
   · ring
 
+theorem integral_Ioo_congr {f g : ℝ → ℝ} (h : ∀ x ∈ Set.Ioo 0 1, f x = g x) :
+    ∫ x in (0)..1, f x = ∫ x in (0)..1, g x := by
+  rw [intervalIntegral.integral_of_le (by norm_num), intervalIntegral.integral_of_le (by norm_num),
+     MeasureTheory.integral_Ioc_eq_integral_Ioo, MeasureTheory.integral_Ioc_eq_integral_Ioo]
+  exact MeasureTheory.setIntegral_congr (by simp) h
+
 lemma integral_comm1 (n : ℕ) : ∫ (x : ℝ) (y : ℝ) in (0)..1, eval x (legendre n) * (-1) ^ n *
     eval y (legendre n) * ∫ (z : ℝ) in (0)..1, 1 / ((1 - (1 - z) * x) * (1 - (1 - y) * z)) =
     ∫ (z : ℝ) (x : ℝ) (y : ℝ) in (0)..1, eval x (legendre n) * eval (1 - y) (legendre n) * 1 /
     ((1 - (1 - z) * x) * (1 - (1 - y) * z)) := by
   sorry
 
-lemma integral_comm2 (n : ℕ) : ∫ (z : ℝ) (y : ℝ) (x : ℝ) in (0)..1, (x * (1 - x) * y * (1 - y) * z *
+lemma integral_comm2 (n : ℕ) : ∫ (z : ℝ) (x : ℝ) (y : ℝ) in (0)..1, (x * (1 - x) * y * (1 - y) * z *
     (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n / ((1 - (1 - z) * x) * (1 - y * z)) =
     ∫ (x : ℝ) (y : ℝ) (z : ℝ) in (0)..1, (x * (1 - x) * y * (1 - y) * z * (1 - z) / ((1 - (1 - z) *
     x) * (1 - y * z))) ^ n / ((1 - (1 - z) * x) * (1 - y * z)) := by
@@ -95,14 +101,9 @@ lemma JJ_eq_form (n : ℕ) : JJ n = ∫ (x : ℝ) (y : ℝ) (z : ℝ) in (0)..1,
     exact eq.symm
   _ = ∫ (x : ℝ) (y : ℝ) in (0)..1, eval x (legendre n) * (-1) ^ n * eval y (legendre n) *
       ∫ (z : ℝ) in (0)..1, 1 /((1 - (1 - z) * x) * (1 - (1 - y) * z)):= by
-    rw [intervalIntegral.integral_of_le (by norm_num), intervalIntegral.integral_of_le (by norm_num),
-      MeasureTheory.integral_Ioc_eq_integral_Ioo, MeasureTheory.integral_Ioc_eq_integral_Ioo]
-    apply MeasureTheory.setIntegral_congr (by simp)
+    apply integral_Ioo_congr
     intro x hx
-    simp only
-    rw [intervalIntegral.integral_of_le (by norm_num), intervalIntegral.integral_of_le (by norm_num),
-      MeasureTheory.integral_Ioc_eq_integral_Ioo, MeasureTheory.integral_Ioc_eq_integral_Ioo]
-    apply MeasureTheory.setIntegral_congr (by simp)
+    apply integral_Ioo_congr
     intro y hy
     simp_all only [Set.mem_Ioo]
     rw [legendre_eval_symm, show 1 - (1 - x) = x by simp, integral_equality x y hx.1 hx.2 hy.1 hy.2]
@@ -112,54 +113,41 @@ lemma JJ_eq_form (n : ℕ) : JJ n = ∫ (x : ℝ) (y : ℝ) (z : ℝ) in (0)..1,
     exact integral_comm1 n
   _ = ∫ (z : ℝ) (x : ℝ) (y : ℝ) in (0)..1, eval x (legendre n) * eval y (legendre n) *
       1 /((1 - (1 - z) * x) * (1 - y * z)):= by
-    rw [intervalIntegral.integral_of_le (by norm_num), intervalIntegral.integral_of_le (by norm_num),
-      MeasureTheory.integral_Ioc_eq_integral_Ioo, MeasureTheory.integral_Ioc_eq_integral_Ioo]
-    apply MeasureTheory.setIntegral_congr (by simp)
-    intro z hz
-    simp only
-    rw [intervalIntegral.integral_of_le (by norm_num), intervalIntegral.integral_of_le (by norm_num),
-      MeasureTheory.integral_Ioc_eq_integral_Ioo, MeasureTheory.integral_Ioc_eq_integral_Ioo]
-    apply MeasureTheory.setIntegral_congr (by simp)
-    intro x hx
-    simp only
+    apply integral_Ioo_congr
+    intro z _
+    apply integral_Ioo_congr
+    intro x _
     have eq := intervalIntegral.mul_integral_comp_sub_mul (a := 0) (b := 1)
       (f := fun y ↦ eval x (legendre n) * eval (1 - y) (legendre n) * 1 / ((1 - (1 - z) * x) * (1 - (1 - y) * z))) 1 1
     simp only [one_mul, sub_sub_cancel, mul_one, sub_self, mul_zero, sub_zero] at eq
     simp_all only [Set.mem_Ioo, eval_mul, one_div, eval_C, mul_one]
   _ = ∫ (z : ℝ) in (0)..1, (∫ (x : ℝ) in (0)..1, eval x (legendre n) / ((1 - (1 - z) * x))) *
       (∫ (y : ℝ) in (0)..1, eval y (legendre n) / ((1 - y * z))) := by
-    rw [intervalIntegral.integral_of_le (by norm_num), intervalIntegral.integral_of_le (by norm_num),
-      MeasureTheory.integral_Ioc_eq_integral_Ioo, MeasureTheory.integral_Ioc_eq_integral_Ioo]
-    apply MeasureTheory.setIntegral_congr (by simp)
-    intro z hz
-    simp only
+    apply integral_Ioo_congr
+    intro z _
     rw [← intervalIntegral.integral_mul_const]
     simp_rw [← intervalIntegral.integral_const_mul, ← mul_div_mul_comm]
     simp
-  _ = ∫ (z : ℝ) (y : ℝ) (x : ℝ) in (0)..1,
+  _ = ∫ (z : ℝ) (x : ℝ) (y : ℝ) in (0)..1,
       ( x * (1 - x) * y * (1 - y) * z * (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n /
       ((1 - (1 - z) * x) * (1 - y * z)) := by
-    rw [intervalIntegral.integral_of_le (by norm_num), intervalIntegral.integral_of_le (by norm_num),
-      MeasureTheory.integral_Ioc_eq_integral_Ioo, MeasureTheory.integral_Ioc_eq_integral_Ioo]
-    apply  MeasureTheory.setIntegral_congr (by simp)
+    apply integral_Ioo_congr
     intro z hz
     simp only [Set.mem_Ioo] at hz
     have hz1 : 0 < (1 - z) ∧ (1 - z) < 1 := by constructor <;> linarith
     simp_rw [legendre_integral_special hz1, mul_comm, legendre_integral_special hz]
     rw [mul_mul_mul_comm, ← pow_add, ← two_mul, pow_mul]
     simp only [even_two, Even.neg_pow, one_pow, one_mul, div_pow]
-    simp_rw [← intervalIntegral.integral_const_mul]
+    simp_rw [← intervalIntegral.integral_mul_const]
     rw [intervalIntegral.integral_of_le (by norm_num), MeasureTheory.integral_Ioc_eq_integral_Ioo]
     symm
     rw [intervalIntegral.integral_of_le (by norm_num), MeasureTheory.integral_Ioc_eq_integral_Ioo]
-    apply  MeasureTheory.setIntegral_congr (by simp)
-    intro y hy
-    simp only
-    rw [← intervalIntegral.integral_mul_const]
-    rw [intervalIntegral.integral_of_le (by norm_num), MeasureTheory.integral_Ioc_eq_integral_Ioo,
-      intervalIntegral.integral_of_le (by norm_num), MeasureTheory.integral_Ioc_eq_integral_Ioo]
-    apply  MeasureTheory.setIntegral_congr (by simp)
+    apply MeasureTheory.setIntegral_congr (by simp)
     intro x hx
+    simp only
+    rw [← intervalIntegral.integral_const_mul]
+    apply integral_Ioo_congr
+    intro y hy
     simp_all only [div_div, Set.mem_Ioo]
     rw [← mul_div_mul_comm, div_eq_div_iff]
     · simp only [mul_pow]; ring
@@ -181,7 +169,7 @@ lemma IntervalIntegrable1 : IntervalIntegrable
     (fun x ↦ ∫ (y : ℝ) (z : ℝ) in (0)..1,
     (x * (1 - x) * y * (1 - y) * z * (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n /
     ((1 - (1 - z) * x) * (1 - y * z))) MeasureTheory.volume 0 1 := by
-  apply Continuous.intervalIntegrable
+  -- apply IntervalIntegrable.mono_fun'
   -- apply MeasureTheory.continuous_integral_integral
   sorry
 
@@ -263,12 +251,21 @@ lemma JJ_upper (n : ℕ) : JJ n < 2 * (1 / 30) ^ n * ∑' n : ℕ , 1 / ((n : �
     MeasureTheory.integral_Ioc_eq_integral_Ioo, MeasureTheory.integral_Ioc_eq_integral_Ioo]
   sorry
 
-lemma upper_tendsto_zero : Filter.Tendsto (fun n ↦ 2 * (21 / 30) ^ n * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3) ⊤ (nhds 0) := by
-  sorry
+lemma upper_tendsto_zero : Filter.Tendsto (fun n ↦ (2 * (21 / 30) ^ n * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3)) Filter.atTop (nhds 0) := by
+  rw [show (0 : ℝ) = 2 * 0 by simp]
+  simp_rw [mul_assoc]
+  apply Filter.Tendsto.const_mul (b := 2) (f := fun n ↦ (21 / 30) ^ n * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3)
+    (c := 0) (l := Filter.atTop)
+  rw [show (0 : ℝ) = 0 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 by simp]
+  apply Filter.Tendsto.mul_const (b := ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3) (f := fun n ↦ (21 / 30) ^ n)
+    (c := 0) (l := Filter.atTop)
+  apply tendsto_pow_atTop_nhds_zero_of_lt_one (r := (21 / 30 : ℝ)) <;>
+  norm_num
 
-lemma fun1_tendsto_zero : Filter.Tendsto (fun n ↦ fun1 n) ⊤ (nhds 0) := by
-  intro x hx
+lemma fun1_tendsto_zero : Filter.Tendsto (fun n ↦ fun1 n) Filter.atTop (nhds 0) := by
   delta fun1
+  rw [tendsto_atTop_nhds]
+  intro U hU hU'
   sorry
 
 theorem zeta_3_irratoinal : ¬ ∃ r : ℚ , (r : ℝ) = riemannZeta 3 := by
@@ -305,6 +302,9 @@ theorem zeta_3_irratoinal : ¬ ∃ r : ℚ , (r : ℝ) = riemannZeta 3 := by
   have prop : (-1/2 : ℝ) < 0 := by
     rw [div_neg_iff]; right
     simp only [Left.neg_neg_iff, zero_lt_one, Nat.ofNat_pos, and_self]
-  specialize prop2 0
-  cases' ((prop1 prop) 0) with h1 h2
+  specialize prop1 prop
+  simp only [Filter.eventually_atTop, ge_iff_le] at prop1
+  cases' prop1 with a ha
+  specialize prop2 (a + 1)
+  specialize ha (a + 1) (by simp)
   linarith
