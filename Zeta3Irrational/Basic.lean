@@ -72,25 +72,60 @@ lemma linear_int (n : ℕ) : ∃ a b : ℕ → ℤ,
       simp
   · ring
 
+lemma integral_comm1 (n : ℕ) : ∫ (x : ℝ) (y : ℝ) in (0)..1, eval x (legendre n) * (-1) ^ n *
+    eval y (legendre n) * ∫ (z : ℝ) in (0)..1, 1 / ((1 - (1 - z) * x) * (1 - (1 - y) * z)) =
+    ∫ (z : ℝ) (x : ℝ) (y : ℝ) in (0)..1, eval x (legendre n) * eval (1 - y) (legendre n) * 1 /
+    ((1 - (1 - z) * x) * (1 - (1 - y) * z)) := by
+  sorry
+
+lemma integral_comm2 (n : ℕ) : ∫ (z : ℝ) (y : ℝ) (x : ℝ) in (0)..1, (x * (1 - x) * y * (1 - y) * z *
+    (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n / ((1 - (1 - z) * x) * (1 - y * z)) =
+    ∫ (x : ℝ) (y : ℝ) (z : ℝ) in (0)..1, (x * (1 - x) * y * (1 - y) * z * (1 - z) / ((1 - (1 - z) *
+    x) * (1 - y * z))) ^ n / ((1 - (1 - z) * x) * (1 - y * z)) := by
+  sorry
+
 lemma JJ_eq_form (n : ℕ) : JJ n = ∫ (x : ℝ) (y : ℝ) (z : ℝ) in (0)..1,
     ( x * (1 - x) * y * (1 - y) * z * (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n / ((1 - (1 - z) * x) * (1 - y * z)) := by
   calc
-  _ = ∫ (x : ℝ) (y : ℝ) in (0)..1, eval x (legendre n) * eval y (legendre n) * (∫ (z : ℝ) in (0)..1, (1 / (1 - (1 - x * y) * z))):= by
-    simp_rw [← intervalIntegral.integral_neg, ← neg_div, neg_mul_eq_mul_neg, JJ_upper_aux]
   _ = ∫ (x : ℝ) (y : ℝ) in (0)..1, eval (1 - x) (legendre n) * eval y (legendre n) * (∫ (z : ℝ) in (0)..1, (1 / (1 - (1 - (1 - x) * y) * z))) := by
-    sorry
-  _ = ∫ (x : ℝ) (y : ℝ) in (0)..1, (-1) ^ n * eval x (legendre n) * eval y (legendre n) *
-      ∫ (z : ℝ) in (0)..1, 1 /((1 - (1 - z) * x) * (1 - (1 - y) * z)):= by
-    sorry
+    simp_rw [← intervalIntegral.integral_neg, ← neg_div, neg_mul_eq_mul_neg, JJ_upper_aux]
+    have eq := intervalIntegral.mul_integral_comp_sub_mul (a := 0) (b := 1)
+      (f := fun x ↦ ∫ (y : ℝ) in (0)..1, eval x (legendre n) * eval y (legendre n) * ∫ (z : ℝ) in (0)..1, 1 / (1 - (1 - x * y) * z)) 1 1
+    simp only [one_mul, mul_one, sub_self, mul_zero, sub_zero] at eq
+    exact eq.symm
   _ = ∫ (x : ℝ) (y : ℝ) in (0)..1, eval x (legendre n) * (-1) ^ n * eval y (legendre n) *
       ∫ (z : ℝ) in (0)..1, 1 /((1 - (1 - z) * x) * (1 - (1 - y) * z)):= by
-    sorry
-  _ = ∫ (z : ℝ) (y : ℝ) (x : ℝ) in (0)..1, eval x (legendre n) * eval (1 - y) (legendre n) *
+    rw [intervalIntegral.integral_of_le (by norm_num), intervalIntegral.integral_of_le (by norm_num),
+      MeasureTheory.integral_Ioc_eq_integral_Ioo, MeasureTheory.integral_Ioc_eq_integral_Ioo]
+    apply MeasureTheory.setIntegral_congr (by simp)
+    intro x hx
+    simp only
+    rw [intervalIntegral.integral_of_le (by norm_num), intervalIntegral.integral_of_le (by norm_num),
+      MeasureTheory.integral_Ioc_eq_integral_Ioo, MeasureTheory.integral_Ioc_eq_integral_Ioo]
+    apply MeasureTheory.setIntegral_congr (by simp)
+    intro y hy
+    simp_all only [Set.mem_Ioo]
+    rw [legendre_eval_symm, show 1 - (1 - x) = x by simp, integral_equality x y hx.1 hx.2 hy.1 hy.2]
+    ring_nf
+  _ = ∫ (z : ℝ) (x : ℝ) (y : ℝ) in (0)..1, eval x (legendre n) * eval (1 - y) (legendre n) *
       1 /((1 - (1 - z) * x) * (1 - (1 - y) * z)):= by
-    sorry
+    exact integral_comm1 n
   _ = ∫ (z : ℝ) (x : ℝ) (y : ℝ) in (0)..1, eval x (legendre n) * eval y (legendre n) *
       1 /((1 - (1 - z) * x) * (1 - y * z)):= by
-    sorry
+    rw [intervalIntegral.integral_of_le (by norm_num), intervalIntegral.integral_of_le (by norm_num),
+      MeasureTheory.integral_Ioc_eq_integral_Ioo, MeasureTheory.integral_Ioc_eq_integral_Ioo]
+    apply MeasureTheory.setIntegral_congr (by simp)
+    intro z hz
+    simp only
+    rw [intervalIntegral.integral_of_le (by norm_num), intervalIntegral.integral_of_le (by norm_num),
+      MeasureTheory.integral_Ioc_eq_integral_Ioo, MeasureTheory.integral_Ioc_eq_integral_Ioo]
+    apply MeasureTheory.setIntegral_congr (by simp)
+    intro x hx
+    simp only
+    have eq := intervalIntegral.mul_integral_comp_sub_mul (a := 0) (b := 1)
+      (f := fun y ↦ eval x (legendre n) * eval (1 - y) (legendre n) * 1 / ((1 - (1 - z) * x) * (1 - (1 - y) * z))) 1 1
+    simp only [one_mul, sub_sub_cancel, mul_one, sub_self, mul_zero, sub_zero] at eq
+    simp_all only [Set.mem_Ioo, eval_mul, one_div, eval_C, mul_one]
   _ = ∫ (z : ℝ) in (0)..1, (∫ (x : ℝ) in (0)..1, eval x (legendre n) / ((1 - (1 - z) * x))) *
       (∫ (y : ℝ) in (0)..1, eval y (legendre n) / ((1 - y * z))) := by
     rw [intervalIntegral.integral_of_le (by norm_num), intervalIntegral.integral_of_le (by norm_num),
@@ -140,7 +175,7 @@ lemma JJ_eq_form (n : ℕ) : JJ n = ∫ (x : ℝ) (y : ℝ) (z : ℝ) in (0)..1,
   _ = ∫ (x : ℝ) (y : ℝ) (z : ℝ) in (0)..1,
       ( x * (1 - x) * y * (1 - y) * z * (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n /
       ((1 - (1 - z) * x) * (1 - y * z)) := by
-    sorry
+    exact integral_comm2 n
 
 lemma IntervalIntegrable1 : IntervalIntegrable
     (fun x ↦ ∫ (y : ℝ) (z : ℝ) in (0)..1,
