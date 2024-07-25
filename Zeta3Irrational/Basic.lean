@@ -171,7 +171,11 @@ lemma IntervalIntegrable1 : IntervalIntegrable
     ((1 - (1 - z) * x) * (1 - y * z))) MeasureTheory.volume 0 1 := by
   -- apply IntervalIntegrable.mono_fun'
   -- apply MeasureTheory.continuous_integral_integral
-  sorry
+  rw [intervalIntegrable_iff, MeasureTheory.IntegrableOn, MeasureTheory.Integrable]
+  constructor
+  · sorry
+  · rw [MeasureTheory.HasFiniteIntegral]
+    sorry
 
 lemma IntervalIntegrable2 {x : ℝ} (hx : x ∈ Set.Ioo 0 1) : IntervalIntegrable
     (fun y ↦ ∫ (z : ℝ) in (0)..1,
@@ -262,11 +266,17 @@ lemma upper_tendsto_zero : Filter.Tendsto (fun n ↦ (2 * (21 / 30) ^ n * ∑' n
   apply tendsto_pow_atTop_nhds_zero_of_lt_one (r := (21 / 30 : ℝ)) <;>
   norm_num
 
-lemma fun1_tendsto_zero : Filter.Tendsto (fun n ↦ fun1 n) Filter.atTop (nhds 0) := by
-  delta fun1
-  rw [tendsto_atTop_nhds]
-  intro U hU hU'
-  sorry
+lemma fun1_tendsto_zero : Filter.Tendsto (fun n ↦ ENNReal.ofReal (fun1 n)) Filter.atTop (nhds 0) := by
+  rw [ENNReal.tendsto_atTop_zero]
+  intro ε hε
+  if h : ε = ⊤ then simp [h]
+  else
+    rw [show ε = ENNReal.ofReal ε.toReal by simp [h]]
+    use 1
+    intro n hn
+    rw [ENNReal.ofReal_le_ofReal_iff (by simp)]
+
+    sorry
 
 theorem zeta_3_irratoinal : ¬ ∃ r : ℚ , (r : ℝ) = riemannZeta 3 := by
   rw [zeta_eq_tsum_one_div_nat_add_one_cpow (by simp)]
@@ -277,9 +287,10 @@ theorem zeta_3_irratoinal : ¬ ∃ r : ℚ , (r : ℝ) = riemannZeta 3 := by
   cases' r with r hr
   let q := r.den
   let hq := Rat.den_nz r
-  have prop1 := Filter.Tendsto.mul_const (b := (q : ℝ)) (fun1_tendsto_zero)
+  have prop1 := ENNReal.Tendsto.mul_const (b := (q : ENNReal)) (fun1_tendsto_zero) (by simp)
   rw [zero_mul] at prop1
-  have prop2 : ∀ n : ℕ, fun1 n * q ≥ 1 := by
+  have prop2 : ∀ n : ℕ, fun1 n * q > 1/2 := by
+    suffices ∀ n : ℕ, fun1 n * q ≥ 1 by intro n; linarith [this n]
     intro n
     obtain ⟨a, b, h⟩ := linear_int n
     have : fun1 n * q > 0 := by
@@ -294,17 +305,25 @@ theorem zeta_3_irratoinal : ¬ ∃ r : ℚ , (r : ℝ) = riemannZeta 3 := by
     norm_cast at this ⊢
     rw [Rat.mul_den_eq_num] at this ⊢
     norm_cast at this ⊢
-  rw [Filter.tendsto_iff_forall_eventually_mem] at prop1
-  specialize prop1 (Set.Ico (-1/2) (1/2))
+  rw [ENNReal.tendsto_atTop_zero] at prop1
+  specialize prop1 (1/2) (by simp)
   simp only [one_div, Ico_mem_nhds_iff, Set.mem_Ioo, inv_pos, Nat.ofNat_pos, and_true, Set.mem_Ico,
     Filter.eventually_top] at prop1
   rw [← one_div] at prop1
-  have prop : (-1/2 : ℝ) < 0 := by
-    rw [div_neg_iff]; right
-    simp only [Left.neg_neg_iff, zero_lt_one, Nat.ofNat_pos, and_self]
-  specialize prop1 prop
   simp only [Filter.eventually_atTop, ge_iff_le] at prop1
   cases' prop1 with a ha
   specialize prop2 (a + 1)
   specialize ha (a + 1) (by simp)
-  linarith
+  rw [gt_iff_lt, ← ENNReal.ofReal_lt_ofReal_iff, ENNReal.ofReal_mul' (by simp)] at prop2
+  · suffices ENNReal.ofReal (fun1 (a + 1)) * ↑q < ENNReal.ofReal (fun1 (a + 1)) * ↑q by
+      simp only [mul_neg, eval_mul, one_div, eval_C, Function.iterate_succ, Function.comp_apply,
+      derivative_mul, derivative_X_pow, Nat.cast_add, Nat.cast_one, map_add, map_natCast, map_one,
+      add_tsub_cancel_right, iterate_map_add, eval_add, lt_self_iff_false] at this
+    rw [show ENNReal.ofReal ↑q = (q : ENNReal) by simp only [ENNReal.ofReal_natCast],
+      show ENNReal.ofReal (1 / 2) = 1 / 2 by rw [← Real.ennnorm_eq_ofReal (by simp)]; simp] at prop2
+    apply LE.le.trans_lt (b := (1 / 2 : ENNReal)) ha prop2
+  · apply mul_pos _ (by simp; omega)
+    apply mul_pos _ (JJ_pos (a + 1))
+    apply pow_pos
+    simp only [Nat.cast_pos]
+    exact fin_d_neq_zero (a + 1)
