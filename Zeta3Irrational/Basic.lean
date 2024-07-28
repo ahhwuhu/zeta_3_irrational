@@ -186,7 +186,6 @@ lemma IntervalIntegrable2 {x : ℝ} (hx : x ∈ Set.Ioo 0 1) : IntervalIntegrabl
   apply continuous_parametric_integral_of_continuous
   · rw [continuous_iff_continuousAt]
     intro y Y hy
-
     sorry
   · rw [← Set.uIcc_of_le (by norm_num)]
     exact isCompact_uIcc
@@ -251,8 +250,6 @@ lemma JJ_upper (n : ℕ) : JJ n < 2 * (1 / 30) ^ n * ∑' n : ℕ , 1 / ((n : �
   rw [← zeta_3_eq_form]
   rw [← intervalIntegral.integral_const_mul]
   simp_rw [← intervalIntegral.integral_const_mul]
-  rw [intervalIntegral.integral_of_le (by norm_num), intervalIntegral.integral_of_le (by norm_num),
-    MeasureTheory.integral_Ioc_eq_integral_Ioo, MeasureTheory.integral_Ioc_eq_integral_Ioo]
   sorry
 
 lemma upper_tendsto_zero : Filter.Tendsto (fun n ↦ (2 * (21 / 30) ^ n * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3)) Filter.atTop (nhds 0) := by
@@ -271,7 +268,9 @@ lemma fun1_tendsto_zero : Filter.Tendsto (fun n ↦ ENNReal.ofReal (fun1 n)) Fil
   intro ε hε
   if h : ε = ⊤ then simp [h]
   else
+    delta fun1
     rw [show ε = ENNReal.ofReal ε.toReal by simp [h]]
+    -- use x/lnx 的等价无穷小代换
     use 1
     intro n hn
     rw [ENNReal.ofReal_le_ofReal_iff (by simp)]
