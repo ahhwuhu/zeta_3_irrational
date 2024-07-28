@@ -13,10 +13,48 @@ noncomputable abbrev I (r s : ℕ) : ℝ :=
 noncomputable abbrev J (r s : ℕ) : ℝ :=
   - ∫ (x : ℝ) in (0)..1, (∫ (y : ℝ) in (0)..1, x ^ r * y ^ s * (x * y).log / (1 - x * y))
 
-lemma pow_ln_integral {a b : ℝ} {n : ℕ} (h : a ≤ b): ∫ (x : ℝ) in a..b, x ^ n * (x).log =
+lemma pow_ln_integral {a b : ℝ} {n : ℕ} (h : 0 < a ∧ a ≤ b): ∫ (x : ℝ) in a..b, x ^ n * (x).log =
     (b ^ (n + 1) * b.log /(n + 1) - b ^ (n + 1) /(n + 1) ^ 2) -
     (a ^ (n + 1) * a.log /(n + 1) - a ^ (n + 1) /(n + 1) ^ 2):= by
-  sorry
+  let f := fun x : ℝ => x ^ (n + 1) * x.log /(n + 1) - x ^ (n + 1) /(n + 1) ^ 2
+  rw [show (b ^ (n + 1) * b.log /(n + 1) - b ^ (n + 1) /(n + 1) ^ 2) -
+    (a ^ (n + 1) * a.log /(n + 1) - a ^ (n + 1) /(n + 1) ^ 2) = f b - f a  by simp]
+  refine intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le h.2 (a := a) (b := b) (f := f)
+    (f' := fun x : ℝ => x ^ n * x.log ) ?_ ?_ ?_
+  · simp [f]
+    apply ContinuousOn.sub _ (ContinuousOn.div_const (continuousOn_pow (n + 1)) (((n : ℝ) + 1) ^ 2))
+    apply ContinuousOn.div_const
+    apply ContinuousOn.mul (continuousOn_pow (n + 1))
+    apply ContinuousOn.log continuousOn_id
+    intro x hx
+    simp only [Set.mem_Icc, id_eq] at hx ⊢
+    linarith
+  · intro x hx
+    simp only [Set.mem_Ioo] at hx
+    simp only [f]
+    rw [show x ^ n * x.log = (x ^ n * x.log + x ^ n / (↑n + 1)) - x ^ n / (↑n + 1) by ring]
+    apply HasDerivAt.sub
+    · rw [show x ^ n * x.log + x ^ n / (↑n + 1) = ((↑n + 1) * x ^ n * x.log + x ^ n) / (↑n + 1) by
+        field_simp; ring]
+      apply HasDerivAt.div_const
+      nth_rw 2 [show x ^ n = x ^ (n + 1) * (1 / x) by field_simp; rw [eq_div_iff (by linarith)]; ring]
+      apply HasDerivAt.mul
+      · nth_rw 3 [show n = n + 1 - 1 by simp]
+        norm_cast
+        apply hasDerivAt_pow (n + 1) x
+      · apply HasDerivAt.log (hasDerivAt_id' x) (by linarith)
+    · rw [show x ^ n / (↑n + 1) = x ^ n * (↑n + 1) / (↑n + 1) ^ 2 by field_simp; rw [pow_two, ← mul_assoc]]
+      apply HasDerivAt.div_const
+      rw [mul_comm]
+      nth_rw 3 [show n = n + 1 - 1 by simp]
+      norm_cast
+      apply hasDerivAt_pow (n + 1) x
+  · apply IntervalIntegrable.mul_continuousOn (intervalIntegral.intervalIntegrable_pow n)
+    · apply ContinuousOn.log continuousOn_id
+      intro x hx
+      rw [Set.uIcc_of_le h.2] at hx
+      simp only [Set.mem_Icc, id_eq, ne_eq] at hx ⊢
+      nlinarith
 
 theorem zeta_3 : J 0 0 = 2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
   delta J
