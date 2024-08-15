@@ -102,46 +102,50 @@ lemma multi_integral_sum_comm (c : ℕ → ℤ) : ∫ (x : ℝ) (y : ℝ) in (0)
     ∑ x_2 ∈ Finset.range (n + 1), ↑(c x_1) * x ^ x_1 * ↑(c x_2) * y ^ x_2 * (x * y).log / (1 - x * y)
     = ∑ x_1 ∈ Finset.range (n + 1), ∑ x_2 ∈ Finset.range (n + 1), ∫ (x : ℝ) (y : ℝ) in (0)..1,
     ↑(c x_1) * x ^ x_1 * ↑(c x_2) * y ^ x_2 * (x * y).log / (1 - x * y) := by
-  calc
-  _ = ∫ (x : ℝ) in (0)..1, ∑ x_1 ∈ Finset.range (n + 1), ∫ (y : ℝ) in (0)..1, ∑ x_2 ∈ Finset.range (n + 1),
-    ↑(c x_1) * x ^ x_1 * ↑(c x_2) * y ^ x_2 * (x * y).log / (1 - x * y) := by
-    rw [intervalIntegral.integral_of_le (by norm_num), intervalIntegral.integral_of_le (by norm_num),
-      MeasureTheory.integral_Ioc_eq_integral_Ioo, MeasureTheory.integral_Ioc_eq_integral_Ioo]
-    apply MeasureTheory.setIntegral_congr (by simp)
-    intro x hx
-    simp only
-    rw [intervalIntegral.integral_finset_sum]
-    intro i hi
-    rw [show (fun y ↦ ∑ x_2 ∈ Finset.range (n + 1), ↑(c i) * x ^ i * ↑(c x_2) * y ^ x_2 * (x * y).log / (1 - x * y))
-      = (∑ x_2 ∈ Finset.range (n + 1), fun y ↦ ↑(c i) * x ^ i * ↑(c x_2) * y ^ x_2 * (x * y).log / (1 - x * y)) by ext y; simp]
-    apply IntervalIntegrable.sum
-    intro j hj
-    rw [show (fun y ↦ ↑(c i) * x ^ i * ↑(c j) * y ^ j * (x * y).log / (1 - x * y)) =
-      (fun y ↦ (↑(c i) * ↑(c j) * x ^ i) * (y ^ j * (x * y).log / (1 - x * y))) by ext; ring]
-    apply IntervalIntegrable.const_mul
-    rw [IntervalIntegrable, MeasureTheory.IntegrableOn, MeasureTheory.IntegrableOn,
-        MeasureTheory.Integrable, MeasureTheory.Integrable]
-    constructor
-    · constructor
-      ·
-        sorry
-      · sorry
-    · constructor
-      ·
-        sorry
-      · sorry
-    -- apply ContinuousOn.intervalIntegrable
-    -- apply ContinuousOn.div
-    -- · refine ContinuousOn.mul (ContinuousOn.mul continuousOn_const (ContinuousOn.pow continuousOn_id j)) ?_
-    --   apply ContinuousOn.log (ContinuousOn.mul continuousOn_const continuousOn_id)
-    --   intro y hy
-    --   simp_all only [Set.mem_Ioo, ge_iff_le, zero_le_one, Set.uIcc_of_le, Set.mem_Icc, id_eq]
-    --   suffices x * y > 0 by linarith
-    --   sorry
-    -- · apply ContinuousOn.sub continuousOn_const (ContinuousOn.mul continuousOn_const continuousOn_id)
-    -- · intro x hx; simp_all only [Set.mem_Ioo, ge_iff_le, zero_le_one, Set.uIcc_of_le, Set.mem_Icc]; nlinarith
-  _ = ∑ x_1 ∈ Finset.range (n + 1), ∑ x_2 ∈ Finset.range (n + 1), ∫ (x : ℝ) (y : ℝ) in (0)..1,
-    ↑(c x_1) * x ^ x_1 * ↑(c x_2) * y ^ x_2 * (x * y).log / (1 - x * y) := by sorry
+  induction' n with n hn
+  · simp
+  · 
+  -- calc
+  -- _ = ∫ (x : ℝ) in (0)..1, ∑ x_1 ∈ Finset.range (n + 1), ∫ (y : ℝ) in (0)..1, ∑ x_2 ∈ Finset.range (n + 1),
+  --   ↑(c x_1) * x ^ x_1 * ↑(c x_2) * y ^ x_2 * (x * y).log / (1 - x * y) := by
+  --   rw [intervalIntegral.integral_of_le (by norm_num), intervalIntegral.integral_of_le (by norm_num),
+  --     MeasureTheory.integral_Ioc_eq_integral_Ioo, MeasureTheory.integral_Ioc_eq_integral_Ioo]
+  --   apply MeasureTheory.setIntegral_congr (by simp)
+  --   intro x hx
+  --   simp only
+  --   rw [intervalIntegral.integral_finset_sum]
+  --   intro i hi
+  --   rw [show (fun y ↦ ∑ x_2 ∈ Finset.range (n + 1), ↑(c i) * x ^ i * ↑(c x_2) * y ^ x_2 * (x * y).log / (1 - x * y))
+  --     = (∑ x_2 ∈ Finset.range (n + 1), fun y ↦ ↑(c i) * x ^ i * ↑(c x_2) * y ^ x_2 * (x * y).log / (1 - x * y)) by ext y; simp]
+  --   apply IntervalIntegrable.sum
+  --   intro j hj
+  --   rw [show (fun y ↦ ↑(c i) * x ^ i * ↑(c j) * y ^ j * (x * y).log / (1 - x * y)) =
+  --     (fun y ↦ (↑(c i) * ↑(c j) * x ^ i) * (y ^ j * (x * y).log / (1 - x * y))) by ext; ring]
+  --   apply IntervalIntegrable.const_mul
+  --   rw [IntervalIntegrable, MeasureTheory.IntegrableOn, MeasureTheory.IntegrableOn,
+  --       MeasureTheory.Integrable, MeasureTheory.Integrable]
+  --   constructor
+  --   · constructor
+  --     ·
+  --       sorry
+  --     · sorry
+  --   · constructor
+  --     ·
+  --       sorry
+  --     · sorry
+  --   -- apply ContinuousOn.intervalIntegrable
+  --   -- apply ContinuousOn.div
+  --   -- · refine ContinuousOn.mul (ContinuousOn.mul continuousOn_const (ContinuousOn.pow continuousOn_id j)) ?_
+  --   --   apply ContinuousOn.log (ContinuousOn.mul continuousOn_const continuousOn_id)
+  --   --   intro y hy
+  --   --   simp_all only [Set.mem_Ioo, ge_iff_le, zero_le_one, Set.uIcc_of_le, Set.mem_Icc, id_eq]
+  --   --   suffices x * y > 0 by linarith
+  --   --   sorry
+  --   -- · apply ContinuousOn.sub continuousOn_const (ContinuousOn.mul continuousOn_const continuousOn_id)
+  --   -- · intro x hx; simp_all only [Set.mem_Ioo, ge_iff_le, zero_le_one, Set.uIcc_of_le, Set.mem_Icc]; nlinarith
+  -- _ = ∑ x_1 ∈ Finset.range (n + 1), ∑ x_2 ∈ Finset.range (n + 1), ∫ (x : ℝ) (y : ℝ) in (0)..1,
+  --   ↑(c x_1) * x ^ x_1 * ↑(c x_2) * y ^ x_2 * (x * y).log / (1 - x * y) := by sorry
+    sorry
 
 lemma multi_integral_mul_const (c d : ℕ) (p q : ℝ): ∫ (x : ℝ) (y : ℝ) in (0)..1,
     p * x ^ c * q * y ^ d * (x * y).log / (1 - x * y) = p * q * - J c d := by

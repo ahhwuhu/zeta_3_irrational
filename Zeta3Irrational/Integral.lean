@@ -77,13 +77,7 @@ theorem zeta_3 : J 0 0 = 2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
     simp_all only [Set.mem_Ioo, norm_mul, Real.norm_eq_abs]
     rw [abs_eq_self.2 (LT.lt.le hx.1), abs_eq_self.2 (LT.lt.le hy.1)]
     nlinarith
-  _ = -∫ (x : ℝ) in (0)..1, ∑' (n : ℕ), ∫ (y : ℝ) in (0)..1, (x * y) ^ n * (x * y).log := by
-    rw [neg_inj, intervalIntegral.integral_of_le (by norm_num), intervalIntegral.integral_of_le (by norm_num),
-      MeasureTheory.integral_Ioc_eq_integral_Ioo, MeasureTheory.integral_Ioc_eq_integral_Ioo]
-    apply MeasureTheory.setIntegral_congr (by simp)
-    intro x hx
-    simp only
-
+  _ = ∑' (n : ℕ), -∫ (x : ℝ) (y : ℝ) in (0)..1, (x * y) ^ n * (x * y).log := by
     sorry
   _ = 2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by sorry
 
