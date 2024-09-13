@@ -78,6 +78,48 @@ theorem integral_Ioo_congr {f g : ℝ → ℝ} (h : ∀ x ∈ Set.Ioo 0 1, f x =
      MeasureTheory.integral_Ioc_eq_integral_Ioo, MeasureTheory.integral_Ioc_eq_integral_Ioo]
   exact MeasureTheory.setIntegral_congr (by simp) h
 
+/-
+∫ (z : ℝ) (x : ℝ) (y : ℝ) in (0)..1, (x * (1 - x) * y * (1 - y) * z *
+    (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n / ((1 - (1 - z) * x) * (1 - y * z))
+-/
+
+
+lemma intervalIntegral_eq_setInteral' (n : ℕ) :
+    ∫ (z : ℝ) (x : ℝ) (y : ℝ) in (0)..1,
+    (x * (1 - x) * y * (1 - y) * z *
+    (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n / ((1 - (1 - z) * x) * (1 - y * z)) =
+    ∫ (zxy : ℝ × ℝ × ℝ) in (Set.Ioo 0 1) ×ˢ ((Set.Ioo 0 1) ×ˢ (Set.Ioo 0 1)),
+      (zxy.2.1 * (1 - zxy.2.1) * zxy.2.2 * (1 - zxy.2.2) * zxy.1 * (1 - zxy.1) / ((1 - (1 - zxy.1) * zxy.2.1) * (1 - zxy.2.2 * zxy.1))) ^ n /
+      ((1 - (1 - zxy.1) * zxy.2.1) * (1 - zxy.2.2 * zxy.1))
+      ∂MeasureTheory.volume := by
+  sorry
+
+lemma intervalIntegral_eq_setInteral (n : ℕ) :
+    ∫ (x : ℝ) (y : ℝ) (z : ℝ) in (0)..1,
+    ( x * (1 - x) * y * (1 - y) * z * (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n / ((1 - (1 - z) * x) * (1 - y * z)) =
+    ∫ (xyz : ℝ × ℝ × ℝ) in (Set.Ioo 0 1) ×ˢ ((Set.Ioo 0 1) ×ˢ (Set.Ioo 0 1)),
+      (xyz.1 * (1 - xyz.1) * xyz.2.1 * (1 - xyz.2.1) * xyz.2.2 * (1 - xyz.2.2) / ((1 - (1 - xyz.2.2) * xyz.1) * (1 - xyz.2.1 * xyz.2.2))) ^ n /
+      ((1 - (1 - xyz.2.2) * xyz.1) * (1 - xyz.2.1 * xyz.2.2))
+      ∂MeasureTheory.volume := by
+  rw [intervalIntegral.integral_of_le (by norm_num),
+    MeasureTheory.integral_Ioc_eq_integral_Ioo]
+  rw [MeasureTheory.Measure.volume_eq_prod]
+  rw [MeasureTheory.setIntegral_prod]
+  swap
+  · sorry -- everything is continuous
+  refine MeasureTheory.setIntegral_congr (by simp) ?_
+  intro x hx
+  simp only
+  rw [intervalIntegral.integral_of_le (by norm_num), MeasureTheory.integral_Ioc_eq_integral_Ioo]
+  rw [MeasureTheory.Measure.volume_eq_prod]
+  rw [MeasureTheory.setIntegral_prod]
+  swap
+  · sorry -- everything is continuous
+  refine MeasureTheory.setIntegral_congr (by simp) ?_
+  intro y hy
+  simp only
+  rw [intervalIntegral.integral_of_le (by norm_num), MeasureTheory.integral_Ioc_eq_integral_Ioo]
+
 lemma integral_comm1 (n : ℕ) : ∫ (x : ℝ) (y : ℝ) in (0)..1, eval x (legendre n) * (-1) ^ n *
     eval y (legendre n) * ∫ (z : ℝ) in (0)..1, 1 / ((1 - (1 - z) * x) * (1 - (1 - y) * z)) =
     ∫ (z : ℝ) (x : ℝ) (y : ℝ) in (0)..1, eval x (legendre n) * eval (1 - y) (legendre n) * 1 /
@@ -88,7 +130,31 @@ lemma integral_comm2 (n : ℕ) : ∫ (z : ℝ) (x : ℝ) (y : ℝ) in (0)..1, (x
     (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n / ((1 - (1 - z) * x) * (1 - y * z)) =
     ∫ (x : ℝ) (y : ℝ) (z : ℝ) in (0)..1, (x * (1 - x) * y * (1 - y) * z * (1 - z) / ((1 - (1 - z) *
     x) * (1 - y * z))) ^ n / ((1 - (1 - z) * x) * (1 - y * z)) := by
+  rw [intervalIntegral_eq_setInteral, intervalIntegral_eq_setInteral',
+    MeasureTheory.Measure.volume_eq_prod, MeasureTheory.Measure.volume_eq_prod]
+  rw [MeasureTheory.setIntegral_prod, MeasureTheory.setIntegral_prod]
+  pick_goal 2
+  · sorry
+  pick_goal 2
+  · sorry
+
+  change ∫ (z : ℝ) in Set.Ioo 0 1, ∫ (xy : ℝ × ℝ) in Set.Ioo 0 1 ×ˢ Set.Ioo 0 1, _ = ∫ x in _, ∫ (yz) in _, _
+  dsimp
+  rw [MeasureTheory.integral_integral_swap]
+  pick_goal 2
+  · sorry
+
+  change ∫ xy in _, ∫ z in _,  _ = _
+  rw [MeasureTheory.Measure.volume_eq_prod, MeasureTheory.setIntegral_prod]
+  pick_goal 2
+  · sorry
+
+  refine MeasureTheory.setIntegral_congr (by simp) ?_
+  intro x hx
+  dsimp
+  rw [MeasureTheory.setIntegral_prod]
   sorry
+
 
 lemma JJ_eq_form (n : ℕ) : JJ n = ∫ (x : ℝ) (y : ℝ) (z : ℝ) in (0)..1,
     ( x * (1 - x) * y * (1 - y) * z * (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n / ((1 - (1 - z) * x) * (1 - y * z)) := by
@@ -164,6 +230,7 @@ lemma JJ_eq_form (n : ℕ) : JJ n = ∫ (x : ℝ) (y : ℝ) (z : ℝ) in (0)..1,
       ( x * (1 - x) * y * (1 - y) * z * (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n /
       ((1 - (1 - z) * x) * (1 - y * z)) := by
     exact integral_comm2 n
+
 
 lemma JJ_eq_form' (n : ℕ) :
     JJ n =
