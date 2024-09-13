@@ -165,6 +165,19 @@ lemma JJ_eq_form (n : ℕ) : JJ n = ∫ (x : ℝ) (y : ℝ) (z : ℝ) in (0)..1,
       ((1 - (1 - z) * x) * (1 - y * z)) := by
     exact integral_comm2 n
 
+lemma IntervalIntegrable1_aux : (fun x ↦ ∫ (y : ℝ) (z : ℝ) in (0)..1,
+    (x * (1 - x) * y * (1 - y) * z * (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n /
+    ((1 - (1 - z) * x) * (1 - y * z))) = fun x ↦ (1 : ℝ) := by
+  ext x
+  calc
+  ∫ (y : ℝ) (z : ℝ) in (0)..1,
+    (x * (1 - x) * y * (1 - y) * z * (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n /
+    ((1 - (1 - z) * x) * (1 - y * z)) = ∫ (y : ℝ) (z : ℝ) in (0)..1,
+    (y * (1 - y) * z * (1 - z)) ^ n / (1 - y * z) ^ (n + 1) * (x - x ^ 2) ^ n / (1 - (1 - z) * x) ^ (n + 1) := by
+
+    sorry
+  _ = 1 := by sorry
+
 lemma IntervalIntegrable1 : IntervalIntegrable
     (fun x ↦ ∫ (y : ℝ) (z : ℝ) in (0)..1,
     (x * (1 - x) * y * (1 - y) * z * (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n /
@@ -173,9 +186,29 @@ lemma IntervalIntegrable1 : IntervalIntegrable
   -- apply MeasureTheory.continuous_integral_integral
   rw [intervalIntegrable_iff, MeasureTheory.IntegrableOn, MeasureTheory.Integrable]
   constructor
-  · sorry
+  ·
+    sorry
   · rw [MeasureTheory.HasFiniteIntegral]
     sorry
+
+lemma IntervalIntegrable2_aux {x : ℝ} (hx : x ∈ Set.Ioo 0 1) : (fun y ↦ ∫ (z : ℝ) in (0)..1,
+    (x * (1 - x) * y * (1 - y) * z * (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n /
+    ((1 - (1 - z) * x) * (1 - y * z))) = fun y ↦ (1 : ℝ) := by
+  ext y
+  calc
+  ∫ (z : ℝ) in (0)..1,
+    (x * (1 - x) * y * (1 - y) * z * (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n /
+    ((1 - (1 - z) * x) * (1 - y * z)) =
+    (x * (1 - x) * y * (1 - y)) ^ n * ∫ (z : ℝ) in (0)..1, (z - z ^ 2) ^ n / ((1 - y * z) * (1 - (1 - z) * x)) ^ (n + 1) := by
+    rw [← intervalIntegral.integral_const_mul]
+    apply integral_Ioo_congr
+    intro z hz
+    simp only [Set.mem_Ioo] at hz
+    simp only [div_pow, div_div, mul_div]
+    -- rw [show (z - z ^ 2) = z * (1 - z) by ring, div_eq_div_iff]
+
+    sorry
+  _ = 1 := by sorry
 
 lemma IntervalIntegrable2 {x : ℝ} (hx : x ∈ Set.Ioo 0 1) : IntervalIntegrable
     (fun y ↦ ∫ (z : ℝ) in (0)..1,
@@ -185,7 +218,8 @@ lemma IntervalIntegrable2 {x : ℝ} (hx : x ∈ Set.Ioo 0 1) : IntervalIntegrabl
   simp_rw [intervalIntegral.integral_of_le (show 0 ≤ 1 by norm_num), ← MeasureTheory.integral_Icc_eq_integral_Ioc]
   apply continuous_parametric_integral_of_continuous
   · rw [continuous_iff_continuousAt]
-    intro y Y hy
+    intro y
+
     sorry
   · rw [← Set.uIcc_of_le (by norm_num)]
     exact isCompact_uIcc

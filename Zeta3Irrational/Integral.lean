@@ -56,6 +56,24 @@ lemma pow_ln_integral {a b : ℝ} {n : ℕ} (h : 0 < a ∧ a ≤ b): ∫ (x : �
       simp only [Set.mem_Icc, id_eq, ne_eq] at hx ⊢
       nlinarith
 
+lemma a (m : ℕ) : Filter.Tendsto (fun (n : ℕ) =>
+    (∫(z : ℝ) in (0)..1, ∫(x : ℝ) (y : ℝ) in (1 / n : ℝ)..(1 - 1 / n), (x * y) ^ m * (x * y).log))
+    Filter.atTop
+    (nhds (∫(z : ℝ) in (0)..1, ∫ (x : ℝ) (y : ℝ) in (0)..1, (x * y) ^ m * (x * y).log)) := by
+  -- apply MeasureTheory.integral_tendsto_of_tendsto_of_monotone
+  sorry
+
+lemma b (m : ℕ) : Filter.Tendsto (fun (n : ℕ) =>
+    (∫(z : ℝ) in (0)..1, ∫(x : ℝ) (y : ℝ) in (1 / n : ℝ)..(1 - 1 / n), (x * y) ^ m * (x * y).log))
+    Filter.atTop (nhds (-2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3)) := by
+  -- apply MeasureTheory.integral_tendsto_of_tendsto_of_monotone
+  sorry
+
+example (a b : ℝ) (h : 0 < a ∧ a < b ∧ b < 1) :
+    ∫ (x : ℝ) (y : ℝ) in a..b, ∑' (n : ℕ), (x * y) ^ n =
+    ∑' (n : ℕ), ∫ (x : ℝ) (y : ℝ) in a..b, (x * y) ^ n := by
+  sorry
+
 theorem zeta_3 : J 0 0 = 2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
   delta J
   simp only [pow_zero, mul_one, one_mul]
