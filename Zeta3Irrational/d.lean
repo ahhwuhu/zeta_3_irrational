@@ -63,9 +63,9 @@ lemma Nat.Prime.dvd_lcm {p} (hp : Nat.Prime p) (a b) (h : p ∣ Nat.lcm a b) : p
 lemma Nat.primeFactors_lcm {a b : ℕ} (ha : a ≠ 0) (hb : b ≠ 0) :
     (a.lcm b).primeFactors = a.primeFactors ∪ b.primeFactors := by
   ext p
-  rw [Nat.mem_primeFactors_iff_mem_factors, Finset.mem_union,
-    Nat.mem_primeFactors_iff_mem_factors, Nat.mem_primeFactors_iff_mem_factors]
-  simp only [mem_factors', ne_eq]
+  rw [Nat.mem_primeFactors_iff_mem_primeFactorsList, Finset.mem_union,
+    Nat.mem_primeFactors_iff_mem_primeFactorsList, Nat.mem_primeFactors_iff_mem_primeFactorsList]
+  simp only [mem_primeFactorsList', ne_eq]
   constructor
   · rintro ⟨hp1, hp2, hp3⟩
     obtain hp4|hp4 := hp1.dvd_lcm a b hp2

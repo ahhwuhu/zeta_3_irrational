@@ -41,8 +41,9 @@ lemma Finsum_iterate_deriv {R : Type u_1} [CommRing R] {k : ℕ} {h : ℕ → �
     have := Int.even_or_odd n
     rcases this with (hn1 | hn2)
     · simp_all only [nsmul_eq_mul, Int.even_coe_nat, Even.neg_pow, one_pow, one_mul]
-    · simp_all only [nsmul_eq_mul, Int.odd_iff_not_even, Int.even_coe_nat, Nat.odd_iff_not_even,
-      not_false_eq_true, Odd.neg_one_pow, neg_mul, one_mul, iterate_map_neg]
+    · rw [Odd.neg_one_pow]
+      simp only [neg_mul, one_mul, iterate_map_neg, mul_neg]
+      exact_mod_cast hn2
 
 lemma legendre_eq_sum (n : ℕ) : legendre n = ∑ k in Finset.range (n + 1),
     C ((- 1) ^ k : ℝ) • (Nat.choose n k) * (Nat.choose (n + k) n) * X ^ k := by
@@ -423,9 +424,12 @@ lemma integral_legendre_mul_smooth_eq_aux {n : ℕ} {a : ℝ} (m : ℕ) (h : m �
             Set.uIcc_of_le]
           refine ContinuousOn.mul continuousOn_const (ContinuousOn.mul continuousOn_const ?_)
           apply ContinuousOn.pow (ContinuousOn.sub continuousOn_const continuousOn_id)
-    · have (x : ℝ) : deriv (deriv^[m] fun x ↦ 1 / (1 - a * x)) x = Function.eval x (deriv (deriv^[m] fun x ↦ 1 / (1 - a * x))) := by
+    · have : deriv (deriv^[m] fun x ↦ 1 / (1 - a * x)) =
+        (Function.eval · (deriv (deriv^[m] fun x ↦ 1 / (1 - a * x)))) := by
+        ext x
         simp only [one_div, Function.eval]
-      simp_rw [this]
+
+      rw [this]
       simp_rw [← Function.iterate_succ_apply', Nat.succ_eq_add_one, Function.eval]
       apply ContinuousOn.intervalIntegrable_of_Icc (by norm_num)
       rw [← Set.uIcc_of_le (by norm_num)]

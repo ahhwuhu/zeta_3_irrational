@@ -9,15 +9,18 @@ package «Zeta3Irrational» where
   ]
   -- add any additional package configuration options here
 
-require mathlib from git
-  "https://github.com/leanprover-community/mathlib4.git"
-
 @[default_target]
 lean_lib «Zeta3Irrational» where
   -- add any library configuration options here
 
 require checkdecls from git "https://github.com/PatrickMassot/checkdecls.git"
 
+require mathlib from git
+  "https://github.com/leanprover-community/mathlib4.git" @ "v4.11.0"
+
+require «PrimeNumberTheoremAnd» from git
+  "https://github.com/AlexKontorovich/PrimeNumberTheoremAnd.git"
+
 -- meta if get_config? env = some "dev" then
 require «doc-gen4» from git
-  "https://github.com/leanprover/doc-gen4" @ "main"
+  "https://github.com/leanprover/doc-gen4" @ "e490631"
