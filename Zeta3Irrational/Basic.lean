@@ -165,84 +165,137 @@ lemma JJ_eq_form (n : ℕ) : JJ n = ∫ (x : ℝ) (y : ℝ) (z : ℝ) in (0)..1,
       ((1 - (1 - z) * x) * (1 - y * z)) := by
     exact integral_comm2 n
 
-lemma IntervalIntegrable1 : IntervalIntegrable
-    (fun x ↦ ∫ (y : ℝ) (z : ℝ) in (0)..1,
-    (x * (1 - x) * y * (1 - y) * z * (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n /
-    ((1 - (1 - z) * x) * (1 - y * z))) MeasureTheory.volume 0 1 := by
-  -- apply IntervalIntegrable.mono_fun'
-  -- apply MeasureTheory.continuous_integral_integral
-  rw [intervalIntegrable_iff, MeasureTheory.IntegrableOn, MeasureTheory.Integrable]
-  constructor
-  · sorry
-  · rw [MeasureTheory.HasFiniteIntegral]
-    sorry
+lemma JJ_eq_form' (n : ℕ) :
+    JJ n =
+    ∫ (xyz : ℝ × ℝ × ℝ) in (Set.Ioo 0 1) ×ˢ ((Set.Ioo 0 1) ×ˢ (Set.Ioo 0 1)),
+      (xyz.1 * (1 - xyz.1) * xyz.2.1 * (1 - xyz.2.1) * xyz.2.2 * (1 - xyz.2.2) / ((1 - (1 - xyz.2.2) * xyz.1) * (1 - xyz.2.1 * xyz.2.2))) ^ n /
+      ((1 - (1 - xyz.2.2) * xyz.1) * (1 - xyz.2.1 * xyz.2.2))
+      ∂MeasureTheory.volume := by
+  rw [JJ_eq_form, intervalIntegral.integral_of_le (by norm_num),
+    MeasureTheory.integral_Ioc_eq_integral_Ioo]
+  rw [MeasureTheory.Measure.volume_eq_prod]
+  rw [MeasureTheory.setIntegral_prod]
+  swap
+  · sorry -- everything is continuous
+  refine MeasureTheory.setIntegral_congr (by simp) ?_
+  intro x hx
+  simp only
+  rw [intervalIntegral.integral_of_le (by norm_num), MeasureTheory.integral_Ioc_eq_integral_Ioo]
+  rw [MeasureTheory.Measure.volume_eq_prod]
+  rw [MeasureTheory.setIntegral_prod]
+  swap
+  · sorry -- everything is continuous
+  refine MeasureTheory.setIntegral_congr (by simp) ?_
+  intro y hy
+  simp only
+  rw [intervalIntegral.integral_of_le (by norm_num), MeasureTheory.integral_Ioc_eq_integral_Ioo]
 
-lemma IntervalIntegrable2 {x : ℝ} (hx : x ∈ Set.Ioo 0 1) : IntervalIntegrable
-    (fun y ↦ ∫ (z : ℝ) in (0)..1,
-    (x * (1 - x) * y * (1 - y) * z * (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n /
-    ((1 - (1 - z) * x) * (1 - y * z))) MeasureTheory.volume 0 1 := by
-  apply Continuous.intervalIntegrable
-  simp_rw [intervalIntegral.integral_of_le (show 0 ≤ 1 by norm_num), ← MeasureTheory.integral_Icc_eq_integral_Ioc]
-  apply continuous_parametric_integral_of_continuous
-  · rw [continuous_iff_continuousAt]
-    intro y Y hy
-    sorry
-  · rw [← Set.uIcc_of_le (by norm_num)]
-    exact isCompact_uIcc
+-- lemma IntervalIntegrable1 : IntervalIntegrable
+--     (fun x ↦ ∫ (y : ℝ) (z : ℝ) in (0)..1,
+--     (x * (1 - x) * y * (1 - y) * z * (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n /
+--     ((1 - (1 - z) * x) * (1 - y * z))) MeasureTheory.volume 0 1 := by
+--   -- apply IntervalIntegrable.mono_fun'
+--   -- apply MeasureTheory.continuous_integral_integral
+--   rw [intervalIntegrable_iff, MeasureTheory.IntegrableOn, MeasureTheory.Integrable]
+--   constructor
+--   · sorry
+--   · rw [MeasureTheory.HasFiniteIntegral]
+--     sorry
 
-lemma IntervalIntegrable3 {x y : ℝ} (hx : x ∈ Set.Ioo 0 1) (hy : y ∈ Set.Ioo 0 1): IntervalIntegrable
-  (fun z ↦ (x * (1 - x) * y * (1 - y) * z * (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n /
-      ((1 - (1 - z) * x) * (1 - y * z)))
-  MeasureTheory.volume 0 1 := by
-  apply IntervalIntegrable.continuousOn_mul
-  · apply intervalIntegral.intervalIntegrable_inv
-    · intro z hz
-      suffices (1 - (1 - z) * x) * (1 - y * z) > 0 by linarith
-      apply mul_pos <;> simp_all only [Set.mem_Ioo, ge_iff_le, zero_le_one, Set.uIcc_of_le,
-        Set.mem_Icc, sub_pos] <;> nlinarith
-    · apply ContinuousOn.mul
-      · apply ContinuousOn.sub continuousOn_const
-        apply ContinuousOn.mul
-        · apply ContinuousOn.sub continuousOn_const continuousOn_id
-        · exact continuousOn_const
-      · apply ContinuousOn.sub continuousOn_const
-        apply ContinuousOn.mul continuousOn_const continuousOn_id
-  · apply ContinuousOn.pow
-    apply ContinuousOn.div
-    · apply ContinuousOn.mul _ (ContinuousOn.sub continuousOn_const continuousOn_id)
-      apply ContinuousOn.mul continuousOn_const continuousOn_id
-    · apply ContinuousOn.mul
-      · apply ContinuousOn.sub continuousOn_const
-        apply ContinuousOn.mul _ continuousOn_const
-        apply ContinuousOn.sub continuousOn_const continuousOn_id
-      · apply ContinuousOn.sub continuousOn_const
-        apply ContinuousOn.mul continuousOn_const continuousOn_id
-    · intro z hz
-      suffices (1 - (1 - z) * x) * (1 - y * z) > 0 by linarith
-      apply mul_pos <;>
-      simp_all only [Set.mem_Ioo, ge_iff_le, zero_le_one, Set.uIcc_of_le, Set.mem_Icc, sub_pos] <;>
-      nlinarith
+-- lemma IntervalIntegrable2 {x : ℝ} (hx : x ∈ Set.Ioo 0 1) : IntervalIntegrable
+--     (fun y ↦ ∫ (z : ℝ) in (0)..1,
+--     (x * (1 - x) * y * (1 - y) * z * (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n /
+--     ((1 - (1 - z) * x) * (1 - y * z))) MeasureTheory.volume 0 1 := by
+--   apply Continuous.intervalIntegrable
+--   simp_rw [intervalIntegral.integral_of_le (show 0 ≤ 1 by norm_num), ← MeasureTheory.integral_Icc_eq_integral_Ioc]
+--   apply continuous_parametric_integral_of_continuous
+--   · rw [continuous_iff_continuousAt]
+--     intro y Y hy
+--     sorry
+--   · rw [← Set.uIcc_of_le (by norm_num)]
+--     exact isCompact_uIcc
+
+-- lemma IntervalIntegrable3 {x y : ℝ} (hx : x ∈ Set.Ioo 0 1) (hy : y ∈ Set.Ioo 0 1): IntervalIntegrable
+--   (fun z ↦ (x * (1 - x) * y * (1 - y) * z * (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n /
+--       ((1 - (1 - z) * x) * (1 - y * z)))
+--   MeasureTheory.volume 0 1 := by
+--   apply IntervalIntegrable.continuousOn_mul
+--   · apply intervalIntegral.intervalIntegrable_inv
+--     · intro z hz
+--       suffices (1 - (1 - z) * x) * (1 - y * z) > 0 by linarith
+--       apply mul_pos <;> simp_all only [Set.mem_Ioo, ge_iff_le, zero_le_one, Set.uIcc_of_le,
+--         Set.mem_Icc, sub_pos] <;> nlinarith
+--     · apply ContinuousOn.mul
+--       · apply ContinuousOn.sub continuousOn_const
+--         apply ContinuousOn.mul
+--         · apply ContinuousOn.sub continuousOn_const continuousOn_id
+--         · exact continuousOn_const
+--       · apply ContinuousOn.sub continuousOn_const
+--         apply ContinuousOn.mul continuousOn_const continuousOn_id
+--   · apply ContinuousOn.pow
+--     apply ContinuousOn.div
+--     · apply ContinuousOn.mul _ (ContinuousOn.sub continuousOn_const continuousOn_id)
+--       apply ContinuousOn.mul continuousOn_const continuousOn_id
+--     · apply ContinuousOn.mul
+--       · apply ContinuousOn.sub continuousOn_const
+--         apply ContinuousOn.mul _ continuousOn_const
+--         apply ContinuousOn.sub continuousOn_const continuousOn_id
+--       · apply ContinuousOn.sub continuousOn_const
+--         apply ContinuousOn.mul continuousOn_const continuousOn_id
+--     · intro z hz
+--       suffices (1 - (1 - z) * x) * (1 - y * z) > 0 by linarith
+--       apply mul_pos <;>
+--       simp_all only [Set.mem_Ioo, ge_iff_le, zero_le_one, Set.uIcc_of_le, Set.mem_Icc, sub_pos] <;>
+--       nlinarith
 
 lemma JJ_pos (n : ℕ) : 0 < JJ n := by
-  rw [JJ_eq_form]
-  apply intervalIntegral.intervalIntegral_pos_of_pos_on IntervalIntegrable1 _ (by simp)
-  · intro x hx
-    apply intervalIntegral.intervalIntegral_pos_of_pos_on (IntervalIntegrable2 hx) _ (by simp)
-    · intro y hy
-      apply intervalIntegral.intervalIntegral_pos_of_pos_on (IntervalIntegrable3 hx hy) _ (by simp)
-      · intro z hz
-        simp_all only [Set.mem_Ioo]
-        cases' hx with hx1 hx2
-        cases' hy with hy1 hy2
-        cases' hz with hz1 hz2
-        rw [← sub_pos] at hx2 hy2 hz2
-        apply div_pos
-        · rw [div_pow]
-          apply div_pos
-          · apply pow_pos; positivity
-          · apply pow_pos
-            apply mul_pos <;> nlinarith
-        · apply mul_pos <;> nlinarith
+  rw [JJ_eq_form']
+  -- rw [intervalIntegral.integral_of_le]
+  -- simp_rw [intervalIntegral.integral_of_le]
+  rw [MeasureTheory.integral_pos_iff_support_of_nonneg_ae]
+  · set F := _;
+    change 0 < MeasureTheory.volume.restrict _ (Function.support F)
+
+    have subset : Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 ⊆ Function.support F := sorry
+
+    rw [MeasureTheory.Measure.restrict_apply']
+    rw [Set.inter_eq_right.2 subset]
+    simp only [MeasureTheory.Measure.volume_eq_prod, MeasureTheory.Measure.prod_prod]
+    simp only [Real.volume_Ioo, sub_zero, ENNReal.ofReal_one, mul_one, zero_lt_one]
+    · measurability
+  · delta Filter.EventuallyLE
+    rw [Filter.eventually_iff, MeasureTheory.mem_ae_iff]
+    rw [MeasureTheory.Measure.restrict_apply']
+    convert_to MeasureTheory.volume (∅ : Set (ℝ × ℝ × ℝ)) = 0
+    · congr 1
+      ext ⟨x, ⟨y, z⟩⟩
+      simp only [Pi.zero_apply, div_pow, Set.mem_inter_iff, Set.mem_compl_iff, Set.mem_setOf_eq,
+        not_le, Set.mem_prod, Set.mem_Ioo, Set.mem_empty_iff_false, iff_false, not_and, not_lt,
+        and_imp]
+      contrapose!
+      rintro ⟨hx0, hx1, hy0, hy1, hz0, hz1⟩
+      sorry
+    · exact MeasureTheory.OuterMeasureClass.measure_empty MeasureTheory.volume
+    . measurability
+  · sorry
+  -- apply intervalIntegral.intervalIntegral_pos_of_pos_on IntervalIntegrable1 _ (by simp)
+  -- · intro x hx
+  --   apply intervalIntegral.intervalIntegral_pos_of_pos_on (IntervalIntegrable2 hx) _ (by simp)
+  --   · intro y hy
+  --     apply intervalIntegral.intervalIntegral_pos_of_pos_on (IntervalIntegrable3 hx hy) _ (by simp)
+  --     · intro z hz
+  --       simp_all only [Set.mem_Ioo]
+  --       cases' hx with hx1 hx2
+  --       cases' hy with hy1 hy2
+  --       cases' hz with hz1 hz2
+  --       rw [← sub_pos] at hx2 hy2 hz2
+  --       apply div_pos
+  --       · rw [div_pow]
+  --         apply div_pos
+  --         · apply pow_pos; positivity
+  --         · apply pow_pos
+  --           apply mul_pos <;> nlinarith
+  --       · apply mul_pos <;> nlinarith
 
 lemma JJ_upper (n : ℕ) : JJ n < 2 * (1 / 30) ^ n * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
   rw [JJ_eq_form, mul_rotate, mul_assoc]
