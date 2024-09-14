@@ -6,9 +6,9 @@ open scoped Nat
 open BigOperators Polynomial
 
 lemma max_value {x : ℝ} (x0 : 0 < x) (x1 : x < 1) : √x * √(1 - x) ≤ ((1 / 2) : ℝ) := by
-  rw [← Real.sqrt_mul, le_div_iff', ← show √4 = 2 by rw [Real.sqrt_eq_iff_sq_eq] <;> linarith,
-    ← Real.sqrt_mul, Real.sqrt_le_one, show 4 * (x * (1 - x)) = 1 - (2 * x - 1)^2 by ring] <;>
-  linarith [mul_self_nonneg (2 * x - 1)]
+  rw [← Real.sqrt_mul, le_div_iff₀, ← show √4 = 2 by rw [Real.sqrt_eq_iff_eq_sq] <;> linarith,
+    ← Real.sqrt_mul, Real.sqrt_le_one, show x * (1 - x) * 4= 1 - (2 * x - 1)^2 by ring] <;>
+  nlinarith [mul_self_nonneg (2 * x - 1)]
 
 lemma nonneg {x : ℝ} (_ : 0 < x) (_ : x < 1) : (0 : ℝ) ≤ √x * √(1 -x) :=
   mul_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)
@@ -58,7 +58,7 @@ lemma bound (x y z : ℝ) (x0 : 0 < x) (x1 : x < 1) (y0 : 0 < y) (y1 : y < 1) (z
         all_goals linarith
     _ ≤ (1 / 2) * (1 / 2) * (1 / 2) / 4 := by
       refine div_le_div (by norm_num)
-        (mul_le_mul_of_le_of_le (mul_le_mul_of_le_of_le (max_value ?_ ?_) (max_value ?_ ?_) ?_ ?_)
+        (mul_le_mul_of_nonneg (mul_le_mul_of_nonneg (max_value ?_ ?_) (max_value ?_ ?_) ?_ ?_)
           (max_value ?_ ?_) (mul_nonneg ?_ ?_) ?_) (by norm_num) (by norm_num) <;>
       linarith
     _ < (1 / 30 : ℝ) := by norm_num

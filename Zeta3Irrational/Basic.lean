@@ -9,6 +9,7 @@ import Zeta3Irrational.Equality
 import Zeta3Irrational.LegendrePoly
 import Zeta3Irrational.Bound
 import Zeta3Irrational.LinearForm
+import PrimeNumberTheoremAnd.Consequences
 
 open scoped Nat
 open BigOperators Polynomial
@@ -83,6 +84,13 @@ theorem integral_Ioo_congr {f g : ℝ → ℝ} (h : ∀ x ∈ Set.Ioo 0 1, f x =
     (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n / ((1 - (1 - z) * x) * (1 - y * z))
 -/
 
+lemma integralable (n : ℕ): MeasureTheory.IntegrableOn
+    (fun (xyz : ℝ × ℝ × ℝ) ↦
+      1 / ((1 - (1 - xyz.2.2) * xyz.1) * (1 - xyz.2.1 * xyz.2.2)))
+    (Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1)
+    (MeasureTheory.volume.prod (MeasureTheory.volume.prod MeasureTheory.volume)) := by
+
+  sorry
 
 lemma intervalIntegral_eq_setInteral' (n : ℕ) :
     ∫ (z : ℝ) (x : ℝ) (y : ℝ) in (0)..1,
@@ -323,7 +331,24 @@ lemma JJ_pos (n : ℕ) : 0 < JJ n := by
   · set F := _;
     change 0 < MeasureTheory.volume.restrict _ (Function.support F)
 
-    have subset : Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 ⊆ Function.support F := sorry
+    have subset : Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 ⊆ Function.support F := by
+      intro a ha
+      change F a ≠ 0
+      simp only [div_pow, ne_eq, _root_.div_eq_zero_iff, pow_eq_zero_iff', mul_eq_zero, not_or,
+        not_and, Decidable.not_not, F]
+      simp only [Set.mem_prod, Set.mem_Ioo] at ha
+      rcases ha with ⟨⟨hx0, hx1⟩, ⟨hy0, hy1⟩, hz0, hz1⟩
+      constructor
+      · constructor
+        · intro h
+          rcases h with (h | h); swap; nlinarith
+          rcases h with (h | h); swap; nlinarith
+          rcases h with (h | h); swap; nlinarith
+          rcases h with (h | h); swap; nlinarith
+          rcases h with (h | h) <;> nlinarith
+        · intro h
+          rcases h with (h | h) <;> nlinarith
+      · constructor <;> nlinarith
 
     rw [MeasureTheory.Measure.restrict_apply']
     rw [Set.inter_eq_right.2 subset]
@@ -341,7 +366,19 @@ lemma JJ_pos (n : ℕ) : 0 < JJ n := by
         and_imp]
       contrapose!
       rintro ⟨hx0, hx1, hy0, hy1, hz0, hz1⟩
-      sorry
+      suffices 0 < (x * (1 - x) * y * (1 - y) * z * (1 - z)) ^ n / ((1 - (1 - z) * x) * (1 - y * z)) ^ n /
+      ((1 - (1 - z) * x) * (1 - y * z)) by linarith
+      apply div_pos
+      · apply div_pos
+        · apply pow_pos
+          apply mul_pos; swap; linarith
+          apply mul_pos; swap; linarith
+          apply mul_pos; swap; linarith
+          apply mul_pos; swap; linarith
+          apply mul_pos hx0; linarith
+        · apply pow_pos
+          apply mul_pos <;> nlinarith
+      · apply mul_pos <;> nlinarith
     · exact MeasureTheory.OuterMeasureClass.measure_empty MeasureTheory.volume
     . measurability
   · sorry
@@ -394,6 +431,11 @@ lemma fun1_tendsto_zero : Filter.Tendsto (fun n ↦ ENNReal.ofReal (fun1 n)) Fil
     use 1
     intro n hn
     rw [ENNReal.ofReal_le_ofReal_iff (by simp)]
+    obtain ⟨c,⟨hc0, hc1⟩⟩ := pi_alt
+    have h1 : (Real.exp 1) ^ 3 < (21 : ℝ) := by
+      suffices (2.7182818286) ^ 3 < (21 : ℝ) by
+        exact pow_lt_pow_left Real.exp_one_lt_d9 (n := 3) (by linarith [Real.exp_pos 1]) (by simp) |>.trans this
+      norm_num
 
     sorry
 
