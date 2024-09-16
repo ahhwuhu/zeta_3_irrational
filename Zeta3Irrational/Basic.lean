@@ -89,7 +89,6 @@ lemma integralable (n : ℕ): MeasureTheory.IntegrableOn
       1 / ((1 - (1 - xyz.2.2) * xyz.1) * (1 - xyz.2.1 * xyz.2.2)))
     (Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1)
     (MeasureTheory.volume.prod (MeasureTheory.volume.prod MeasureTheory.volume)) := by
-
   sorry
 
 lemma intervalIntegral_eq_setInteral' (n : ℕ) :
