@@ -89,7 +89,44 @@ lemma integralable (n : ℕ): MeasureTheory.IntegrableOn
       1 / ((1 - (1 - xyz.2.2) * xyz.1) * (1 - xyz.2.1 * xyz.2.2)))
     (Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1)
     (MeasureTheory.volume.prod (MeasureTheory.volume.prod MeasureTheory.volume)) := by
-  sorry
+  rw [MeasureTheory.IntegrableOn, MeasureTheory.Integrable]
+  constructor
+  · apply ContinuousOn.aestronglyMeasurable
+    swap
+    measurability
+    apply ContinuousOn.div
+    · exact continuousOn_const
+    · apply ContinuousOn.mul
+      · apply ContinuousOn.sub continuousOn_const
+        apply ContinuousOn.mul
+        · apply ContinuousOn.sub
+          exact continuousOn_const
+          rw [ContinuousOn]
+          rintro ⟨x, y, z⟩ h
+          simp only [Set.mem_prod, Set.mem_Ioo] at h
+          rw [ContinuousWithinAt]
+          intro q hq
+          sorry
+        · sorry
+      · apply ContinuousOn.sub continuousOn_const
+        apply ContinuousOn.mul
+        · sorry
+        · sorry
+    · rintro ⟨x, y, z⟩ h
+      simp only [Set.mem_prod, Set.mem_Ioo] at h
+      simp only [ne_eq, mul_eq_zero, not_or]
+      constructor <;> nlinarith
+  · rw [MeasureTheory.HasFiniteIntegral]
+    calc
+    _ = ∫⁻ (a : ℝ × ℝ × ℝ) in Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1, ENNReal.ofReal ((1 : ℝ) / ((1 - (1 - a.2.2) * a.1) * (1 - a.2.1 * a.2.2)))
+      ∂MeasureTheory.volume.prod (MeasureTheory.volume.prod MeasureTheory.volume) := by
+      apply MeasureTheory.setLIntegral_congr_fun
+      measurability
+      simp only [Set.mem_prod, Set.mem_Ioo, one_div, mul_inv_rev, nnnorm_mul, nnnorm_inv,
+        ENNReal.coe_mul, and_imp]
+      sorry
+    _ < (⊤ : ENNReal) := by sorry
+
 
 lemma intervalIntegral_eq_setInteral' (n : ℕ) :
     ∫ (z : ℝ) (x : ℝ) (y : ℝ) in (0)..1,
