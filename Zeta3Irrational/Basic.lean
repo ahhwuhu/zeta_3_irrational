@@ -458,16 +458,147 @@ lemma upper_tendsto_zero : Filter.Tendsto (fun n ↦ (2 * (21 / 30) ^ n * ∑' n
   norm_num
 
 lemma gcd_le_counting (n : ℕ) : (d (Finset.Icc 1 n)) ^ 3 ≤ (n ^ (n.primeCounting)) ^ 3 := by
-    sorry
+
+  sorry
+
+lemma Summable_of_zeta_two' : Summable (fun (n : ℕ) ↦ 1 / ((n : ℝ) + 1) ^ 2) := by
+  rw [Summable]
+  use Real.pi ^ 2 / 6
+  obtain h := hasSum_zeta_two
+  let f := fun (n : ℕ) ↦ 1 / (n : ℝ) ^ 2
+  let g := fun (n : ℕ) => n + 1
+  have h1 : Function.Injective g := by
+    intro m n h
+    simp only [g] at h
+    linarith
+  have h2 : ∀ x ∉ Set.range g, f x = 0 := by
+    intro x hx
+    simp only [Set.mem_range, not_exists] at hx
+    suffices x = 0 by simp only [one_div, inv_eq_zero, ne_eq, OfNat.ofNat_ne_zero,
+      not_false_eq_true, pow_eq_zero_iff, Nat.cast_eq_zero, f, this]
+    by_contra! h
+    apply hx (x - 1)
+    simp only [g]
+    omega
+  have h3 : f ∘ g = fun (n : ℕ) ↦ 1 / (n + 1 : ℝ) ^ 2 := by
+    ext x
+    simp [f, g]
+  have := Function.Injective.hasSum_iff (f := f) (g := g) (a := (Real.pi ^ 2 / 6 : ℝ)) h1 h2
+  rw [h3] at this
+  rw [this]
+  simp only [f]
+  exact h
 
 lemma zeta_3_pos : 0 < ∑' (n : ℕ), 1 / ((n : ℝ) + 1) ^ 3 := by
   apply tsum_pos (ι := ℕ) (g := fun n => 1 / ((n : ℝ) + 1) ^ 3) (i := 1)
-  · sorry
+  · apply summable_of_sum_range_le (c := Real.pi ^ 2 / 6)
+    · intro _
+      positivity
+    · intro n
+      suffices ∑ i ∈ Finset.range n, 1 / ((i : ℝ) + 1) ^ 3 ≤ ∑ i ∈ Finset.range n, 1 / ((i : ℝ) + 1) ^ 2 by
+        have : ∑ i ∈ Finset.range n, 1 / ((i : ℝ) + 1) ^ 2 ≤ Real.pi ^ 2 / 6 := by
+          suffices ∑ i in Finset.range n, 1 / ((i : ℝ) + 1) ^ 2 ≤ ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 2 by
+            have h : ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 2 = (riemannZeta 2).re := by
+              rw [zeta_eq_tsum_one_div_nat_add_one_cpow (by simp)]
+              simp_rw [← Complex.ofReal_natCast]
+              norm_cast
+            rw [h, riemannZeta_two] at this
+            norm_cast at *
+          apply sum_le_tsum (s := Finset.range n)
+          intro i _
+          positivity
+          exact Summable_of_zeta_two'
+        linarith
+      apply Finset.sum_le_sum
+      intro i _
+      rw [div_le_div_iff, one_mul, one_mul]
+      · apply pow_le_pow_right <;> linarith
+      · positivity
+      · positivity
   · intro m
     simp only [one_div, pow_succ, add_comm, add_left_comm]
     positivity
   · positivity
 
+lemma zeta3_le_zeta2 : ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 < ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 2 := by
+  apply tsum_lt_tsum_of_nonneg (f := fun n => 1 / ((n : ℝ) + 1) ^ 3) (g := fun n => 1 / ((n : ℝ) + 1) ^ 2) (i := 2)
+  · intro n
+    positivity
+  · intro n
+    rw [div_le_div_iff, one_mul, one_mul]
+    · apply pow_le_pow_right <;> linarith
+    · positivity
+    · positivity
+  · norm_num
+  · exact Summable_of_zeta_two'
+
+lemma eventuallyN_of_le : ∃ N : ℕ, ∀ n : ℕ, n ≥ N → ↑(d (Finset.Icc 1 n)) ^ 3 ≤ (21 : ℝ) ^ n := by
+    obtain ⟨c,⟨hc0, hc1⟩⟩ := pi_alt
+    have h1 : (Real.exp 1) ^ 3 < (21 : ℝ) := by
+      suffices (2.7182818286) ^ 3 < (21 : ℝ) by
+        exact pow_lt_pow_left Real.exp_one_lt_d9 (n := 3) (by linarith [Real.exp_pos 1]) (by simp) |>.trans this
+      norm_num
+    rw [Asymptotics.isLittleO_const_iff (by simp), tendsto_atTop_nhds] at hc0
+    let ε1 := Real.logb (21 : ℝ) (15 / ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3)
+    have ε1_pos : ε1 > 0 := by
+      apply Real.logb_pos (by norm_num)
+      rw [one_lt_div]
+      swap
+      exact zeta_3_pos
+      trans ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 2
+      exact zeta3_le_zeta2
+      have : ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 2 = (riemannZeta 2).re := by
+        rw [zeta_eq_tsum_one_div_nat_add_one_cpow (by simp)]
+        simp_rw [← Complex.ofReal_natCast]
+        norm_cast
+      rw [this, riemannZeta_two]
+      norm_cast
+      rw [div_lt_iff (by norm_num)]
+      norm_num
+      trans (3.15) ^ 2
+      apply pow_lt_pow_left Real.pi_lt_315 Real.pi_nonneg (by norm_num)
+      norm_num
+    have isopen : IsOpen (Set.Ioo (-1 : ℝ) ε1) := by exact isOpen_Ioo
+    obtain ⟨N, hN⟩ := hc0 (Set.Ioo (-1 : ℝ) ε1) (by simp only [Set.mem_Ioo, Left.neg_neg_iff,
+      zero_lt_one, true_and, ε1_pos]) isopen
+
+      -- have : (n ^ n.primeCounting) ^ 3 ≤ (21 : ℝ) ^ ((1 + c n) * n) := by
+      --   specialize hc1 n
+      --   simp only [Nat.floor_natCast] at hc1
+      --   nth_rewrite 2 [← Real.rpow_natCast]
+      --   rw [hc1]
+      --   nth_rewrite 1 [← Real.exp_log (x := n) (by norm_cast; omega)]
+      --   rw [← Real.exp_one_rpow, ← Real.rpow_mul (by exact Real.exp_nonneg 1), mul_div, mul_comm,
+      --     ← mul_div, div_self]
+      --   · rw [mul_one, ← Real.rpow_natCast (n := 3), ← Real.rpow_mul (by linarith [Real.exp_pos 1]),
+      --       mul_comm, Real.rpow_mul (by linarith [Real.exp_pos 1]), Real.rpow_natCast]
+      --     suffices (Real.exp 1 ^ 3) ^ ((1 + c ↑n) * n) < 21 ^ ((1 + c ↑n) * ↑n) by linarith
+      --     apply Real.rpow_lt_rpow (by positivity) h1
+      --     apply mul_pos _ (by simp only [Nat.cast_pos]; omega)
+      --     nlinarith
+      --   · rw [Real.log_ne_zero (x := n)]
+      --     norm_cast
+      --     aesop
+      -- trans (n ^ n.primeCounting) ^ 3
+      -- norm_cast
+      -- exact gcd_le_counting n
+      -- exact this
+    -- _ ≤ 21 ^ (↑n) * (∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3) / (15 : ℝ) := by
+    --   rw [add_mul, add_comm, Real.rpow_add (by norm_num), one_mul, ← mul_div]
+    --   nth_rewrite 2 [div_eq_mul_one_div]
+    --   rw [← mul_assoc]
+    --   nth_rewrite 4 [mul_rotate, mul_rotate]
+    --   apply mul_le_mul_of_nonneg_right _ (by linarith[zeta_3_pos])
+    --   nth_rewrite 5 [mul_comm]
+    --   rw [mul_assoc, mul_assoc]
+    --   apply mul_le_mul_of_nonneg_left _ (by positivity)
+    --   rw [← mul_assoc, mul_rotate, mul_assoc, Real.rpow_natCast, ← mul_pow, one_div_mul_eq_div]
+    --   trans 2 * (21 / 30) ^ 10
+    --   apply mul_le_mul_of_nonneg_left _ (by norm_num)
+    --   suffices (21 / 30 : ℝ) ^ n < (21 / 30) ^ 10 by linarith
+    --   apply pow_lt_pow_right_of_lt_one (by norm_num) (by norm_num) (by omega)
+    --   norm_num
+    sorry
 
 lemma fun1_tendsto_zero : Filter.Tendsto (fun n ↦ ENNReal.ofReal (fun1 n)) Filter.atTop (nhds 0) := by
   rw [ENNReal.tendsto_atTop_zero]
@@ -476,17 +607,15 @@ lemma fun1_tendsto_zero : Filter.Tendsto (fun n ↦ ENNReal.ofReal (fun1 n)) Fil
   else
     delta fun1
     rw [show ε = ENNReal.ofReal ε.toReal by simp [h]]
-    obtain ⟨c,⟨hc0, hc1⟩⟩ := pi_alt
-    have h1 : (Real.exp 1) ^ 3 < (21 : ℝ) := by
-      suffices (2.7182818286) ^ 3 < (21 : ℝ) by
-        exact pow_lt_pow_left Real.exp_one_lt_d9 (n := 3) (by linarith [Real.exp_pos 1]) (by simp) |>.trans this
-      norm_num
-    rw [Asymptotics.isLittleO_const_iff] at hc0
-    swap
-    simp only [ne_eq, one_ne_zero, not_false_eq_true]
-
-    -- use x/lnx 的等价无穷小代换
-    use 11111111111
+    obtain ⟨N, hN⟩ := eventuallyN_of_le
+    obtain h := ENNReal.tendsto_pow_atTop_nhds_zero_of_lt_one (r := (ENNReal.ofReal (21 / 30 : ℝ)))
+      (by simp only [ENNReal.ofReal_lt_one]; norm_num)
+    rw [ENNReal.tendsto_atTop_zero] at h
+    specialize h (ε / (ENNReal.ofReal (2 * (∑' n : ℕ , 1 / ((n : ℝ)+ 1) ^ 3))))
+      (by simp only [one_div, gt_iff_lt, ENNReal.div_pos_iff, ne_eq, ENNReal.ofReal_ne_top,
+        not_false_eq_true, and_true]; aesop)
+    obtain ⟨N1, hN1⟩ := h
+    use N.max N1
     intro n hn
     rw [ENNReal.ofReal_le_ofReal_iff (by simp)]
     suffices ↑(d (Finset.Icc 1 n)) ^ 3 * 2 * (1 / 30) ^ n * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 ≤ ε.toReal by
@@ -497,41 +626,22 @@ lemma fun1_tendsto_zero : Filter.Tendsto (fun n ↦ ENNReal.ofReal (fun1 n)) Fil
       apply mul_le_mul_of_nonneg_left _ (by simp)
       linarith [JJ_upper n]
     calc
-    _ ≤ (n ^ (n.primeCounting)) ^ 3 * 2 * (1 / 30 : ℝ) ^ n * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
-      apply mul_le_mul_of_nonneg_right _
-      suffices 0 < ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 by linarith
-      exact zeta_3_pos
+    _ ≤ 2 * (21 / 30 : ℝ) ^ n * (∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3) := by
+      apply mul_le_mul_of_nonneg_right _ (by linarith[zeta_3_pos])
+      nth_rewrite 2 [mul_comm, div_eq_mul_one_div]
+      rw [mul_pow, ← mul_assoc]
       apply mul_le_mul_of_nonneg_right _ (by positivity)
-      apply mul_le_mul_of_nonneg_right _ (by positivity)
-      norm_cast
-      exact gcd_le_counting n
-    _ ≤ 21 ^ ((1 + c ↑n) * ↑n) * 2 * (1 / 30 : ℝ) ^ n * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
-      specialize hc1 n
-      simp only [Nat.floor_natCast] at hc1
-      nth_rewrite 2 [← Real.rpow_natCast]
-      rw [hc1]
-      nth_rewrite 1 [← Real.exp_log (x := n)]
-      rw [← Real.exp_one_rpow, ← Real.rpow_mul, mul_div]
-      nth_rewrite 4 [mul_comm]
-      rw [← mul_div, div_self]
-      · apply mul_le_mul_of_nonneg_right _ (by linarith[zeta_3_pos])
-        apply mul_le_mul_of_nonneg_right _ (by positivity)
-        apply mul_le_mul_of_nonneg_right _ (by positivity)
-        rw [mul_one, ← Real.rpow_natCast (n := 3), ← Real.rpow_mul (by linarith [Real.exp_pos 1]),
-          mul_comm, Real.rpow_mul (by linarith [Real.exp_pos 1]), Real.rpow_natCast]
-        suffices (Real.exp 1 ^ 3) ^ ((1 + c ↑n) * n) < 21 ^ ((1 + c ↑n) * ↑n) by linarith
-        apply Real.rpow_lt_rpow (by positivity) h1
-        apply mul_pos _ (by simp only [Nat.cast_pos]; omega)
-        sorry
-      · rw [Real.log_ne_zero (x := n)]
-        norm_cast
-        aesop
-      · linarith [Real.exp_pos 1]
-      · norm_cast
-        omega
+      apply mul_le_mul_of_nonneg_left _ (by positivity)
+      exact hN n (le_of_max_le_left hn)
     _ ≤ ε.toReal := by
-      sorry
-
+      specialize hN1 n (le_of_max_le_right hn)
+      rw [← ENNReal.ofReal_toReal_eq_iff.2 h, ← ENNReal.ofReal_div_of_pos (by linarith [zeta_3_pos]),
+        ← ENNReal.ofReal_pow (by norm_num), ENNReal.ofReal_le_ofReal_iff] at hN1
+      · rw [le_div_iff₀ (by linarith [zeta_3_pos])] at hN1
+        linarith
+      · suffices 0 <  ε.toReal / (2 * ∑' (n : ℕ), 1 / ((n : ℝ) + 1) ^ 3)by linarith
+        apply div_pos _ (by linarith [zeta_3_pos])
+        apply ENNReal.toReal_pos (by aesop) (by aesop)
 
 theorem zeta_3_irratoinal : ¬ ∃ r : ℚ , (r : ℝ) = riemannZeta 3 := by
   rw [zeta_eq_tsum_one_div_nat_add_one_cpow (by simp)]
