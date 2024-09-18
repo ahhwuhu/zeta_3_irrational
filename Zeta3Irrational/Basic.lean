@@ -150,7 +150,8 @@ lemma intervalIntegral_eq_setInteral (n : ℕ) :
   rw [MeasureTheory.Measure.volume_eq_prod]
   rw [MeasureTheory.setIntegral_prod]
   swap
-  · sorry -- everything is continuous
+  ·
+    sorry -- everything is continuous
   refine MeasureTheory.setIntegral_congr (by simp) ?_
   intro x hx
   simp only
@@ -456,6 +457,18 @@ lemma upper_tendsto_zero : Filter.Tendsto (fun n ↦ (2 * (21 / 30) ^ n * ∑' n
   apply tendsto_pow_atTop_nhds_zero_of_lt_one (r := (21 / 30 : ℝ)) <;>
   norm_num
 
+lemma gcd_le_counting (n : ℕ) : (d (Finset.Icc 1 n)) ^ 3 ≤ (n ^ (n.primeCounting)) ^ 3 := by
+    sorry
+
+lemma zeta_3_pos : 0 < ∑' (n : ℕ), 1 / ((n : ℝ) + 1) ^ 3 := by
+  apply tsum_pos (ι := ℕ) (g := fun n => 1 / ((n : ℝ) + 1) ^ 3) (i := 1)
+  · sorry
+  · intro m
+    simp only [one_div, pow_succ, add_comm, add_left_comm]
+    positivity
+  · positivity
+
+
 lemma fun1_tendsto_zero : Filter.Tendsto (fun n ↦ ENNReal.ofReal (fun1 n)) Filter.atTop (nhds 0) := by
   rw [ENNReal.tendsto_atTop_zero]
   intro ε hε
@@ -463,17 +476,62 @@ lemma fun1_tendsto_zero : Filter.Tendsto (fun n ↦ ENNReal.ofReal (fun1 n)) Fil
   else
     delta fun1
     rw [show ε = ENNReal.ofReal ε.toReal by simp [h]]
-    -- use x/lnx 的等价无穷小代换
-    use 1
-    intro n hn
-    rw [ENNReal.ofReal_le_ofReal_iff (by simp)]
     obtain ⟨c,⟨hc0, hc1⟩⟩ := pi_alt
     have h1 : (Real.exp 1) ^ 3 < (21 : ℝ) := by
       suffices (2.7182818286) ^ 3 < (21 : ℝ) by
         exact pow_lt_pow_left Real.exp_one_lt_d9 (n := 3) (by linarith [Real.exp_pos 1]) (by simp) |>.trans this
       norm_num
+    rw [Asymptotics.isLittleO_const_iff] at hc0
+    swap
+    simp only [ne_eq, one_ne_zero, not_false_eq_true]
 
-    sorry
+    -- use x/lnx 的等价无穷小代换
+    use 11111111111
+    intro n hn
+    rw [ENNReal.ofReal_le_ofReal_iff (by simp)]
+    suffices ↑(d (Finset.Icc 1 n)) ^ 3 * 2 * (1 / 30) ^ n * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 ≤ ε.toReal by
+      trans ↑(d (Finset.Icc 1 n)) ^ 3 * 2 * (1 / 30) ^ n * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3
+      swap
+      exact this
+      rw [mul_assoc, mul_assoc]
+      apply mul_le_mul_of_nonneg_left _ (by simp)
+      linarith [JJ_upper n]
+    calc
+    _ ≤ (n ^ (n.primeCounting)) ^ 3 * 2 * (1 / 30 : ℝ) ^ n * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
+      apply mul_le_mul_of_nonneg_right _
+      suffices 0 < ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 by linarith
+      exact zeta_3_pos
+      apply mul_le_mul_of_nonneg_right _ (by positivity)
+      apply mul_le_mul_of_nonneg_right _ (by positivity)
+      norm_cast
+      exact gcd_le_counting n
+    _ ≤ 21 ^ ((1 + c ↑n) * ↑n) * 2 * (1 / 30 : ℝ) ^ n * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
+      specialize hc1 n
+      simp only [Nat.floor_natCast] at hc1
+      nth_rewrite 2 [← Real.rpow_natCast]
+      rw [hc1]
+      nth_rewrite 1 [← Real.exp_log (x := n)]
+      rw [← Real.exp_one_rpow, ← Real.rpow_mul, mul_div]
+      nth_rewrite 4 [mul_comm]
+      rw [← mul_div, div_self]
+      · apply mul_le_mul_of_nonneg_right _ (by linarith[zeta_3_pos])
+        apply mul_le_mul_of_nonneg_right _ (by positivity)
+        apply mul_le_mul_of_nonneg_right _ (by positivity)
+        rw [mul_one, ← Real.rpow_natCast (n := 3), ← Real.rpow_mul (by linarith [Real.exp_pos 1]),
+          mul_comm, Real.rpow_mul (by linarith [Real.exp_pos 1]), Real.rpow_natCast]
+        suffices (Real.exp 1 ^ 3) ^ ((1 + c ↑n) * n) < 21 ^ ((1 + c ↑n) * ↑n) by linarith
+        apply Real.rpow_lt_rpow (by positivity) h1
+        apply mul_pos _ (by simp only [Nat.cast_pos]; omega)
+        sorry
+      · rw [Real.log_ne_zero (x := n)]
+        norm_cast
+        aesop
+      · linarith [Real.exp_pos 1]
+      · norm_cast
+        omega
+    _ ≤ ε.toReal := by
+      sorry
+
 
 theorem zeta_3_irratoinal : ¬ ∃ r : ℚ , (r : ℝ) = riemannZeta 3 := by
   rw [zeta_eq_tsum_one_div_nat_add_one_cpow (by simp)]
