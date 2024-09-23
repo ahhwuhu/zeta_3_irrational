@@ -118,16 +118,30 @@ lemma integralable (n : ℕ): MeasureTheory.IntegrableOn
       simp only [Set.mem_prod, Set.mem_Ioo] at h
       simp only [ne_eq, mul_eq_zero, not_or]
       constructor <;> nlinarith
-  · rw [MeasureTheory.HasFiniteIntegral]
-    calc
-    _ = ∫⁻ (a : ℝ × ℝ × ℝ) in Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1, ENNReal.ofReal ((1 : ℝ) / ((1 - (1 - a.2.2) * a.1) * (1 - a.2.1 * a.2.2)))
-      ∂MeasureTheory.volume.prod (MeasureTheory.volume.prod MeasureTheory.volume) := by
-      apply MeasureTheory.setLIntegral_congr_fun
-      measurability
-      simp only [Set.mem_prod, Set.mem_Ioo, one_div, mul_inv_rev, nnnorm_mul, nnnorm_inv,
-        ENNReal.coe_mul, and_imp]
+  · rw [MeasureTheory.hasFiniteIntegral_iff_ofReal]
+    -- calc
+    -- _ = ∫⁻ (a : ℝ × ℝ × ℝ) in Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1, ENNReal.ofReal ((1 : ℝ) / ((1 - (1 - a.2.2) * a.1) * (1 - a.2.1 * a.2.2)))
+    --   ∂MeasureTheory.volume.prod (MeasureTheory.volume.prod MeasureTheory.volume) := by
+    --   apply MeasureTheory.setLIntegral_congr_fun
+    --   measurability
+    --   simp only [Set.mem_prod, Set.mem_Ioo, one_div, mul_inv_rev, nnnorm_mul, nnnorm_inv,
+    --     ENNReal.coe_mul, and_imp]
+    --   sorry
+    -- _ < (⊤ : ENNReal) := by sorry
+    ·
       sorry
-    _ < (⊤ : ENNReal) := by sorry
+    · rw [Filter.EventuallyLE, MeasureTheory.ae_restrict_iff']
+      · apply MeasureTheory.ae_of_all
+        rintro ⟨x, y, z⟩ h
+        simp only [Set.mem_prod, Set.mem_Ioo, Pi.zero_apply, one_div, mul_inv_rev] at *
+        suffices h : 0 < (1 - y * z)⁻¹ * (1 - (1 - z) * x)⁻¹ by linarith
+        apply mul_pos
+        · rw [← one_div]
+          apply div_pos <;> nlinarith
+        · rw [← one_div]
+          apply div_pos <;> nlinarith
+      · measurability
+
 
 
 lemma intervalIntegral_eq_setInteral' (n : ℕ) :
@@ -201,7 +215,6 @@ lemma integral_comm2 (n : ℕ) : ∫ (z : ℝ) (x : ℝ) (y : ℝ) in (0)..1, (x
   dsimp
   rw [MeasureTheory.setIntegral_prod]
   sorry
-
 
 lemma JJ_eq_form (n : ℕ) : JJ n = ∫ (x : ℝ) (y : ℝ) (z : ℝ) in (0)..1,
     ( x * (1 - x) * y * (1 - y) * z * (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n / ((1 - (1 - z) * x) * (1 - y * z)) := by
@@ -459,8 +472,65 @@ lemma JJ_upper (n : ℕ) : JJ n < 2 * (1 / 30) ^ n * ∑' n : ℕ , 1 / ((n : �
 --   apply tendsto_pow_atTop_nhds_zero_of_lt_one (r := (21 / 30 : ℝ)) <;>
 --   norm_num
 
-lemma gcd_le_counting (n : ℕ) : (d (Finset.Icc 1 n)) ^ 3 ≤ (n ^ (n.primeCounting)) ^ 3 := by
-  sorry
+lemma d_eq_prod_pow (n : ℕ) :
+    d (Finset.Icc 1 n) = ∏ p ∈ ((n + 1).primesBelow), p ^ ⌊(Real.log (n : ℝ)) / (Real.log (p : ℝ))⌋₊ := by
+  induction' n  with n hn
+  · simp only [zero_lt_one, Finset.Icc_eq_empty_of_lt, zero_add, CharP.cast_eq_zero, Real.log_zero,
+      zero_div, Nat.floor_zero, pow_zero, Finset.prod_const_one, d_empty]
+  ·
+    refine dvd_antisymm ?_ ?_
+    · rw [← Finset.Ico_insert_right (by omega), d_insert]
+      rw [← Nat.factorizationLCMLeft_mul_factorizationLCMRight (by omega)]
+      sorry
+      sorry
+    ·
+      sorry
+
+lemma d_le_pow_counting (n : ℕ) : d (Finset.Icc 1 n) ≤ n ^ (n.primeCounting) := by
+  if h : n = 0 then
+    rw [h]; aesop
+  else
+    have h1 : 1 ≤ n := by omega
+    rw [d_eq_prod_pow n]
+    calc
+    _ ≤ ∏ _ ∈ ((n + 1).primesBelow), n := by
+      apply Finset.prod_le_prod
+      · intro p _
+        simp only [zero_le]
+      · intro p hp
+        rw [Nat.mem_primesBelow] at hp
+        have h2 : 1 ≤ p := by
+          by_contra! h
+          have : p = 0 := by omega
+          aesop
+        suffices p ^ (⌊(Real.log (n : ℝ)) / (Real.log (p : ℝ))⌋₊ : ℝ) ≤ (n : ℝ) by norm_cast at this
+        trans p ^ ((Real.log (n : ℝ)) / (Real.log (p : ℝ)))
+        · apply Real.rpow_le_rpow_of_exponent_le (by norm_cast)
+          · apply Nat.floor_le (α := ℝ)
+            if h2 : n = 1 ∨ p = 1 then
+              rcases h2 with (rfl | rfl) <;> simp
+            else
+              rcases (not_or.1 h2) with ⟨_, h2⟩
+              have h1 : 1 < n := by omega
+              have h2 : 1 < p := by omega
+              suffices 0 < Real.log (n : ℝ) / Real.log (p : ℝ) by linarith
+              apply div_pos <;>
+              exact Real.log_pos (by norm_cast)
+        · nth_rewrite 1 [← Real.exp_log (x := (p : ℝ)) (by norm_cast), ← Real.exp_one_rpow,
+            ← Real.rpow_mul (by exact Real.exp_nonneg 1), mul_div, mul_comm, ← mul_div]
+          if hp : p = 1 then
+            rw [hp]; simp only [Nat.cast_one, Real.log_one, div_zero, mul_zero, Real.rpow_zero,
+              Nat.one_le_cast, h1]
+          else
+            rw [div_self, mul_one, Real.exp_one_rpow, Real.exp_log (by norm_cast)]
+            rw [Real.log_ne_zero]
+            norm_cast
+            simp only [not_false_eq_true, and_true]
+            omega
+    _ ≤ n ^ (n.primeCounting) := by
+      rw [Finset.prod_const]
+      suffices ((n + 1).primesBelow).card = n.primeCounting by apply Nat.pow_le_pow_right <;> linarith
+      rw [Nat.primeCounting, ← Nat.primesBelow_card_eq_primeCounting']
 
 lemma Summable_of_zeta_two' : Summable (fun (n : ℕ) ↦ 1 / ((n : ℝ) + 1) ^ 2) := by
   rw [Summable]
@@ -535,7 +605,30 @@ lemma zeta3_le_zeta2 : ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 < ∑' n : ℕ , 1
 
 lemma ε_N_def_of_pi_alt : ∀ ε > (0 : ℝ), ∃ N : ℕ, ∀ n : ℕ, n ≥ N → n.primeCounting ≤ (1 + ε) * (n : ℝ) / (n : ℝ).log := by
   intro ε hε
-  sorry
+  obtain ⟨c,⟨hc0, hc1⟩⟩ := pi_alt
+  rw [Asymptotics.isLittleO_const_iff (by simp), tendsto_atTop_nhds] at hc0
+  specialize hc0 (Set.Ioo (-ε) ε) (by simp only [Set.mem_Ioo, Left.neg_neg_iff, hε, and_self])
+    (by exact isOpen_Ioo)
+  obtain ⟨N, hN⟩ := hc0
+  use ⌈N⌉₊ + 2
+  intro n hn
+  have hn' : n ≥ N := by
+    trans (⌈N⌉₊ : ℝ)
+    norm_cast
+    linarith
+    exact Nat.le_ceil N
+  specialize hN n hn'
+  specialize hc1 n
+  simp only [Nat.floor_natCast] at hc1
+  simp only [Set.mem_Ioo] at hN
+  rw [hc1, ← mul_div, ← mul_div, mul_le_mul_right]
+  linarith
+  apply div_pos
+  norm_cast
+  omega
+  apply Real.log_pos
+  norm_cast
+  omega
 
 lemma eventuallyN_of_le : ∃ N : ℕ, ∀ n : ℕ, n ≥ N → ↑(d (Finset.Icc 1 n)) ^ 3 ≤ (21 : ℝ) ^ n := by
     have h1 : (Real.exp 1) ^ 3 < (21 : ℝ) := by
@@ -555,7 +648,8 @@ lemma eventuallyN_of_le : ∃ N : ℕ, ∀ n : ℕ, n ≥ N → ↑(d (Finset.Ic
     calc
     _ ≤ ((n : ℝ) ^ (n.primeCounting)) ^ 3 := by
       norm_cast
-      exact gcd_le_counting n
+      apply pow_le_pow_left (by simp)
+      exact d_le_pow_counting n
     _ ≤ (n ^ (1 / 3 * Real.log 21 * ↑n / Real.log ↑n)) ^ 3 := by
       apply pow_le_pow_left (by simp)
       rw [← Real.rpow_natCast, Real.rpow_le_rpow_left_iff]
