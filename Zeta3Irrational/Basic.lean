@@ -84,6 +84,9 @@ theorem integral_Ioo_congr {f g : ℝ → ℝ} (h : ∀ x ∈ Set.Ioo 0 1, f x =
     (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n / ((1 - (1 - z) * x) * (1 - y * z))
 -/
 
+
+
+
 lemma integralable (n : ℕ): MeasureTheory.IntegrableOn
     (fun (xyz : ℝ × ℝ × ℝ) ↦
       1 / ((1 - (1 - xyz.2.2) * xyz.1) * (1 - xyz.2.1 * xyz.2.2)))
@@ -128,7 +131,8 @@ lemma integralable (n : ℕ): MeasureTheory.IntegrableOn
     --     ENNReal.coe_mul, and_imp]
     --   sorry
     -- _ < (⊤ : ENNReal) := by sorry
-    ·
+    · rw [lt_top_iff_ne_top]
+
       sorry
     · rw [Filter.EventuallyLE, MeasureTheory.ae_restrict_iff']
       · apply MeasureTheory.ae_of_all
@@ -477,14 +481,33 @@ lemma d_eq_prod_pow (n : ℕ) :
   induction' n  with n hn
   · simp only [zero_lt_one, Finset.Icc_eq_empty_of_lt, zero_add, CharP.cast_eq_zero, Real.log_zero,
       zero_div, Nat.floor_zero, pow_zero, Finset.prod_const_one, d_empty]
-  ·
-    refine dvd_antisymm ?_ ?_
-    · rw [← Finset.Ico_insert_right (by omega), d_insert]
-      rw [← Nat.factorizationLCMLeft_mul_factorizationLCMRight (by omega)]
-      sorry
-      sorry
-    ·
-      sorry
+  · obtain h := Nat.primesBelow_succ (n + 1)
+    simp only [Nat.succ_eq_add_one] at h
+    if g : Nat.Prime (n + 1) then
+      refine dvd_antisymm ?_ ?_
+
+      · rw [← Finset.Ico_insert_right (by omega), d_insert]
+        rw [← Nat.factorizationLCMLeft_mul_factorizationLCMRight (by omega)]
+        sorry
+        sorry
+      ·
+        sorry
+    else
+      simp only [g, ↓reduceIte] at h
+      apply Nat.eq_of_factorization_eq
+      · sorry
+      · rw [h]
+        suffices ∏ p ∈ (n + 1).primesBelow, p ^ ⌊Real.log ↑(n + 1) / Real.log ↑p⌋₊ > 0 by linarith
+
+        sorry
+
+      · intro p
+        rw [← Finset.Ico_insert_right (by omega), d_insert, ← Nat.succ_eq_add_one, Nat.Ico_succ_right,
+          hn, Nat.factorization_lcm (by omega)]
+        ·
+          sorry
+        · rw [← hn]
+          sorry
 
 lemma d_le_pow_counting (n : ℕ) : d (Finset.Icc 1 n) ≤ n ^ (n.primeCounting) := by
   if h : n = 0 then
