@@ -60,9 +60,24 @@ lemma zeta3_integrable : MeasureTheory.IntegrableOn (fun x ↦ Real.log (x.1 * x
     (MeasureTheory.volume.prod MeasureTheory.volume) := by
   sorry
 
+lemma zeta3_aux : J 0 0 = -∫ (x : ℝ × ℝ) in (Set.Ioo 0 1 ×ˢ Set.Ioo 0 1), (x.1 * x.2).log / (1 - x.1 * x.2) := by
+  delta J
+  simp only [pow_zero, mul_one, one_mul, neg_inj]
+  rw [intervalIntegral.integral_of_le (by norm_num),
+    MeasureTheory.integral_Ioc_eq_integral_Ioo]
+  rw [MeasureTheory.Measure.volume_eq_prod]
+  rw [MeasureTheory.setIntegral_prod]
+  · apply MeasureTheory.setIntegral_congr (by measurability)
+    intro x _
+    simp only
+    rw [intervalIntegral.integral_of_le (by norm_num),
+      MeasureTheory.integral_Ioc_eq_integral_Ioo]
+  · exact zeta3_integrable
+
 lemma special_int (n : ℕ) (a b : ℝ) (h : 0 < a ∧ a ≤ b ∧ b < 1) :
-    ∫ (x : ℝ × ℝ) in (Set.Ioo (1 / (n + 1) : ℝ) (1 - 1 / (n + 1)) ×ˢ
-    Set.Ioo (1 / (n + 1) : ℝ) (1 - 1 / (n + 1))), (x.1 * x.2) ^ m * (x.1 * x.2).log = 1 := by
+    ∫ (x : ℝ × ℝ) in (Set.Ioo a b ×ˢ Set.Ioo a b), (x.1 * x.2).log / (1 - x.1 * x.2) =
+    -∫ (x : ℝ) (y : ℝ) in a..b, ∑' (n : ℕ), (x * y) ^ n * (x * y).log := by
+
   sorry
 
 lemma subset_indicator_fun_eq (n : ℕ): Set.EqOn ((Set.Ioo 0 1 ×ˢ Set.Ioo 0 1).indicator fun x ↦ Real.log (x.1 * x.2) / (1 - x.1 * x.2))
@@ -86,6 +101,33 @@ lemma subset_indicator_fun_eq (n : ℕ): Set.EqOn ((Set.Ioo 0 1 ×ˢ Set.Ioo 0 1
         simp only [one_div, inv_pos]; norm_cast; omega
   simp only [this, ↓reduceIte]
 
+lemma aa (s : Set (ℝ × ℝ)) (f : ℝ × ℝ → ℝ) (x : ℝ × ℝ) : s.indicator f x = (f x) * s.indicator 1 x := by
+
+  sorry
+
+lemma subset (n : ℕ) : Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1)) ×ˢ Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1))
+    ⊆ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 := by
+  rw [Set.prod_subset_prod_iff]
+  left
+  constructor
+  · apply Set.Ioo_subset_Ioo
+    · suffices 1 / ((n : ℝ) + 1) > 0 by linarith
+      simp only [one_div, inv_pos]; norm_cast; omega
+    · suffices 1 / ((n : ℝ) + 1) > 0 by linarith
+      simp only [one_div, inv_pos]; norm_cast; omega
+  · apply Set.Ioo_subset_Ioo
+    · suffices 1 / ((n : ℝ) + 1) > 0 by linarith
+      simp only [one_div, inv_pos]; norm_cast; omega
+    · suffices 1 / ((n : ℝ) + 1) > 0 by linarith
+      simp only [one_div, inv_pos]; norm_cast; omega
+
+lemma inter_indicator_fun_eq (f : ℝ × ℝ → ℝ) : (fun (n : ℕ) ↦
+    (Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1)) ×ˢ Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1)) ∩
+    Set.Ioo 0 1 ×ˢ Set.Ioo 0 1).indicator f x) = (fun (n : ℕ) ↦ (f x) *
+    (Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1)) ×ˢ Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1))).indicator 1 x) := by
+  ext n
+  rw [aa, Set.inter_eq_left.2 (subset n)]
+
 lemma subset_indicator_fun_eq' (n : ℕ): Set.EqOn ((Set.Ioo 0 1 ×ˢ Set.Ioo 0 1).indicator fun x ↦ Real.log (x.1 * x.2) / (1 - x.1 * x.2))
     (fun x ↦ Real.log (x.1 * x.2) / (1 - x.1 * x.2))
     (Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1)) ×ˢ Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1))) := by
@@ -94,38 +136,27 @@ lemma subset_indicator_fun_eq' (n : ℕ): Set.EqOn ((Set.Ioo 0 1 ×ˢ Set.Ioo 0 
   have : x ∈ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 := by
     suffices Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1)) ×ˢ Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1))
       ⊆ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 by apply this; exact hx
-    rw [Set.prod_subset_prod_iff]
-    left
-    constructor
-    · apply Set.Ioo_subset_Ioo
-      · suffices 1 / ((n : ℝ) + 1) > 0 by linarith
-        simp only [one_div, inv_pos]; norm_cast; omega
-      · suffices 1 / ((n : ℝ) + 1) > 0 by linarith
-        simp only [one_div, inv_pos]; norm_cast; omega
-    · apply Set.Ioo_subset_Ioo
-      · suffices 1 / ((n : ℝ) + 1) > 0 by linarith
-        simp only [one_div, inv_pos]; norm_cast; omega
-      · suffices 1 / ((n : ℝ) + 1) > 0 by linarith
-        simp only [one_div, inv_pos]; norm_cast; omega
+    exact subset n
   simp only [this, ↓reduceIte]
 
-example : Filter.Tendsto
-  (fun (n : ℕ) ↦
-    (Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1)) ×ˢ Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1))).indicator
-      ((Set.Ioo 0 1 ×ˢ Set.Ioo 0 1).indicator fun x ↦ Real.log (x.1 * x.2) / (1 - x.1 * x.2)) x)
-  Filter.atTop (nhds ((Set.Ioo 0 1 ×ˢ Set.Ioo 0 1).indicator
-      ((Set.Ioo 0 1 ×ˢ Set.Ioo 0 1).indicator fun x ↦ Real.log (x.1 * x.2) / (1 - x.1 * x.2)) x)) := by
-  have h1 : (Monotone fun (n : ℕ) => Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1)) ×ˢ Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1))) := by
-    sorry
-  obtain Q := @Monotone.tendsto_indicator ℝ _ _ h1 ((Set.Ioo 0 1 ×ˢ Set.Ioo 0 1).indicator fun (x : ℝ × ℝ) ↦ Real.log (x.1 * x.2) / (1 - x.1 * x.2)) x
-     (s := fun (n : ℕ) => Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1)) ×ˢ Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1)))
-  suffices pure
-    ((⋃ (i : ℕ), Set.Ioo (1 / ((i : ℝ) + 1)) (1 - 1 / (↑i + 1)) ×ˢ Set.Ioo (1 / ((i : ℝ) + 1)) (1 - 1 / (↑i + 1))).indicator
-      ((Set.Ioo 0 1 ×ˢ Set.Ioo 0 1).indicator fun x ↦ Real.log (x.1 * x.2) / (1 - x.1 * x.2)) x) = nhds ((Set.Ioo 0 1 ×ˢ Set.Ioo 0 1).indicator
-      ((Set.Ioo 0 1 ×ˢ Set.Ioo 0 1).indicator fun x ↦ Real.log (x.1 * x.2) / (1 - x.1 * x.2)) x) by
-      rw [← this]
-      exact Q
-  sorry
+-- example : Filter.Tendsto
+--   (fun (n : ℕ) ↦
+--     (Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1)) ×ˢ Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1))).indicator
+--       ((Set.Ioo 0 1 ×ˢ Set.Ioo 0 1).indicator fun x ↦ Real.log (x.1 * x.2) / (1 - x.1 * x.2)) x)
+--   Filter.atTop (nhds ((Set.Ioo 0 1 ×ˢ Set.Ioo 0 1).indicator
+--       ((Set.Ioo 0 1 ×ˢ Set.Ioo 0 1).indicator fun x ↦ Real.log (x.1 * x.2) / (1 - x.1 * x.2)) x)) := by
+--   have h1 : (Monotone fun (n : ℕ) => Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1)) ×ˢ Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1))) := by
+--     sorry
+--   obtain Q := @Monotone.tendsto_indicator ℝ _ _ h1 ((Set.Ioo 0 1 ×ˢ Set.Ioo 0 1).indicator fun (x : ℝ × ℝ) ↦ Real.log (x.1 * x.2) / (1 - x.1 * x.2)) x
+--      (s := fun (n : ℕ) => Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1)) ×ˢ Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1)))
+--   suffices pure
+--     ((⋃ (i : ℕ), Set.Ioo (1 / ((i : ℝ) + 1)) (1 - 1 / (↑i + 1)) ×ˢ Set.Ioo (1 / ((i : ℝ) + 1)) (1 - 1 / (↑i + 1))).indicator
+--       ((Set.Ioo 0 1 ×ˢ Set.Ioo 0 1).indicator fun x ↦ Real.log (x.1 * x.2) / (1 - x.1 * x.2)) x) = nhds ((Set.Ioo 0 1 ×ˢ Set.Ioo 0 1).indicator
+--       ((Set.Ioo 0 1 ×ˢ Set.Ioo 0 1).indicator fun x ↦ Real.log (x.1 * x.2) / (1 - x.1 * x.2)) x) by
+--       rw [← this]
+--       exact Q
+--   sorry
+
 
 lemma a : Filter.Tendsto (fun (n : ℕ) =>
     (∫ (x : ℝ × ℝ) in (Set.Ioo (1 / (n + 1) : ℝ) (1 - 1 / (n + 1)) ×ˢ
@@ -191,14 +222,17 @@ lemma a : Filter.Tendsto (fun (n : ℕ) =>
     simp only [F, f, f₀]
     apply Set.indicator_le_indicator_of_subset
     · sorry
-    · sorry
+    ·
+      sorry
   have h4 : (∀ᵐ (x : ℝ × ℝ) ∂MeasureTheory.volume.prod MeasureTheory.volume,
     Filter.Tendsto (fun n ↦ F n x) Filter.atTop (nhds (f x))) := by
     apply Filter.Eventually.of_forall
     intro x
     simp only [F, f, f₀]
-
-
+    simp_rw [Set.indicator_indicator]
+    rw [inter_indicator_fun_eq]
+    rw [aa]
+    apply Filter.Tendsto.const_mul
     sorry
   obtain L := @MeasureTheory.integral_tendsto_of_tendsto_of_monotone (ℝ × ℝ)
     (MeasurableSpace.prod Real.measurableSpace Real.measurableSpace)
@@ -249,20 +283,6 @@ lemma b : Filter.Tendsto (fun (n : ℕ) =>
 --   rw [abs_eq_self.2 (LT.lt.le hx.1), abs_eq_self.2 (LT.lt.le hy.1)]
 --   nlinarith
 
-lemma zeta3_aux : J 0 0 = -∫ (x : ℝ × ℝ) in (Set.Ioo 0 1 ×ˢ Set.Ioo 0 1), (x.1 * x.2).log / (1 - x.1 * x.2) := by
-  delta J
-  simp only [pow_zero, mul_one, one_mul, neg_inj]
-  rw [intervalIntegral.integral_of_le (by norm_num),
-    MeasureTheory.integral_Ioc_eq_integral_Ioo]
-  rw [MeasureTheory.Measure.volume_eq_prod]
-  rw [MeasureTheory.setIntegral_prod]
-  · apply MeasureTheory.setIntegral_congr (by measurability)
-    intro x hx
-    simp only
-    rw [intervalIntegral.integral_of_le (by norm_num),
-      MeasureTheory.integral_Ioc_eq_integral_Ioo]
-  ·
-    sorry
 
 theorem zeta_3 : J 0 0 = 2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
   rw [zeta3_aux, neg_eq_iff_eq_neg, ← neg_mul]
