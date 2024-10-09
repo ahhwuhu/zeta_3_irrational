@@ -13,9 +13,9 @@ noncomputable abbrev I (r s : ℕ) : ℝ :=
 noncomputable abbrev J (r s : ℕ) : ℝ :=
   - ∫ (x : ℝ) in (0)..1, (∫ (y : ℝ) in (0)..1, x ^ r * y ^ s * (x * y).log / (1 - x * y))
 
-lemma pow_ln_integral {a b : ℝ} {n : ℕ} (h : 0 < a ∧ a ≤ b): ∫ (x : ℝ) in a..b, x ^ n * (x).log =
+lemma pow_ln_integral {a b : ℝ} {n : ℕ} (h : 0 < a ∧ a ≤ b): ∫ (x : ℝ) in a..b, x ^ n * x.log =
     (b ^ (n + 1) * b.log /(n + 1) - b ^ (n + 1) /(n + 1) ^ 2) -
-    (a ^ (n + 1) * a.log /(n + 1) - a ^ (n + 1) /(n + 1) ^ 2):= by
+    (a ^ (n + 1) * a.log /(n + 1) - a ^ (n + 1) /(n + 1) ^ 2) := by
   let f := fun x : ℝ => x ^ (n + 1) * x.log /(n + 1) - x ^ (n + 1) /(n + 1) ^ 2
   rw [show (b ^ (n + 1) * b.log /(n + 1) - b ^ (n + 1) /(n + 1) ^ 2) -
     (a ^ (n + 1) * a.log /(n + 1) - a ^ (n + 1) /(n + 1) ^ 2) = f b - f a  by simp]
@@ -76,22 +76,22 @@ lemma zeta3_aux : J 0 0 = -∫ (x : ℝ × ℝ) in (Set.Ioo 0 1 ×ˢ Set.Ioo 0 1
 
 lemma subset_indicator_fun_eq (n : ℕ): Set.EqOn ((Set.Ioo 0 1 ×ˢ Set.Ioo 0 1).indicator fun x ↦ Real.log (x.1 * x.2) / (1 - x.1 * x.2))
     (fun x ↦ Real.log (x.1 * x.2) / (1 - x.1 * x.2))
-    (Set.Icc (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1)) ×ˢ Set.Icc (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1))) := by
+    (Set.Icc (1 / ((n : ℝ) + 2)) (1 - 1 / (↑n + 2)) ×ˢ Set.Icc (1 / ((n : ℝ) + 2)) (1 - 1 / (↑n + 2))) := by
   rintro x hx
   rw [Set.indicator_apply]
   have : x ∈ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 := by
-    suffices Set.Icc (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1)) ×ˢ Set.Icc (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1))
+    suffices Set.Icc (1 / ((n : ℝ) + 2)) (1 - 1 / (↑n + 2)) ×ˢ Set.Icc (1 / ((n : ℝ) + 2)) (1 - 1 / (↑n + 2))
       ⊆ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 by apply this; exact hx
     rw [Set.prod_subset_prod_iff]
     left
     constructor
     · apply Set.Icc_subset_Ioo
       · simp only [one_div, inv_pos]; norm_cast; omega
-      · suffices 1 / ((n : ℝ) + 1) > 0 by linarith
+      · suffices 1 / ((n : ℝ) + 2) > 0 by linarith
         simp only [one_div, inv_pos]; norm_cast; omega
     · apply Set.Icc_subset_Ioo
       · simp only [one_div, inv_pos]; norm_cast; omega
-      · suffices 1 / ((n : ℝ) + 1) > 0 by linarith
+      · suffices 1 / ((n : ℝ) + 2) > 0 by linarith
         simp only [one_div, inv_pos]; norm_cast; omega
   simp only [this, ↓reduceIte]
 
@@ -101,36 +101,36 @@ lemma aa (s : Set (ℝ × ℝ)) (f : ℝ × ℝ → ℝ) (x : ℝ × ℝ) : s.in
     aesop
   apply Classical.propDecidable
 
-lemma subset (n : ℕ) : Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1)) ×ˢ Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1))
+lemma subset (n : ℕ) : Set.Ioo (1 / ((n : ℝ) + 2)) (1 - 1 / (↑n + 2)) ×ˢ Set.Ioo (1 / ((n : ℝ) + 2)) (1 - 1 / (↑n + 2))
     ⊆ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 := by
   rw [Set.prod_subset_prod_iff]
   left
   constructor
   · apply Set.Ioo_subset_Ioo
-    · suffices 1 / ((n : ℝ) + 1) > 0 by linarith
+    · suffices 1 / ((n : ℝ) + 2) > 0 by linarith
       simp only [one_div, inv_pos]; norm_cast; omega
-    · suffices 1 / ((n : ℝ) + 1) > 0 by linarith
+    · suffices 1 / ((n : ℝ) + 2) > 0 by linarith
       simp only [one_div, inv_pos]; norm_cast; omega
   · apply Set.Ioo_subset_Ioo
-    · suffices 1 / ((n : ℝ) + 1) > 0 by linarith
+    · suffices 1 / ((n : ℝ) + 2) > 0 by linarith
       simp only [one_div, inv_pos]; norm_cast; omega
-    · suffices 1 / ((n : ℝ) + 1) > 0 by linarith
+    · suffices 1 / ((n : ℝ) + 2) > 0 by linarith
       simp only [one_div, inv_pos]; norm_cast; omega
 
 lemma inter_indicator_fun_eq (f : ℝ × ℝ → ℝ) : (fun (n : ℕ) ↦
-    (Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1)) ×ˢ Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1)) ∩
+    (Set.Ioo (1 / ((n : ℝ) + 2)) (1 - 1 / (↑n + 2)) ×ˢ Set.Ioo (1 / ((n : ℝ) + 2)) (1 - 1 / (↑n + 2)) ∩
     Set.Ioo 0 1 ×ˢ Set.Ioo 0 1).indicator f x) = (fun (n : ℕ) ↦ (f x) *
-    (Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1)) ×ˢ Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1))).indicator (fun _ => 1) x) := by
+    (Set.Ioo (1 / ((n : ℝ) + 2)) (1 - 1 / (↑n + 2)) ×ˢ Set.Ioo (1 / ((n : ℝ) + 2)) (1 - 1 / (↑n + 2))).indicator (fun _ => 1) x) := by
   ext n
   rw [aa, Set.inter_eq_left.2 (subset n)]
 
 lemma subset_indicator_fun_eq' (n : ℕ): Set.EqOn ((Set.Ioo 0 1 ×ˢ Set.Ioo 0 1).indicator fun x ↦ Real.log (x.1 * x.2) / (1 - x.1 * x.2))
     (fun x ↦ Real.log (x.1 * x.2) / (1 - x.1 * x.2))
-    (Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1)) ×ˢ Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1))) := by
+    (Set.Ioo (1 / ((n : ℝ) + 2)) (1 - 1 / (↑n + 2)) ×ˢ Set.Ioo (1 / ((n : ℝ) + 2)) (1 - 1 / (↑n + 2))) := by
   rintro x hx
   rw [Set.indicator_apply]
   have : x ∈ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 := by
-    suffices Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1)) ×ˢ Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1))
+    suffices Set.Ioo (1 / ((n : ℝ) + 2)) (1 - 1 / (↑n + 2)) ×ˢ Set.Ioo (1 / ((n : ℝ) + 2)) (1 - 1 / (↑n + 2))
       ⊆ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 by apply this; exact hx
     exact subset n
   simp only [this, ↓reduceIte]
@@ -154,14 +154,14 @@ lemma subset_indicator_fun_eq' (n : ℕ): Set.EqOn ((Set.Ioo 0 1 ×ˢ Set.Ioo 0 
 --   sorry
 
 lemma a : Filter.Tendsto (fun (n : ℕ) =>
-    (∫ (x : ℝ × ℝ) in (Set.Ioo (1 / (n + 1) : ℝ) (1 - 1 / (n + 1)) ×ˢ
-    Set.Ioo (1 / (n + 1) : ℝ) (1 - 1 / (n + 1))), (x.1 * x.2).log / (1 - x.1 * x.2)))
+    (∫ (x : ℝ × ℝ) in (Set.Ioo (1 / (n + 2) : ℝ) (1 - 1 / (n + 2)) ×ˢ
+    Set.Ioo (1 / (n + 2) : ℝ) (1 - 1 / (n + 2))), (x.1 * x.2).log / (1 - x.1 * x.2)))
     Filter.atTop
     (nhds (∫ (x : ℝ × ℝ) in (Set.Ioo 0 1 ×ˢ Set.Ioo 0 1), (x.1 * x.2).log / (1 - x.1 * x.2))) := by
   let f₀ := fun (x : ℝ × ℝ) ↦ (x.1 * x.2).log / (1 - x.1 * x.2)
   let f := @Set.indicator (ℝ × ℝ ) ℝ _ (Set.Ioo 0 1 ×ˢ Set.Ioo 0 1) f₀
   let F : ℕ → ℝ × ℝ → ℝ := λ n => (@Set.indicator (ℝ × ℝ) ℝ _
-    (Set.Ioo (1 / (n + 1) : ℝ) (1 - 1 / (n + 1)) ×ˢ Set.Ioo (1 / (n + 1) : ℝ) (1 - 1 / (n + 1))) f)
+    (Set.Ioo (1 / (n + 2) : ℝ) (1 - 1 / (n + 2)) ×ˢ Set.Ioo (1 / (n + 2) : ℝ) (1 - 1 / (n + 2))) f)
   have h1 : ∀ (n : ℕ), MeasureTheory.Integrable (F n) (MeasureTheory.volume.prod MeasureTheory.volume) := by
     intro n
     simp only [F, f, f₀]
@@ -169,7 +169,7 @@ lemma a : Filter.Tendsto (fun (n : ℕ) =>
     swap
     measurability
     apply MeasureTheory.IntegrableOn.mono_set
-      (t := Set.Icc (1 / ((n : ℝ) + 1)) (1 - 1 / (n + 1)) ×ˢ Set.Icc (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1)))
+      (t := Set.Icc (1 / ((n : ℝ) + 2)) (1 - 1 / (n + 2)) ×ˢ Set.Icc (1 / ((n : ℝ) + 2)) (1 - 1 / (↑n + 2)))
     swap
     rw [Set.prod_subset_prod_iff]
     left
@@ -198,13 +198,13 @@ lemma a : Filter.Tendsto (fun (n : ℕ) =>
       simp only [one_div, Set.Icc_prod_Icc, Set.mem_Icc, Prod.mk_le_mk] at *
       rcases hx with ⟨⟨hx₁, hy₁⟩, ⟨hx₂, hy₂⟩⟩
       suffices x * y < 1 by linarith
-      have hx₁ : 0 < x := by apply LT.lt.trans_le (b := ((n : ℝ) + 1)⁻¹); simp only [inv_pos]; norm_cast; omega; linarith
-      have hy₁ : 0 < y := by apply LT.lt.trans_le (b := ((n : ℝ) + 1)⁻¹); simp only [inv_pos]; norm_cast; omega; linarith
+      have hx₁ : 0 < x := by apply LT.lt.trans_le (b := ((n : ℝ) + 2)⁻¹); simp only [inv_pos]; norm_cast; omega; linarith
+      have hy₁ : 0 < y := by apply LT.lt.trans_le (b := ((n : ℝ) + 2)⁻¹); simp only [inv_pos]; norm_cast; omega; linarith
       have hx₂ : x < 1 := by
-        suffices ((n : ℝ) + 1)⁻¹ > 0 by linarith
+        suffices ((n : ℝ) + 2)⁻¹ > 0 by linarith
         simp only [inv_pos]; norm_cast; omega
       have hy₂ : y < 1 := by
-        suffices ((n : ℝ) + 1)⁻¹ > 0 by linarith
+        suffices ((n : ℝ) + 2)⁻¹ > 0 by linarith
         simp only [inv_pos]; norm_cast; omega
       nlinarith
   have h2 : MeasureTheory.Integrable f (MeasureTheory.volume.prod MeasureTheory.volume) := by
@@ -243,17 +243,64 @@ lemma a : Filter.Tendsto (fun (n : ℕ) =>
     · exact MeasurableSet.prod measurableSet_Ioo measurableSet_Ioo
   · exact MeasurableSet.prod measurableSet_Ioo measurableSet_Ioo
 
-lemma special_int (n : ℕ) (a b : ℝ) (h : 0 < a ∧ a ≤ b ∧ b < 1) :
+lemma special_int₀ (n : ℕ) (a b : ℝ) (h₀ : 0 < a) (h₁ : a ≤ b) (h₂ : b < 1) :
     ∫ (x : ℝ × ℝ) in (Set.Ioo a b ×ˢ Set.Ioo a b), (x.1 * x.2).log / (1 - x.1 * x.2) =
-    -∫ (x : ℝ) (y : ℝ) in a..b, ∑' (n : ℕ), (x * y) ^ n * (x * y).log := by
+    2 * ∑' (n : ℕ), (((b ^ (n + 1) * b.log /(n + 1) - b ^ (n + 1) /(n + 1) ^ 2) -
+    (a ^ (n + 1) * a.log /(n + 1) - a ^ (n + 1) /(n + 1) ^ 2)) *
+    (b ^ (n + 1) / (n + 1) - a ^ (n + 1) / (n + 1))) := by
+  calc
+  _ = ∫ (x : ℝ) (y : ℝ) in a..b, ∑' (n : ℕ), (x * y) ^ n * (x * y).log := by
+    sorry
+  _ = ∑' (n : ℕ), ∫ (x : ℝ) (y : ℝ) in a..b, (x * y) ^ n * (x.log + y.log) := by
+    sorry
+  _ = 2 * ∑' (n : ℕ), ((∫ (x : ℝ) in a..b, x ^ n * x.log) * (∫ (y : ℝ) in a..b, y ^ n)) := by
+    sorry
+  _ = 2 * ∑' (n : ℕ), (((b ^ (n + 1) * b.log /(n + 1) - b ^ (n + 1) /(n + 1) ^ 2) -
+    (a ^ (n + 1) * a.log /(n + 1) - a ^ (n + 1) /(n + 1) ^ 2)) *
+    (b ^ (n + 1) / (n + 1) - a ^ (n + 1) / (n + 1))) := by
+    simp_rw [pow_ln_integral ⟨h₀, h₁⟩]
+    congr 2
+    ext n
+    congr 1
+    simp only [integral_pow]
+    ring
+
+-- lemma special_int₁ (n : ℕ) (a b : ℝ) (h : 0 < a ∧ a ≤ b ∧ b < 1) :
+--     ∫ (x : ℝ × ℝ) in (Set.Ioo a b ×ˢ Set.Ioo a b), (x.1 * x.2).log / (1 - x.1 * x.2) =
+--     -∫ (x : ℝ) (y : ℝ) in a..b, ∑' (n : ℕ), (x * y) ^ n * (x * y).log := by
+--   sorry
+
+
+
+lemma special_int (n : ℕ) (a b : ℝ) (h : 0 < a ∧ a ≤ b ∧ b < 1) :
+    ∫ (x : ℝ × ℝ) in (Set.Ioo a b ×ˢ Set.Ioo a b), (x.1 * x.2).log / (1 - x.1 * x.2) = 1 := by
   sorry
 
+lemma b_aux : (fun (n : ℕ) =>
+    (∫ (x : ℝ × ℝ) in (Set.Ioo (1 / (n + 2) : ℝ) (1 - 1 / (n + 2)) ×ˢ
+    Set.Ioo (1 / (n + 2) : ℝ) (1 - 1 / (n + 2))), (x.1 * x.2).log / (1 - x.1 * x.2))) =
+    (fun (n : ℕ) => (2 * ∑' (i : ℕ),
+    ((1 - 1 / (↑n + 2)) ^ (i + 1) * Real.log (1 - 1 / (↑n + 2)) / (↑i + 1) -
+    (1 - 1 / (↑n + 2)) ^ (i + 1) / (↑i + 1) ^ 2 -
+    ((1 / (↑n + 2)) ^ (i + 1) * Real.log (1 / (↑n + 2)) / (↑i + 1) -
+    (1 / (↑n + 2)) ^ (i + 1) / (↑i + 1) ^ 2)) *
+    ((1 - 1 / (↑n + 2)) ^ (i + 1) / (↑i + 1) - (1 / (↑n + 2)) ^ (i + 1) / (↑i + 1)))) := by
+  ext n
+  rw [special_int₀ n (1 / (n + 2)) (1 - 1 / (n + 2))]
+  positivity
+  rw [le_sub_iff_add_le, ← two_mul, mul_div, mul_one, div_le_iff₀ (by positivity), one_mul]
+  norm_cast
+  omega
+  suffices 1 / ((n : ℝ) + 2) > 0 by linarith
+  positivity
+
 lemma b : Filter.Tendsto (fun (n : ℕ) =>
-    (∫ (x : ℝ × ℝ) in (Set.Ioo (1 / (n + 1) : ℝ) (1 - 1 / (n + 1)) ×ˢ
-    Set.Ioo (1 / (n + 1) : ℝ) (1 - 1 / (n + 1))), (x.1 * x.2).log / (1 - x.1 * x.2)))
+    (∫ (x : ℝ × ℝ) in (Set.Ioo (1 / (n + 2) : ℝ) (1 - 1 / (n + 2)) ×ˢ
+    Set.Ioo (1 / (n + 2) : ℝ) (1 - 1 / (n + 2))), (x.1 * x.2).log / (1 - x.1 * x.2)))
     Filter.atTop
     (nhds (-2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3)) := by
-  obtain :=  MeasureTheory.integral_tendsto_of_tendsto_of_monotone
+  rw [b_aux]
+  obtain := MeasureTheory.integral_tendsto_of_tendsto_of_monotone
 
   sorry
 
@@ -302,3 +349,8 @@ lemma I_rs {r s : ℕ} (h : r ≠ s) :
 lemma J_rs {r s : ℕ} (h : r ≠ s) :
     J r s = (∑ m in Finset.Icc 1 r, 1 / (m : ℝ) ^ 2 - ∑ m in Finset.Icc 1 s, 1 / (m : ℝ) ^ 2) / (r - s) := by
   sorry
+
+
+ -- prb1 : J00 is integrable
+ -- prb2 : Ioo 1/k 1-1/k tendsto Ioo 0 1
+ -- prb3 : prime number in basic
