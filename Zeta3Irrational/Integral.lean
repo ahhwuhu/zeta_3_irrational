@@ -74,12 +74,6 @@ lemma zeta3_aux : J 0 0 = -∫ (x : ℝ × ℝ) in (Set.Ioo 0 1 ×ˢ Set.Ioo 0 1
       MeasureTheory.integral_Ioc_eq_integral_Ioo]
   · exact zeta3_integrable
 
-lemma special_int (n : ℕ) (a b : ℝ) (h : 0 < a ∧ a ≤ b ∧ b < 1) :
-    ∫ (x : ℝ × ℝ) in (Set.Ioo a b ×ˢ Set.Ioo a b), (x.1 * x.2).log / (1 - x.1 * x.2) =
-    -∫ (x : ℝ) (y : ℝ) in a..b, ∑' (n : ℕ), (x * y) ^ n * (x * y).log := by
-
-  sorry
-
 lemma subset_indicator_fun_eq (n : ℕ): Set.EqOn ((Set.Ioo 0 1 ×ˢ Set.Ioo 0 1).indicator fun x ↦ Real.log (x.1 * x.2) / (1 - x.1 * x.2))
     (fun x ↦ Real.log (x.1 * x.2) / (1 - x.1 * x.2))
     (Set.Icc (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1)) ×ˢ Set.Icc (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1))) := by
@@ -101,9 +95,11 @@ lemma subset_indicator_fun_eq (n : ℕ): Set.EqOn ((Set.Ioo 0 1 ×ˢ Set.Ioo 0 1
         simp only [one_div, inv_pos]; norm_cast; omega
   simp only [this, ↓reduceIte]
 
-lemma aa (s : Set (ℝ × ℝ)) (f : ℝ × ℝ → ℝ) (x : ℝ × ℝ) : s.indicator f x = (f x) * s.indicator 1 x := by
-
-  sorry
+lemma aa (s : Set (ℝ × ℝ)) (f : ℝ × ℝ → ℝ) (x : ℝ × ℝ) : s.indicator f x = (f x) * s.indicator (fun _ => 1) x := by
+  suffices Decidable (x ∈ s) by
+    simp only [Set.indicator]
+    aesop
+  apply Classical.propDecidable
 
 lemma subset (n : ℕ) : Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1)) ×ˢ Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1))
     ⊆ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 := by
@@ -124,7 +120,7 @@ lemma subset (n : ℕ) : Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1)) ×ˢ
 lemma inter_indicator_fun_eq (f : ℝ × ℝ → ℝ) : (fun (n : ℕ) ↦
     (Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1)) ×ˢ Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1)) ∩
     Set.Ioo 0 1 ×ˢ Set.Ioo 0 1).indicator f x) = (fun (n : ℕ) ↦ (f x) *
-    (Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1)) ×ˢ Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1))).indicator 1 x) := by
+    (Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1)) ×ˢ Set.Ioo (1 / ((n : ℝ) + 1)) (1 - 1 / (↑n + 1))).indicator (fun _ => 1) x) := by
   ext n
   rw [aa, Set.inter_eq_left.2 (subset n)]
 
@@ -156,7 +152,6 @@ lemma subset_indicator_fun_eq' (n : ℕ): Set.EqOn ((Set.Ioo 0 1 ×ˢ Set.Ioo 0 
 --       rw [← this]
 --       exact Q
 --   sorry
-
 
 lemma a : Filter.Tendsto (fun (n : ℕ) =>
     (∫ (x : ℝ × ℝ) in (Set.Ioo (1 / (n + 1) : ℝ) (1 - 1 / (n + 1)) ×ˢ
@@ -230,9 +225,9 @@ lemma a : Filter.Tendsto (fun (n : ℕ) =>
     intro x
     simp only [F, f, f₀]
     simp_rw [Set.indicator_indicator]
-    rw [inter_indicator_fun_eq]
-    rw [aa]
+    rw [inter_indicator_fun_eq, aa]
     apply Filter.Tendsto.const_mul
+
     sorry
   obtain L := @MeasureTheory.integral_tendsto_of_tendsto_of_monotone (ℝ × ℝ)
     (MeasurableSpace.prod Real.measurableSpace Real.measurableSpace)
@@ -247,6 +242,11 @@ lemma a : Filter.Tendsto (fun (n : ℕ) =>
       · exact subset_indicator_fun_eq' n
     · exact MeasurableSet.prod measurableSet_Ioo measurableSet_Ioo
   · exact MeasurableSet.prod measurableSet_Ioo measurableSet_Ioo
+
+lemma special_int (n : ℕ) (a b : ℝ) (h : 0 < a ∧ a ≤ b ∧ b < 1) :
+    ∫ (x : ℝ × ℝ) in (Set.Ioo a b ×ˢ Set.Ioo a b), (x.1 * x.2).log / (1 - x.1 * x.2) =
+    -∫ (x : ℝ) (y : ℝ) in a..b, ∑' (n : ℕ), (x * y) ^ n * (x * y).log := by
+  sorry
 
 lemma b : Filter.Tendsto (fun (n : ℕ) =>
     (∫ (x : ℝ × ℝ) in (Set.Ioo (1 / (n + 1) : ℝ) (1 - 1 / (n + 1)) ×ˢ

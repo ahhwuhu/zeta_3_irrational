@@ -21,7 +21,7 @@ lemma sub_pow{R : Type u_1} [CommRing R] (x : R) (y : R) (n : ℕ) :
 
 lemma sub_pow_special{R : Type u_1} [CommRing R] (x : R) (n : ℕ) :
     (x - x ^ 2) ^ n = (Finset.range (n + 1)).sum fun (m : ℕ) => (n.choose m) • (- 1) ^ m * x ^ (n + m) := by
-  rw[← Mathlib.Tactic.RingNF.add_neg, add_comm, add_pow]
+  rw[sub_eq_add_neg, add_comm, add_pow]
   apply Finset.sum_congr rfl
   intro m hm
   rw[neg_pow, pow_two, mul_pow,← mul_assoc, mul_comm, mul_assoc, pow_mul_pow_sub, mul_assoc,

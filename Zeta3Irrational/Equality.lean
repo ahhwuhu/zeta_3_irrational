@@ -78,7 +78,6 @@ lemma integral_equality_help (s t : ℝ) (s0 : 0 < s) (s1 : s < 1) (t0 : 0 < t) 
     · obtain b00 := eq1 a b12 b22
       rw[b00, mul_comm]
 
--- FIXME: the proof is broken due to updated mathlib
 lemma integral_equality (s t : ℝ) (s0 : 0 < s) (s1 : s < 1) (t0 : 0 < t) (t1 : t < 1) :
     ∫ (u : ℝ) in (0)..1, 1 /(1 - (1 - (1 - s) * t) * u) =
     ∫ (u : ℝ) in (0)..1, 1 /((1 - (1 - u) * s) * (1 - (1 - t) * u)) := by
