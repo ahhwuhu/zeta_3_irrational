@@ -250,11 +250,73 @@ lemma special_int₀ (n : ℕ) (a b : ℝ) (h₀ : 0 < a) (h₁ : a ≤ b) (h₂
     (b ^ (n + 1) / (n + 1) - a ^ (n + 1) / (n + 1))) := by
   calc
   _ = ∫ (x : ℝ) (y : ℝ) in a..b, ∑' (n : ℕ), (x * y) ^ n * (x * y).log := by
-    sorry
+    rw [intervalIntegral.integral_of_le h₁, MeasureTheory.integral_Ioc_eq_integral_Ioo]
+    rw [MeasureTheory.Measure.volume_eq_prod]
+    rw [MeasureTheory.setIntegral_prod]
+    swap
+    ·
+      sorry
+    · apply MeasureTheory.setIntegral_congr (by simp)
+      intro x hx
+      simp only
+      rw [intervalIntegral.integral_of_le h₁, MeasureTheory.integral_Ioc_eq_integral_Ioo]
+      apply MeasureTheory.setIntegral_congr (by simp)
+      intro y hy
+      simp only [mul_inv_eq_one]
+      rw [tsum_mul_right, mul_comm (b := (x * y).log), div_eq_mul_one_div, one_div]
+      congr; symm
+      apply tsum_geometric_of_norm_lt_one (ξ := x * y)
+      simp_all only [Set.mem_Ioo, norm_mul, Real.norm_eq_abs]
+      suffices |x| * |y| < |x| by
+        trans |x|
+        exact this
+        rw [abs_lt]
+        constructor <;> linarith
+      apply mul_lt_of_lt_one_right
+      · simp only [abs_pos, ne_eq]
+        linarith
+      · suffices 0 < y ∧ y < 1 by
+          rw [abs_lt]
+          constructor <;> linarith
+        constructor <;> linarith
   _ = ∑' (n : ℕ), ∫ (x : ℝ) (y : ℝ) in a..b, (x * y) ^ n * (x.log + y.log) := by
+    have := ENNReal.tendsto_nat_tsum (fun n => ENNReal.ofReal (∫ (x : ℝ) (y : ℝ) in a..b, (x * y) ^ n * (Real.log x + Real.log y)))
+    -- ENNReal.ofReal_sum_of_nonneg
+
     sorry
   _ = 2 * ∑' (n : ℕ), ((∫ (x : ℝ) in a..b, x ^ n * x.log) * (∫ (y : ℝ) in a..b, y ^ n)) := by
-    sorry
+    rw [← tsum_mul_left]
+    congr
+    ext n
+    rw [two_mul]
+    nth_rw 1 [← intervalIntegral.integral_const_mul]
+    simp_rw [← intervalIntegral.integral_mul_const, ← intervalIntegral.integral_const_mul]
+    rw [← intervalIntegral.integral_add]
+    · rw [intervalIntegral.integral_of_le h₁, MeasureTheory.integral_Ioc_eq_integral_Ioo,
+        intervalIntegral.integral_of_le h₁, MeasureTheory.integral_Ioc_eq_integral_Ioo]
+      apply MeasureTheory.setIntegral_congr (by simp)
+      intro x hx
+      simp only
+      rw [← intervalIntegral.integral_add]
+      · rw [intervalIntegral.integral_of_le h₁, MeasureTheory.integral_Ioc_eq_integral_Ioo,
+        intervalIntegral.integral_of_le h₁, MeasureTheory.integral_Ioc_eq_integral_Ioo]
+        apply MeasureTheory.setIntegral_congr (by simp)
+        intro y hy
+        simp only
+        ring
+      · apply IntervalIntegrable.continuousOn_mul
+        · exact intervalIntegral.intervalIntegrable_const _
+        · apply ContinuousOn.mul
+          · apply ContinuousOn.pow continuousOn_id
+          · apply ContinuousOn.log continuousOn_id
+            intro y hy
+            simp only [Set.uIcc_of_le h₁, Set.mem_Icc, id_eq] at hy ⊢
+            nlinarith
+      · apply IntervalIntegrable.mul_continuousOn
+        · exact intervalIntegral.intervalIntegrable_const _
+        · apply ContinuousOn.pow continuousOn_id
+    · sorry -- 可计算
+    · sorry -- 可计算
   _ = 2 * ∑' (n : ℕ), (((b ^ (n + 1) * b.log /(n + 1) - b ^ (n + 1) /(n + 1) ^ 2) -
     (a ^ (n + 1) * a.log /(n + 1) - a ^ (n + 1) /(n + 1) ^ 2)) *
     (b ^ (n + 1) / (n + 1) - a ^ (n + 1) / (n + 1))) := by
@@ -310,25 +372,25 @@ lemma b : Filter.Tendsto (fun (n : ℕ) =>
 
 --   sorry
 
--- lemma zeta3_eq_geo_sum : J 0 0 = -∫ (x : ℝ) (y : ℝ) in (0)..1, ∑' (n : ℕ), (x * y) ^ n * (x * y).log := by
---   delta J
---   simp only [pow_zero, mul_one, one_mul]
---   rw [neg_inj, intervalIntegral.integral_of_le (by norm_num), intervalIntegral.integral_of_le (by norm_num),
---     MeasureTheory.integral_Ioc_eq_integral_Ioo, MeasureTheory.integral_Ioc_eq_integral_Ioo]
---   apply MeasureTheory.setIntegral_congr (by simp)
---   intro x hx
---   simp only
---   rw [intervalIntegral.integral_of_le (by norm_num), intervalIntegral.integral_of_le (by norm_num),
---     MeasureTheory.integral_Ioc_eq_integral_Ioo, MeasureTheory.integral_Ioc_eq_integral_Ioo]
---   apply MeasureTheory.setIntegral_congr (by simp)
---   intro y hy
---   simp only [mul_inv_eq_one]
---   rw [tsum_mul_right, mul_comm (b := (x * y).log), div_eq_mul_one_div, one_div]
---   congr; symm
---   apply tsum_geometric_of_norm_lt_one (ξ := x * y)
---   simp_all only [Set.mem_Ioo, norm_mul, Real.norm_eq_abs]
---   rw [abs_eq_self.2 (LT.lt.le hx.1), abs_eq_self.2 (LT.lt.le hy.1)]
---   nlinarith
+lemma zeta3_eq_geo_sum : J 0 0 = -∫ (x : ℝ) (y : ℝ) in (0)..1, ∑' (n : ℕ), (x * y) ^ n * (x * y).log := by
+  delta J
+  simp only [pow_zero, mul_one, one_mul]
+  rw [neg_inj, intervalIntegral.integral_of_le (by norm_num), intervalIntegral.integral_of_le (by norm_num),
+    MeasureTheory.integral_Ioc_eq_integral_Ioo, MeasureTheory.integral_Ioc_eq_integral_Ioo]
+  apply MeasureTheory.setIntegral_congr (by simp)
+  intro x hx
+  simp only
+  rw [intervalIntegral.integral_of_le (by norm_num), intervalIntegral.integral_of_le (by norm_num),
+    MeasureTheory.integral_Ioc_eq_integral_Ioo, MeasureTheory.integral_Ioc_eq_integral_Ioo]
+  apply MeasureTheory.setIntegral_congr (by simp)
+  intro y hy
+  simp only [mul_inv_eq_one]
+  rw [tsum_mul_right, mul_comm (b := (x * y).log), div_eq_mul_one_div, one_div]
+  congr; symm
+  apply tsum_geometric_of_norm_lt_one (ξ := x * y)
+  simp_all only [Set.mem_Ioo, norm_mul, Real.norm_eq_abs]
+  rw [abs_eq_self.2 (LT.lt.le hx.1), abs_eq_self.2 (LT.lt.le hy.1)]
+  nlinarith
 
 
 theorem zeta_3 : J 0 0 = 2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
@@ -354,3 +416,4 @@ lemma J_rs {r s : ℕ} (h : r ≠ s) :
  -- prb1 : J00 is integrable
  -- prb2 : Ioo 1/k 1-1/k tendsto Ioo 0 1
  -- prb3 : prime number in basic
+ -- prb : 极限怎么取进去
