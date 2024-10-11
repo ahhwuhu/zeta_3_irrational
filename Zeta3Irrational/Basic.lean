@@ -476,38 +476,56 @@ lemma JJ_upper (n : ℕ) : JJ n < 2 * (1 / 30) ^ n * ∑' n : ℕ , 1 / ((n : �
 --   apply tendsto_pow_atTop_nhds_zero_of_lt_one (r := (21 / 30 : ℝ)) <;>
 --   norm_num
 
+lemma d_eq_prod_pow' (n : ℕ) :
+    d (Finset.Icc 1 (n + 1)) =
+    ∏ p ∈ (((n + 1) + 1).primesBelow),
+      p ^ ((Finset.Icc 1 (n + 1)).image (fun i => i.factorization p)).max' (by aesop) := by
+  rw [← Nat.factorization_prod_pow_eq_self (n := d (Finset.Icc 1 (n + 1)))]
+  simp only [Finsupp.prod, Nat.support_factorization]
+  rw [d_primeFactors _ (by aesop)]
+  refine Finset.prod_congr ?_ ?_
+  · ext p
+    constructor <;> intro hp <;> simp only at hp ⊢
+    · rw [Finset.mem_sup] at hp
+
+      obtain ⟨m, H, h⟩ := hp
+      simp only [Finset.mem_Icc] at H
+      rw [Nat.mem_primesBelow]
+
+      sorry
+    · sorry
+  · intro p hp
+    rw [d_factorization]
+    · aesop
+    · rw [Nat.mem_primesBelow] at hp
+      exact hp.2
+  sorry
+
+
+#eval Nat.factorization 2 2
+lemma d_eq_prod_pow'' (n : ℕ) :
+    d (Finset.Icc 1 (n + 1)) =
+    ∏ p ∈ (((n + 1) + 1).primesBelow),
+      p ^ ⌊(Real.log ((n + 1) : ℝ)) / (Real.log (p : ℝ))⌋₊ := by
+  rw [d_eq_prod_pow']
+  refine Finset.prod_congr rfl ?_
+  intro p hp
+  simp only [Nat.mem_primesBelow] at hp
+
+
+  congr 1
+  have eq := d_factorization_eq_div_log (n + 1) p sorry
+  simp only [Nat.cast_add, Nat.cast_one] at eq
+  rw [← eq, d_factorization] <;> aesop
+
 lemma d_eq_prod_pow (n : ℕ) :
-    d (Finset.Icc 1 n) = ∏ p ∈ ((n + 1).primesBelow), p ^ ⌊(Real.log (n : ℝ)) / (Real.log (p : ℝ))⌋₊ := by
-  induction' n  with n hn
-  · simp only [zero_lt_one, Finset.Icc_eq_empty_of_lt, zero_add, CharP.cast_eq_zero, Real.log_zero,
-      zero_div, Nat.floor_zero, pow_zero, Finset.prod_const_one, d_empty]
-  · obtain h := Nat.primesBelow_succ (n + 1)
-    simp only [Nat.succ_eq_add_one] at h
-    if g : Nat.Prime (n + 1) then
-      refine dvd_antisymm ?_ ?_
-
-      · rw [← Finset.Ico_insert_right (by omega), d_insert]
-        rw [← Nat.factorizationLCMLeft_mul_factorizationLCMRight (by omega)]
-        sorry
-        sorry
-      ·
-        sorry
-    else
-      simp only [g, ↓reduceIte] at h
-      apply Nat.eq_of_factorization_eq
-      · sorry
-      · rw [h]
-        suffices ∏ p ∈ (n + 1).primesBelow, p ^ ⌊Real.log ↑(n + 1) / Real.log ↑p⌋₊ > 0 by linarith
-
-        sorry
-
-      · intro p
-        rw [← Finset.Ico_insert_right (by omega), d_insert, ← Nat.succ_eq_add_one, Nat.Ico_succ_right,
-          hn, Nat.factorization_lcm (by omega)]
-        ·
-          sorry
-        · rw [← hn]
-          sorry
+    d (Finset.Icc 1 n) =
+    ∏ p ∈ ((n + 1).primesBelow),
+      p ^ ⌊(Real.log (n : ℝ)) / (Real.log (p : ℝ))⌋₊ := by
+  cases n
+  · simp [d_empty]
+  · rw [d_eq_prod_pow'']
+    simp
 
 lemma d_le_pow_counting (n : ℕ) : d (Finset.Icc 1 n) ≤ n ^ (n.primeCounting) := by
   if h : n = 0 then

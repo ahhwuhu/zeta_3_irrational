@@ -18,3 +18,5 @@ lean_decls
 *.blg
 /blueprint/src/print.pdf
 *.pdf
+
+*/.DS_Store

@@ -7,6 +7,10 @@ import Mathlib.Order.Interval.Finset.Defs
 import Mathlib.Data.Nat.Lattice
 import Mathlib.Algebra.Ring.Nat
 import Mathlib.Data.Nat.Factorization.Basic
+import Mathlib.NumberTheory.SmoothNumbers
+
+import Mathlib.NumberTheory.PrimeCounting
+import Mathlib.Analysis.SpecialFunctions.Log.Basic
 
 open scoped Nat
 open BigOperators
@@ -332,3 +336,77 @@ lemma fin_d_neq_zero (n : ℕ) : d (Finset.Icc 1 n) > 0 := by
   suffices d (Finset.Icc 1 n) ≠ 0 by omega
   apply d_ne_zero
   simp only [Finset.mem_Icc, nonpos_iff_eq_zero, one_ne_zero, zero_le, and_true, not_false_eq_true]
+
+
+lemma lcm_factorization (m n p : ℕ) (hp : Nat.Prime p) :
+    (m.lcm n).factorization p = max (m.factorization p) (n.factorization p) := by
+
+  sorry
+
+lemma lcm_eq_prod (m n : ℕ) : m.lcm n =
+    ∏ p ∈ (max m n).primesBelow, p ^ (max (m.factorization p) (n.factorization p)) := by
+  sorry
+
+
+lemma d_factorization (s : Finset ℕ) (hs : s.Nonempty) (p : ℕ) (hp : Nat.Prime p) :
+    (d s).factorization p =
+    (s.image fun i => i.factorization p).max' (by aesop) := by
+  induction s using Finset.induction_on with
+  | empty => simp only [Finset.not_nonempty_empty] at hs
+  | @insert m s hm ih =>
+    rw [d_insert, lcm_factorization _ _ _ hp]
+    if hs : s.Nonempty
+    then
+    simp only [Finset.image_insert]
+    rw [Finset.max'_insert (H := by aesop)]
+    rw [max_comm]
+    congr 1
+    rw [ih hs]
+    else
+    simp only [Finset.not_nonempty_iff_eq_empty] at hs
+    subst hs
+    simp only [d_empty, Nat.factorization_one, Finsupp.coe_zero, Pi.zero_apply, zero_le,
+      max_eq_left, insert_emptyc_eq, Finset.image_singleton, Finset.max'_singleton]
+
+lemma d_primeFactors (s : Finset ℕ) (hs : 0 ∉ s) :
+    (d s).primeFactors = s.sup fun i => i.primeFactors := by
+   induction s using Finset.induction_on with
+  | empty =>
+    simp only [Finset.sup_empty, Finset.bot_eq_empty, Nat.primeFactors_eq_empty]
+    right
+    simp only [d_empty]
+  | @insert m s hm ih =>
+    simp only [Finset.mem_insert, not_or] at hs
+    rw [d_insert, Nat.primeFactors_lcm (by aesop) (d_ne_zero _ (by aesop))]
+    simp only [Finset.sup_insert, Finset.sup_eq_union]
+    rw [ih (by aesop)]
+
+lemma d_factorization_eq_div_log'' (p : ℕ)  :
+    (d (Finset.Icc 1 0)).factorization p =
+    ⌊Real.log 0 / Real.log p⌋₊ := by
+  simp [d_empty]
+
+lemma d_factorization_eq_div_log' (n p : ℕ) (hp : Nat.Prime p) :
+    (d (Finset.Icc 1 (n + 1))).factorization p =
+    ⌊Real.log (n + 1) / Real.log p⌋₊ := by
+  rw [d_factorization] <;> try aesop
+
+  sorry
+
+lemma d_factorization_eq_div_log (n p : ℕ) (hp : Nat.Prime p) :
+    (d (Finset.Icc 1 n)).factorization p =
+    ⌊Real.log n / Real.log p⌋₊ := by
+  cases n
+  · simp only [zero_lt_one, Finset.Icc_eq_empty_of_lt, d_empty, Nat.factorization_one,
+    Finsupp.coe_zero, Pi.zero_apply, CharP.cast_eq_zero, Real.log_zero, zero_div, Nat.floor_zero]
+
+  · rw [d_factorization_eq_div_log' (hp := hp)]
+    simp
+-- lemma d_eq_prod (s : Finset ℕ) (hs : s.Nonempty) :
+--     d s =
+--     ∏ p ∈ Nat.primesBelow (s.max' hs),
+--       p ^ (s.image fun i => i.factorization p).max' (by aesop) := by
+--   induction s using Finset.induction_on with
+--   | empty => simp only [Finset.not_nonempty_empty] at hs
+--   | @insert m s hm ih =>
+--     sorry
