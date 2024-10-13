@@ -58,6 +58,7 @@ lemma pow_ln_integral {a b : ℝ} {n : ℕ} (h : 0 < a ∧ a ≤ b): ∫ (x : �
 
 lemma zeta3_integrable : MeasureTheory.IntegrableOn (fun x ↦ Real.log (x.1 * x.2) / (1 - x.1 * x.2)) (Set.Ioo 0 1 ×ˢ Set.Ioo 0 1)
     (MeasureTheory.volume.prod MeasureTheory.volume) := by
+
   sorry
 
 lemma zeta3_aux : J 0 0 = -∫ (x : ℝ × ℝ) in (Set.Ioo 0 1 ×ˢ Set.Ioo 0 1), (x.1 * x.2).log / (1 - x.1 * x.2) := by
@@ -216,7 +217,8 @@ lemma a : Filter.Tendsto (fun (n : ℕ) =>
     intro x a b hab
     simp only [F, f, f₀]
     apply Set.indicator_le_indicator_of_subset
-    · sorry
+    ·
+      sorry
     ·
       sorry
   have h4 : (∀ᵐ (x : ℝ × ℝ) ∂MeasureTheory.volume.prod MeasureTheory.volume,
@@ -227,6 +229,8 @@ lemma a : Filter.Tendsto (fun (n : ℕ) =>
     simp_rw [Set.indicator_indicator]
     rw [inter_indicator_fun_eq, aa]
     apply Filter.Tendsto.const_mul
+
+    rw [tendsto_indicator_const_apply_iff_eventually]
 
     sorry
   obtain L := @MeasureTheory.integral_tendsto_of_tendsto_of_monotone (ℝ × ℝ)
@@ -396,6 +400,14 @@ lemma zeta3_eq_geo_sum : J 0 0 = -∫ (x : ℝ) (y : ℝ) in (0)..1, ∑' (n : �
 theorem zeta_3 : J 0 0 = 2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
   rw [zeta3_aux, neg_eq_iff_eq_neg, ← neg_mul]
   exact tendsto_nhds_unique a b
+
+
+
+
+
+
+
+
 
 lemma I_rr (h : 0 < r) : I r r = ∑' m : ℕ , 1 / ((m : ℝ) + r + 1) ^ 3 := by
   sorry

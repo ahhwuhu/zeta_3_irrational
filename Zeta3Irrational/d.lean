@@ -8,9 +8,10 @@ import Mathlib.Data.Nat.Lattice
 import Mathlib.Algebra.Ring.Nat
 import Mathlib.Data.Nat.Factorization.Basic
 import Mathlib.NumberTheory.SmoothNumbers
-
 import Mathlib.NumberTheory.PrimeCounting
 import Mathlib.Analysis.SpecialFunctions.Log.Basic
+import PrimeNumberTheoremAnd.Consequences
+import Mathlib.Data.Nat.Choose.Factorization
 
 open scoped Nat
 open BigOperators
@@ -35,36 +36,36 @@ instance : NormalizedGCDMonoid ℕ where
 
 def d (s : Finset ℕ) : ℕ := s.lcm id
 
-lemma d_insert (s : Finset ℕ) (n : ℕ) : d (insert n s) = Nat.lcm n (d s) := by
+theorem d_insert (s : Finset ℕ) (n : ℕ) : d (insert n s) = Nat.lcm n (d s) := by
   simp only [d, Finset.lcm_insert, id_eq]
   rfl
 
-lemma d_empty : d (∅ : Finset ℕ) = 1 := by simp [d]
+theorem d_empty : d (∅ : Finset ℕ) = 1 := by simp [d]
 
-lemma dvd_d_of_mem (s : Finset ℕ) (n : ℕ) (h : n ∈ s) : n ∣ d s :=
+theorem dvd_d_of_mem (s : Finset ℕ) (n : ℕ) (h : n ∈ s) : n ∣ d s :=
   Finset.dvd_lcm h
 
-lemma d_dvd_d_of_le (s t : Finset ℕ) (h : s ≤ t) : d s ∣ d t := by
+theorem d_dvd_d_of_le (s t : Finset ℕ) (h : s ≤ t) : d s ∣ d t := by
   apply Finset.lcm_dvd
   intro n hn
   exact dvd_d_of_mem t n (h hn)
 
-lemma d_ne_zero (s : Finset ℕ) (hs : 0 ∉ s) : d s ≠ 0 := by
+theorem d_ne_zero (s : Finset ℕ) (hs : 0 ∉ s) : d s ≠ 0 := by
   delta d
   intro r
   rw [Finset.lcm_eq_zero_iff] at r
   exact hs (by simpa using r)
 
-lemma d_eq_zero (s : Finset ℕ) (hs : 0 ∈ s) : d s = 0 := by
+theorem d_eq_zero (s : Finset ℕ) (hs : 0 ∈ s) : d s = 0 := by
   delta d
   rw [Finset.lcm_eq_zero_iff]
   simpa
 
-lemma Nat.Prime.dvd_lcm {p} (hp : Nat.Prime p) (a b) (h : p ∣ Nat.lcm a b) : p ∣ a ∨ p ∣ b := by
+theorem Nat.Prime.dvd_lcm {p} (hp : Nat.Prime p) (a b) (h : p ∣ Nat.lcm a b) : p ∣ a ∨ p ∣ b := by
   have := h.trans <| Nat.lcm_dvd_mul a b
   rwa [Nat.Prime.dvd_mul hp] at this
 
-lemma Nat.primeFactors_lcm {a b : ℕ} (ha : a ≠ 0) (hb : b ≠ 0) :
+theorem Nat.primeFactors_lcm {a b : ℕ} (ha : a ≠ 0) (hb : b ≠ 0) :
     (a.lcm b).primeFactors = a.primeFactors ∪ b.primeFactors := by
   ext p
   rw [Nat.mem_primeFactors_iff_mem_primeFactorsList, Finset.mem_union,
@@ -91,7 +92,7 @@ lemma Nat.primeFactors_lcm {a b : ℕ} (ha : a ≠ 0) (hb : b ≠ 0) :
       erw [lcm_eq_zero_iff] at hp3
       refine hp3.elim (fun ha' => absurd ha' ha) id
 
-lemma d_sq (s : Finset ℕ) : (d s)^2 = d (s.image (· ^ 2)) := by
+theorem d_sq (s : Finset ℕ) : (d s)^2 = d (s.image (· ^ 2)) := by
   induction s using Finset.induction_on with
   | empty => simp [d]
   | @insert i s hi ih =>
@@ -211,7 +212,7 @@ lemma d_sq (s : Finset ℕ) : (d s)^2 = d (s.image (· ^ 2)) := by
       exact ⟨pow_dvd_pow_of_dvd (Nat.dvd_lcm_left _ _) 2,
         pow_dvd_pow_of_dvd (Nat.dvd_lcm_right _ _) 2⟩
 
-lemma d_cube (s : Finset ℕ) : (d s)^3 = d (s.image (· ^ 3)) := by
+theorem d_cube (s : Finset ℕ) : (d s)^3 = d (s.image (· ^ 3)) := by
   induction s using Finset.induction_on with
   | empty => simp [d]
   | @insert i s hi ih =>
@@ -326,49 +327,72 @@ lemma d_cube (s : Finset ℕ) : (d s)^3 = d (s.image (· ^ 3)) := by
       exact ⟨pow_dvd_pow_of_dvd (Nat.dvd_lcm_left _ _) 3,
         pow_dvd_pow_of_dvd (Nat.dvd_lcm_right _ _) 3⟩
 
-lemma d_sq' (n : ℕ) :
+theorem d_sq' (n : ℕ) :
     d (Finset.Icc 1 n)^2 = d (Finset.Icc 1 n |>.image (· ^ 2))  := d_sq _
 
-lemma d_cube' (n : ℕ) :
+theorem d_cube' (n : ℕ) :
     d (Finset.Icc 1 n)^3 = d (Finset.Icc 1 n |>.image (· ^ 3))  := d_cube _
 
-lemma fin_d_neq_zero (n : ℕ) : d (Finset.Icc 1 n) > 0 := by
+theorem fin_d_neq_zero (n : ℕ) : d (Finset.Icc 1 n) > 0 := by
   suffices d (Finset.Icc 1 n) ≠ 0 by omega
   apply d_ne_zero
   simp only [Finset.mem_Icc, nonpos_iff_eq_zero, one_ne_zero, zero_le, and_true, not_false_eq_true]
 
-
-lemma lcm_factorization (m n p : ℕ) (hp : Nat.Prime p) :
+theorem lcm_factorization (m n p : ℕ) (hm : m ≠ 0) (hn : n ≠ 0) :
     (m.lcm n).factorization p = max (m.factorization p) (n.factorization p) := by
+  rw [Nat.factorization_lcm hm hn]
+  aesop
 
-  sorry
+-- lemma lcm_eq_prod (m n : ℕ) : m.lcm n =
+--     ∏ p ∈ (max m n).primesBelow, p ^ (max (m.factorization p) (n.factorization p)) := by
 
-lemma lcm_eq_prod (m n : ℕ) : m.lcm n =
-    ∏ p ∈ (max m n).primesBelow, p ^ (max (m.factorization p) (n.factorization p)) := by
-  sorry
+--   sorry
 
 
-lemma d_factorization (s : Finset ℕ) (hs : s.Nonempty) (p : ℕ) (hp : Nat.Prime p) :
+theorem d_factorization (s : Finset ℕ) (hs : s.Nonempty) (p : ℕ) (hs₁ : 0 ∉ s) :
     (d s).factorization p =
     (s.image fun i => i.factorization p).max' (by aesop) := by
   induction s using Finset.induction_on with
   | empty => simp only [Finset.not_nonempty_empty] at hs
   | @insert m s hm ih =>
-    rw [d_insert, lcm_factorization _ _ _ hp]
+    rw [d_insert, lcm_factorization _ _ _]
+    · if hs : s.Nonempty
+      then
+      simp only [Finset.image_insert]
+      rw [Finset.max'_insert (H := by aesop)]
+      rw [max_comm]
+      congr 1
+      rw [ih hs]
+      aesop
+      else
+      simp only [Finset.not_nonempty_iff_eq_empty] at hs
+      subst hs
+      simp only [d_empty, Nat.factorization_one, Finsupp.coe_zero, Pi.zero_apply, zero_le,
+        max_eq_left, insert_emptyc_eq, Finset.image_singleton, Finset.max'_singleton]
+    · aesop
+    · apply d_ne_zero
+      aesop
+
+theorem d_factorization' (s : Finset ℕ) (hs : s.Nonempty) (p : ℕ) (hs₁ : 0 ∉ s) :
+    ((d s).factorization p : ℝ) =
+    (((s.image fun (i : ℕ) => (i.factorization p : ℝ)))).max' (by aesop) := by
+  rw [d_factorization] <;> try aesop
+  induction s using Finset.induction_on with
+  | empty => simp only [Finset.not_nonempty_empty] at hs
+  | @insert m s _ ih =>
+    simp_rw [Finset.image_insert]
     if hs : s.Nonempty
     then
-    simp only [Finset.image_insert]
+    symm
     rw [Finset.max'_insert (H := by aesop)]
-    rw [max_comm]
-    congr 1
-    rw [ih hs]
+    specialize ih hs (by aesop)
+    rw [← ih, ← Nat.cast_max]
+    norm_cast
+    rw [← Finset.max'_insert (H := by aesop)]
     else
-    simp only [Finset.not_nonempty_iff_eq_empty] at hs
-    subst hs
-    simp only [d_empty, Nat.factorization_one, Finsupp.coe_zero, Pi.zero_apply, zero_le,
-      max_eq_left, insert_emptyc_eq, Finset.image_singleton, Finset.max'_singleton]
+    aesop
 
-lemma d_primeFactors (s : Finset ℕ) (hs : 0 ∉ s) :
+theorem d_primeFactors (s : Finset ℕ) (hs : 0 ∉ s) :
     (d s).primeFactors = s.sup fun i => i.primeFactors := by
    induction s using Finset.induction_on with
   | empty =>
@@ -381,19 +405,64 @@ lemma d_primeFactors (s : Finset ℕ) (hs : 0 ∉ s) :
     simp only [Finset.sup_insert, Finset.sup_eq_union]
     rw [ih (by aesop)]
 
-lemma d_factorization_eq_div_log'' (p : ℕ)  :
+theorem d_factorization_eq_div_log'' (p : ℕ) :
     (d (Finset.Icc 1 0)).factorization p =
     ⌊Real.log 0 / Real.log p⌋₊ := by
   simp [d_empty]
 
-lemma d_factorization_eq_div_log' (n p : ℕ) (hp : Nat.Prime p) :
+theorem d_factorization_eq_div_log' (n p : ℕ) (hp : Nat.Prime p) :
     (d (Finset.Icc 1 (n + 1))).factorization p =
     ⌊Real.log (n + 1) / Real.log p⌋₊ := by
-  rw [d_factorization] <;> try aesop
+  symm
+  rw [Real.log_div_log]
+  rw [Nat.floor_eq_iff]
+  · rw [d_factorization']
+    · constructor
+      · rw [Finset.max'_le_iff]
+        intro y hy
+        rw [Real.le_logb_iff_rpow_le]
+        · simp only [Finset.mem_image, Finset.mem_Icc] at hy
+          obtain ⟨x, hx, rfl⟩ := hy
+          have h := @Nat.pow_factorization_choose_le p x 1 (by omega)
+          norm_cast
+          simp only [Nat.choose_one_right] at h
+          linarith
+        · norm_cast
+          exact Nat.Prime.one_lt hp
+        · norm_cast
+          omega
+      · rw [← sub_lt_iff_lt_add]
+        · by_contra! h
+          rw [Finset.max'_le_iff] at h
+          set y := (Finset.image (fun i ↦ i.factorization p) (Finset.Icc 1 (n + 1))).max' (by aesop)
+          have hy : (y : ℝ) ∈ (Finset.image (fun i ↦ (i.factorization p : ℝ)) (Finset.Icc 1 (n + 1))) := by
+            simp only [Finset.mem_image, Finset.mem_Icc, Nat.cast_inj]
+            simp_rw [← Finset.mem_Icc]
+            rw [← Finset.mem_image]
+            exact Finset.max'_mem _ _
+          specialize h (y : ℝ) hy
+          rw [le_sub_iff_add_le, Real.le_logb_iff_rpow_le] at h
+          · have h2 : y + 1 ∉ (Finset.image (fun i ↦ i.factorization p) (Finset.Icc 1 (n + 1))) := by
+              by_contra! hy1
+              suffices y + 1 ≤ y by linarith
+              exact Finset.le_max' _ _ hy1
+            simp only [Finset.mem_image, Finset.mem_Icc, not_exists, not_and, and_imp] at h2
+            norm_cast at h
+            specialize h2 (p ^ (y + 1)) (by exact one_le_pow_of_one_le' (Nat.Prime.one_le hp) _) h
+            aesop
+          · norm_cast
+            exact Nat.Prime.one_lt hp
+          · norm_cast
+            omega
+        · aesop
+    · aesop
+  · apply Real.logb_nonneg
+    · norm_cast
+      exact Nat.Prime.one_lt hp
+    · norm_cast
+      omega
 
-  sorry
-
-lemma d_factorization_eq_div_log (n p : ℕ) (hp : Nat.Prime p) :
+theorem d_factorization_eq_div_log (n p : ℕ) (hp : Nat.Prime p) :
     (d (Finset.Icc 1 n)).factorization p =
     ⌊Real.log n / Real.log p⌋₊ := by
   cases n
@@ -402,6 +471,7 @@ lemma d_factorization_eq_div_log (n p : ℕ) (hp : Nat.Prime p) :
 
   · rw [d_factorization_eq_div_log' (hp := hp)]
     simp
+
 -- lemma d_eq_prod (s : Finset ℕ) (hs : s.Nonempty) :
 --     d s =
 --     ∏ p ∈ Nat.primesBelow (s.max' hs),
@@ -410,3 +480,104 @@ lemma d_factorization_eq_div_log (n p : ℕ) (hp : Nat.Prime p) :
 --   | empty => simp only [Finset.not_nonempty_empty] at hs
 --   | @insert m s hm ih =>
 --     sorry
+
+theorem d_eq_prod_pow' (n : ℕ) :
+    d (Finset.Icc 1 (n + 1)) =
+    ∏ p ∈ (((n + 1) + 1).primesBelow),
+      p ^ ((Finset.Icc 1 (n + 1)).image (fun i => i.factorization p)).max' (by aesop) := by
+  rw [← Nat.factorization_prod_pow_eq_self (n := d (Finset.Icc 1 (n + 1)))]
+  · simp only [Finsupp.prod, Nat.support_factorization]
+    rw [d_primeFactors _ (by aesop)]
+    refine Finset.prod_congr ?_ ?_
+    · ext p
+      constructor <;> intro hp <;> simp only at hp ⊢
+      · rw [Finset.mem_sup] at hp
+
+        obtain ⟨m, H, h⟩ := hp
+        simp only [Finset.mem_Icc] at H
+        rw [Nat.mem_primesBelow]
+        simp only [Nat.mem_primeFactors, ne_eq] at h
+        constructor
+        · linarith [Nat.le_of_dvd (by omega) h.2.1]
+        · exact h.1
+      · rw [Finset.mem_sup]
+        use p
+        simp only [Finset.mem_Icc, Nat.mem_primeFactors, dvd_refl, ne_eq, true_and]
+        rw [Nat.mem_primesBelow] at hp
+        constructor
+        · exact ⟨Nat.Prime.one_le hp.2, (by linarith)⟩
+        · aesop
+    · intro p _
+      rw [d_factorization]
+      · aesop
+      · simp
+  · apply d_ne_zero
+    aesop
+
+theorem d_eq_prod_pow'' (n : ℕ) :
+    d (Finset.Icc 1 (n + 1)) =
+    ∏ p ∈ (((n + 1) + 1).primesBelow),
+      p ^ ⌊(Real.log ((n + 1) : ℝ)) / (Real.log (p : ℝ))⌋₊ := by
+  rw [d_eq_prod_pow']
+  refine Finset.prod_congr rfl ?_
+  intro p hp
+  simp only [Nat.mem_primesBelow] at hp
+  congr 1
+  have eq := d_factorization_eq_div_log (n + 1) p
+  simp only [Nat.cast_add, Nat.cast_one] at eq
+  rw [← eq, d_factorization] <;> aesop
+
+theorem d_eq_prod_pow (n : ℕ) :
+    d (Finset.Icc 1 n) =
+    ∏ p ∈ ((n + 1).primesBelow),
+      p ^ ⌊(Real.log (n : ℝ)) / (Real.log (p : ℝ))⌋₊ := by
+  cases n
+  · simp [d_empty]
+  · rw [d_eq_prod_pow'']
+    simp
+
+theorem d_le_pow_counting (n : ℕ) : d (Finset.Icc 1 n) ≤ n ^ (n.primeCounting) := by
+  if h : n = 0 then
+    rw [h]; aesop
+  else
+    have h1 : 1 ≤ n := by omega
+    rw [d_eq_prod_pow n]
+    calc
+    _ ≤ ∏ _ ∈ ((n + 1).primesBelow), n := by
+      apply Finset.prod_le_prod
+      · intro p _
+        simp only [zero_le]
+      · intro p hp
+        rw [Nat.mem_primesBelow] at hp
+        have h2 : 1 ≤ p := by
+          by_contra! h
+          have : p = 0 := by omega
+          aesop
+        suffices p ^ (⌊(Real.log (n : ℝ)) / (Real.log (p : ℝ))⌋₊ : ℝ) ≤ (n : ℝ) by norm_cast at this
+        trans p ^ ((Real.log (n : ℝ)) / (Real.log (p : ℝ)))
+        · apply Real.rpow_le_rpow_of_exponent_le (by norm_cast)
+          · apply Nat.floor_le (α := ℝ)
+            if h2 : n = 1 ∨ p = 1 then
+              rcases h2 with (rfl | rfl) <;> simp
+            else
+              rcases (not_or.1 h2) with ⟨_, h2⟩
+              have h1 : 1 < n := by omega
+              have h2 : 1 < p := by omega
+              suffices 0 < Real.log (n : ℝ) / Real.log (p : ℝ) by linarith
+              apply div_pos <;>
+              exact Real.log_pos (by norm_cast)
+        · nth_rewrite 1 [← Real.exp_log (x := (p : ℝ)) (by norm_cast), ← Real.exp_one_rpow,
+            ← Real.rpow_mul (by exact Real.exp_nonneg 1), mul_div, mul_comm, ← mul_div]
+          if hp : p = 1 then
+            rw [hp]; simp only [Nat.cast_one, Real.log_one, div_zero, mul_zero, Real.rpow_zero,
+              Nat.one_le_cast, h1]
+          else
+            rw [div_self, mul_one, Real.exp_one_rpow, Real.exp_log (by norm_cast)]
+            rw [Real.log_ne_zero]
+            norm_cast
+            simp only [not_false_eq_true, and_true]
+            omega
+    _ ≤ n ^ (n.primeCounting) := by
+      rw [Finset.prod_const]
+      suffices ((n + 1).primesBelow).card = n.primeCounting by apply Nat.pow_le_pow_right <;> linarith
+      rw [Nat.primeCounting, ← Nat.primesBelow_card_eq_primeCounting']
