@@ -97,9 +97,64 @@ lemma log_rpow_integral' (n : ℝ) (hn : n > -1) (a : ℝ) (ha : 0 < a ∧ a ≤
       simp only [Set.mem_Icc, id_eq, ne_eq] at hx ⊢
       nlinarith
 
+lemma log_rpow_integrable (n : ℝ) (hn : n > -1) : IntervalIntegrable (fun x ↦ -Real.log x * x ^ n) MeasureTheory.volume 0 1 := by
+  let f := fun (x : ℝ) => -x.log * x ^ n
+  apply MeasureTheory.IntegrableOn.intervalIntegrable
+  rw [Set.uIcc_of_le (by norm_num), integrableOn_Icc_iff_integrableOn_Ioc]
+  apply MeasureTheory.integrableOn_Ioc_of_intervalIntegral_norm_bounded_left (f := f)
+    (l := Filter.atTop) (a := fun (n : ℕ) => 1 / (n + 1 : ℝ)) (a₀ := 0) (b := 1) (I := 1 / (n + 1) ^ 2)
+  · intro i
+    simp only [one_div, f]
+    have hi :  0 < ((i : ℝ) + 1)⁻¹ ∧ ((i : ℝ) + 1)⁻¹ ≤ 1 := by
+      constructor
+      · simp only [inv_pos]; linarith
+      · rw [← one_div, div_le_iff₀] <;> linarith
+    rw [← Set.uIoc_of_le hi.2, ← intervalIntegrable_iff]
+    apply IntervalIntegrable.continuousOn_mul
+    · apply intervalIntegral.intervalIntegrable_rpow
+      right
+      simp only [Set.uIcc_of_le hi.2, Set.mem_Icc, zero_le_one, and_true, not_le]
+      linarith
+    · apply ContinuousOn.neg
+      apply ContinuousOn.log continuousOn_id
+      intro x hx
+      rw [Set.uIcc_of_le hi.2] at hx
+      simp only [Set.mem_Icc, id_eq, ne_eq] at hx ⊢
+      nlinarith
+  · exact tendsto_one_div_add_atTop_nhds_zero_nat
+  · rw [Filter.eventually_atTop]
+    use 0
+    intro b _
+    simp only [Real.norm_eq_abs, f]
+    rw [log_rpow_integral_aux n hn]
+    · rw [log_rpow_integral' n hn]
+      · set k := _
+        change _ - k ≤ _
+        simp only [Real.log_inv, tsub_le_iff_right, le_add_iff_nonneg_right,
+          sub_nonneg, k]
+        rw [div_le_div_iff (by linarith) (by nlinarith), mul_assoc, mul_le_mul_iff_of_pos_left]
+        · trans 0
+          · rw [mul_nonpos_iff]
+            right
+            constructor
+            · apply Real.log_nonpos
+              · simp only [one_div, inv_nonneg]
+                linarith
+              · rw [div_le_iff₀] <;> linarith
+            · positivity
+          · linarith
+        · apply Real.rpow_pos_of_pos
+          simp only [one_div, inv_pos]
+          linarith
+      · constructor
+        · positivity
+        · rw [div_le_one] <;> linarith
+    · constructor
+      · positivity
+      · rw [div_le_one] <;> linarith
+
 lemma log_rpow_integral (n : ℝ) (hn : n > -1) :
     ∫ (x : ℝ) in (0)..1, -x.log * x ^ n = 1 / (n + 1) ^ 2 := by
-  let f := fun (x : ℝ) => -x.log * x ^ n
   let F := fun (x : ℝ) => x ^ (n + 1) * (1 - (n + 1) * x.log) / (n + 1) ^ 2
   have h1 : 1 /(n + 1) ^ 2 = F 1 - F 0 := by
     simp [F]
@@ -135,59 +190,7 @@ lemma log_rpow_integral (n : ℝ) (hn : n > -1) :
       · apply HasDerivAt.const_mul
         rw [← one_div]
         apply HasDerivAt.log (hasDerivAt_id' x) (by linarith)
-  · apply MeasureTheory.IntegrableOn.intervalIntegrable
-    rw [Set.uIcc_of_le (by norm_num), integrableOn_Icc_iff_integrableOn_Ioc]
-    apply MeasureTheory.integrableOn_Ioc_of_intervalIntegral_norm_bounded_left (f := f)
-      (l := Filter.atTop) (a := fun (n : ℕ) => 1 / (n + 1 : ℝ)) (a₀ := 0) (b := 1) (I := 1 / (n + 1) ^ 2)
-    · intro i
-      simp only [one_div, f]
-      have hi :  0 < ((i : ℝ) + 1)⁻¹ ∧ ((i : ℝ) + 1)⁻¹ ≤ 1 := by
-        constructor
-        · simp only [inv_pos]; linarith
-        · rw [← one_div, div_le_iff₀] <;> linarith
-      rw [← Set.uIoc_of_le hi.2, ← intervalIntegrable_iff]
-      apply IntervalIntegrable.continuousOn_mul
-      · apply intervalIntegral.intervalIntegrable_rpow
-        right
-        simp only [Set.uIcc_of_le hi.2, Set.mem_Icc, zero_le_one, and_true, not_le]
-        linarith
-      · apply ContinuousOn.neg
-        apply ContinuousOn.log continuousOn_id
-        intro x hx
-        rw [Set.uIcc_of_le hi.2] at hx
-        simp only [Set.mem_Icc, id_eq, ne_eq] at hx ⊢
-        nlinarith
-    · exact tendsto_one_div_add_atTop_nhds_zero_nat
-    · rw [Filter.eventually_atTop]
-      use 0
-      intro b _
-      simp only [Real.norm_eq_abs, f]
-      rw [log_rpow_integral_aux n hn]
-      · rw [log_rpow_integral' n hn]
-        · set k := _
-          change _ - k ≤ _
-          simp only [Real.log_inv, tsub_le_iff_right, le_add_iff_nonneg_right,
-            sub_nonneg, k]
-          rw [div_le_div_iff (by linarith) (by nlinarith), mul_assoc, mul_le_mul_iff_of_pos_left]
-          · trans 0
-            · rw [mul_nonpos_iff]
-              right
-              constructor
-              · apply Real.log_nonpos
-                · simp only [one_div, inv_nonneg]
-                  linarith
-                · rw [div_le_iff₀] <;> linarith
-              · positivity
-            · linarith
-          · apply Real.rpow_pos_of_pos
-            simp only [one_div, inv_pos]
-            linarith
-        · constructor
-          · positivity
-          · rw [div_le_one] <;> linarith
-      · constructor
-        · positivity
-        · rw [div_le_one] <;> linarith
+  · exact log_rpow_integrable n hn
   · simp only [Real.log_zero, mul_zero, sub_zero, mul_one, F]
     rw [Real.zero_rpow (by linarith), zero_div]
     simp_rw [mul_sub, sub_div]
@@ -222,7 +225,26 @@ lemma log_rpow_integral (n : ℝ) (hn : n > -1) :
 
 lemma ENN_log_rpow_integral (n : ℝ) (hn : n > -1) : ∫⁻ (x : ℝ) in Set.Ioo 0 1,
     ENNReal.ofReal (-x.log * x ^ n) = ENNReal.ofReal (1 / (n + 1) ^ 2) := by
-  sorry
+  calc
+  _ = ∫⁻ (x : ℝ), ENNReal.ofReal ((Set.Ioo 0 1).indicator (fun x => -Real.log x * x ^ n) x) := by
+    rw [← MeasureTheory.lintegral_indicator]
+    · congr
+      ext x
+      rw [Set.indicator_apply, Set.indicator_apply]
+      aesop
+    · measurability
+  _ = ENNReal.ofReal (1 / (n + 1) ^ 2) := by
+    rw [← MeasureTheory.ofReal_integral_eq_lintegral_ofReal]
+    · rw [MeasureTheory.integral_indicator (by measurability),
+        ← MeasureTheory.integral_Ioc_eq_integral_Ioo,
+        ← intervalIntegral.integral_of_le (by norm_num), log_rpow_integral n hn]
+    · apply MeasureTheory.IntegrableOn.integrable_indicator _ (by measurability)
+      rw [← integrableOn_Ioc_iff_integrableOn_Ioo, ← Set.uIoc_of_le (by norm_num),
+        ← intervalIntegrable_iff]
+      exact log_rpow_integrable n hn
+    ·
+
+      sorry
 
 lemma ENN_log_pow_integral (n : ℕ) : ∫⁻ (x : ℝ) in Set.Ioo 0 1,
     ENNReal.ofReal (-x.log * x ^ n) = ENNReal.ofReal (1 / (n + 1) ^ 2) := by

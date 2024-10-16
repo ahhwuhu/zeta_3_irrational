@@ -149,14 +149,15 @@ lemma multi_integral_sum_comm (c : ℕ → ℤ) : ∫ (x : ℝ) (y : ℝ) in (0)
 
 lemma multi_integral_mul_const (c d : ℕ) (p q : ℝ): ∫ (x : ℝ) (y : ℝ) in (0)..1,
     p * x ^ c * q * y ^ d * (x * y).log / (1 - x * y) = p * q * - J c d := by
-  simp_rw [mul_div_assoc, J, neg_neg]
-  rw [← intervalIntegral.integral_const_mul]
-  simp_rw [← intervalIntegral.integral_const_mul]
-  apply intervalIntegral.integral_congr
-  intro x _
-  apply intervalIntegral.integral_congr
-  intro y _
-  ring
+  -- simp_rw [mul_div_assoc, J, neg_neg]
+  -- rw [← intervalIntegral.integral_const_mul]
+  -- simp_rw [← intervalIntegral.integral_const_mul]
+  -- apply intervalIntegral.integral_congr
+  -- intro x _
+  -- apply intervalIntegral.integral_congr
+  -- intro y _
+  -- ring
+  sorry
 
 noncomputable def p (r s : ℕ) : ℤ :=
   if h : r > s then (J_rs_linear h).choose

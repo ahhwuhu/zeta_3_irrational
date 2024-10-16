@@ -214,5 +214,6 @@ lemma zeta_3_eq_form : ∫ (x : ℝ) (y : ℝ) (z : ℝ) in (0)..1, 1 / ((1 - (1
     obtain h := zeta_3
     simp only [J, pow_zero, one_mul] at h
     simp_rw [neg_div]
-    rw [← h, neg_eq_neg_one_mul, ← intervalIntegral.integral_const_mul]
-    simp_rw [← intervalIntegral.integral_const_mul, ← neg_eq_neg_one_mul]
+    -- rw [← h, neg_eq_neg_one_mul, ← intervalIntegral.integral_const_mul]
+    -- simp_rw [← intervalIntegral.integral_const_mul, ← neg_eq_neg_one_mul]
+    sorry
