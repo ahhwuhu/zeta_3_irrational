@@ -242,9 +242,28 @@ lemma ENN_log_rpow_integral (n : ℝ) (hn : n > -1) : ∫⁻ (x : ℝ) in Set.Io
       rw [← integrableOn_Ioc_iff_integrableOn_Ioo, ← Set.uIoc_of_le (by norm_num),
         ← intervalIntegrable_iff]
       exact log_rpow_integrable n hn
-    ·
+    · refine MeasureTheory.ae_nonneg_of_forall_setIntegral_nonneg_of_sigmaFinite ?_ ?_
+      · rintro s - -
+        apply MeasureTheory.Integrable.integrableOn
+        apply MeasureTheory.IntegrableOn.integrable_indicator _ (by measurability)
+        rw [← integrableOn_Ioc_iff_integrableOn_Ioo, ← Set.uIoc_of_le (by norm_num),
+          ← intervalIntegrable_iff]
+        exact log_rpow_integrable n hn
+      · rintro s hs -
+        apply MeasureTheory.setIntegral_nonneg hs
+        suffices  ∀ x, 0 ≤ (Set.Ioo 0 1).indicator (fun x ↦ -Real.log x * x ^ n) x by aesop
+        intro x
+        rw [Set.indicator_apply]
+        by_cases h : x ∈ Set.Ioo 0 1
+        · simp only [h, ↓reduceIte, neg_mul, Left.nonneg_neg_iff]
+          simp only [Set.mem_Ioo] at h
+          rw [mul_nonpos_iff]
+          right
+          constructor
+          · apply Real.log_nonpos <;> linarith
+          · apply Real.rpow_nonneg; linarith
+        · simp only [h, ↓reduceIte, le_refl]
 
-      sorry
 
 lemma ENN_log_pow_integral (n : ℕ) : ∫⁻ (x : ℝ) in Set.Ioo 0 1,
     ENNReal.ofReal (-x.log * x ^ n) = ENNReal.ofReal (1 / (n + 1) ^ 2) := by
