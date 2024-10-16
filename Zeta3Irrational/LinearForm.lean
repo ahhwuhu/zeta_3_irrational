@@ -17,7 +17,7 @@ lemma J_rr_linear (r : ℕ) :
   if h : r = 0 then
     rw [h, zeta_3]; use 0; simp
   else
-    rw [J_rr (by omega)]
+    rw [J_rr]
     simp only [sub_right_inj]
     simp_rw [eq_div_iff d_cube_ne_zero, Finset.mul_sum, Finset.sum_mul]
     use ∑ i ∈ Finset.Icc 1 r, 2 * ↑(d (Finset.Icc 1 r)) ^ 3 / ↑i ^ 3
@@ -104,7 +104,7 @@ lemma multi_integral_sum_comm (c : ℕ → ℤ) : ∫ (x : ℝ) (y : ℝ) in (0)
     ↑(c x_1) * x ^ x_1 * ↑(c x_2) * y ^ x_2 * (x * y).log / (1 - x * y) := by
   induction' n with n hn
   · simp
-  · 
+  ·
   -- calc
   -- _ = ∫ (x : ℝ) in (0)..1, ∑ x_1 ∈ Finset.range (n + 1), ∫ (y : ℝ) in (0)..1, ∑ x_2 ∈ Finset.range (n + 1),
   --   ↑(c x_1) * x ^ x_1 * ↑(c x_2) * y ^ x_2 * (x * y).log / (1 - x * y) := by
