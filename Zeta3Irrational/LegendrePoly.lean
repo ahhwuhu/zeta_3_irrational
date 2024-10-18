@@ -29,25 +29,24 @@ lemma sub_pow_special{R : Type u_1} [CommRing R] (x : R) (n : ℕ) :
   rw[Finset.mem_range] at hm
   linarith
 
-lemma Finsum_iterate_deriv {R : Type u_1} [CommRing R] {k : ℕ} {h : ℕ → ℕ} :
-    derivative^[k] (∑ m in Finset.range (k + 1), (h m) • ((- 1) ^ m : R[X]) * X ^ (k + m)) =
-    ∑ m in Finset.range (k + 1), (h m) • (- 1) ^ m * derivative^[k] (X ^ (k + m)) := by
-  induction' k + 1 with n hn
-  · simp only [Nat.zero_eq, Finset.range_zero, Finset.sum_empty, iterate_map_zero]
-  · rw[Finset.sum_range, Finset.sum_range, Fin.sum_univ_castSucc, Fin.sum_univ_castSucc] at *
-    simp only [Fin.coe_castSucc, Fin.val_last, iterate_map_add, hn, add_right_inj]
-    rw [nsmul_eq_mul, mul_assoc, ← nsmul_eq_mul, Polynomial.iterate_derivative_smul, nsmul_eq_mul,
-      mul_assoc]
-    have := Int.even_or_odd n
-    rcases this with (hn1 | hn2)
-    · simp_all only [nsmul_eq_mul, Int.even_coe_nat, Even.neg_pow, one_pow, one_mul]
-    · rw [Odd.neg_one_pow]
-      simp only [neg_mul, one_mul, iterate_map_neg, mul_neg]
-      exact_mod_cast hn2
+theorem iterate_derivative_finset_sum {R : Type u_1} [CommRing R] (k : ℕ) (h : ℕ → ℕ) :
+    derivative^[k] (∑ m in Finset.range (k + 1), (h m * (-1 : R) ^ m) • X ^ (k + m)) =
+    ∑ m in Finset.range (k + 1), ((h m * (-1 : R) ^ m) • (derivative^[k] (X ^ (k + m))) : R[X]):= by
+  simp only [nsmul_eq_mul, ← LinearMap.pow_apply, map_sum]
+  congr! 1 with i _
+  rw [← smul_eq_mul, map_smul]
 
 lemma legendre_eq_sum (n : ℕ) : legendre n = ∑ k in Finset.range (n + 1),
     C ((- 1) ^ k : ℝ) • (Nat.choose n k) * (Nat.choose (n + k) n) * X ^ k := by
-  rw [legendre, ← mul_pow, mul_one_sub, ← pow_two, sub_pow_special, Finsum_iterate_deriv,
+  have h : derivative^[n] (∑ m ∈ Finset.range (n + 1), n.choose m • (-1 : ℝ[X]) ^ m * X ^ (n + m)) =
+    ∑ m ∈ Finset.range (n + 1), n.choose m • (-1) ^ m * derivative^[n] (X ^ (n + m)) := by
+    have (n m k : ℕ) : (n * (-1 : ℝ) ^ m) • (X : ℝ[X]) ^ k = n • (-1 : ℝ[X]) ^ m * X ^ k := by
+      rw [Algebra.smul_def]; simp
+    simp_rw [← this]
+    rw [iterate_derivative_finset_sum]
+    congr! 1 with i _
+    rw [Algebra.smul_def]; simp
+  rw [legendre, ← mul_pow, mul_one_sub, ← pow_two, sub_pow_special, h,
     Finset.mul_sum]
   apply Finset.sum_congr rfl
   intro x _
