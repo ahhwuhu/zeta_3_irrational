@@ -5,7 +5,7 @@ Author: Junqi Liu and Jujian Zhang.
 import Mathlib
 
 open scoped Nat
-open BigOperators
+open BigOperators Finset
 
 noncomputable abbrev J (r s : ℕ) : ℝ :=
   ∫ (x : ℝ × ℝ) in Set.Ioo 0 1 ×ˢ Set.Ioo 0 1,
@@ -334,7 +334,6 @@ lemma integral1 {a : ℝ} (ha : 0 < a) (ha1 : a < 1) :
   rw[eq3]
   simp
 
--- intervalIntegral.integrableOn_deriv_of_nonneg
 lemma sub_mul_mul_ne_zero (y : ℝ) (x : ℝ × ℝ) (hx : x ∈ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1)
     (hy : y ∈ Set.Icc 0 1) (h1 : 0 < 1 - (1 - x.1 * x.2)) : 1 - (1 - x.1 * x.2) * y ≠ 0 := by
   suffices 1 - (1 - x.1 * x.2) * y > 0 by linarith
@@ -493,9 +492,270 @@ lemma JENN_eq_triple (r s : ℕ) : J_ENN r s =
   _ = J_ENN r s := by
     simp only
 
-lemma J_ENN_rs_eq_tsum (r s : ℕ) (h : r ≤ s) : J_ENN r s = ∑' (k : ℕ), ENNReal.ofReal
-    (1 / ((k + r + 1) ^ 2 * (k + s + 1)) + 1 / ((k + r + 1) * (k + s + 1) ^ s)) := by
-  sorry
+lemma AEMeasurable_aux' : AEMeasurable
+    (fun x ↦ ENNReal.ofReal (-Real.log (x.1 * x.2) * x.1 ^ (k + r) * x.2 ^ (k + s)))
+    (MeasureTheory.volume.restrict (Set.Ioo 0 1 ×ˢ Set.Ioo 0 1)) := by
+  apply AEMeasurable.ennreal_ofReal
+  apply Measurable.aemeasurable
+  apply Measurable.mul _ (Measurable.pow_const measurable_snd _)
+  · apply Measurable.mul _ (Measurable.pow_const measurable_fst _)
+    · apply Measurable.neg
+      apply Measurable.log
+      apply Measurable.mul measurable_fst measurable_snd
+
+lemma aux_lintegral1 (k r s : ℕ) (x : ℝ) (hx : 0 < x ∧ x < 1) : ∫⁻ (a : ℝ) in Set.Ioo 0 1,
+    ENNReal.ofReal (-(Real.log x * x ^ (k + r) * a ^ (k + s)))
+    = ENNReal.ofReal (- x.log * x ^ (k + r) / (k + s + 1)) := by
+  calc
+  _ = ENNReal.ofReal (-Real.log x * x ^ (k + r)) * ∫⁻ (a : ℝ) in Set.Ioo 0 1,
+    ENNReal.ofReal (a ^ (k + s)) := by
+    rw [← MeasureTheory.lintegral_const_mul, ← MeasureTheory.lintegral_indicator _ (by measurability),
+      ← MeasureTheory.lintegral_indicator _ (by measurability)]
+    · congr
+      ext y
+      rw [Set.indicator_apply, Set.indicator_apply]
+      by_cases h : y ∈ Set.Ioo 0 1
+      · simp only [h, ↓reduceIte, ← neg_mul]
+        rw [← ENNReal.ofReal_mul]
+        · simp only [neg_mul, Left.nonneg_neg_iff]
+          rw [mul_nonpos_iff]
+          right
+          constructor
+          · apply Real.log_nonpos (by linarith) (by nlinarith)
+          · apply pow_nonneg (by linarith)
+      · simp only [h, ↓reduceIte]
+    · apply Measurable.ennreal_ofReal
+      apply Measurable.pow measurable_id measurable_const
+  _ = ENNReal.ofReal (- x.log * x ^ (k + r) / (k + s + 1)) := by
+    rw [ENN_pow_integral, ← ENNReal.ofReal_mul, mul_one_div]
+    · norm_cast
+    · simp only [neg_mul, Left.nonneg_neg_iff]
+      rw [mul_nonpos_iff]
+      right
+      constructor
+      · apply Real.log_nonpos (by linarith) (by nlinarith)
+      · apply pow_nonneg (by linarith)
+
+lemma aux_lintegral2 (k r s : ℕ) (x : ℝ) (hx : 0 < x ∧ x < 1) : ∫⁻ (a : ℝ) in Set.Ioo 0 1,
+    ENNReal.ofReal (-(Real.log a * x ^ (k + r) * a ^ (k + s)))
+    = ENNReal.ofReal (x ^ (k + r) / (k + s + 1) ^ 2) := by
+  calc
+  _ = ENNReal.ofReal (x ^ (k + r)) * ∫⁻ (a : ℝ) in Set.Ioo 0 1,
+    ENNReal.ofReal (-a.log * a ^ (k + s)) := by
+    rw [← MeasureTheory.lintegral_const_mul, ← MeasureTheory.lintegral_indicator _ (by measurability),
+      ← MeasureTheory.lintegral_indicator _ (by measurability)]
+    · congr
+      ext y
+      rw [Set.indicator_apply, Set.indicator_apply]
+      by_cases h : y ∈ Set.Ioo 0 1
+      · simp only [h, ↓reduceIte]
+        rw [← ENNReal.ofReal_mul]
+        · nth_rw 2 [mul_comm]
+          simp [← mul_assoc, neg_mul]
+        · apply pow_nonneg (by linarith)
+      · simp [h]
+    · apply Measurable.ennreal_ofReal
+      apply Measurable.mul
+      · apply Measurable.neg
+        apply Measurable.log measurable_id
+      · apply Measurable.pow measurable_id measurable_const
+  _ = ENNReal.ofReal (x ^ (k + r) / (k + s + 1) ^ 2) := by
+    rw [ENN_log_pow_integral, ← ENNReal.ofReal_mul, mul_one_div]
+    · norm_cast
+    · apply pow_nonneg (by linarith)
+
+lemma aux_lintegral3 (k r s : ℕ) : ∫⁻ (x : ℝ) in Set.Ioo 0 1,
+    ENNReal.ofReal (-x.log * x ^ (k + r) / (k + s + 1))
+    = ENNReal.ofReal (1 / ((k + r + 1) ^ 2 * (k + s + 1))) := by
+  calc
+  _ = (∫⁻ (x : ℝ) in Set.Ioo 0 1, ENNReal.ofReal (-x.log * x ^ (k + r))) * ENNReal.ofReal (1 / (k + s + 1)) := by
+    rw [← MeasureTheory.lintegral_mul_const, ← MeasureTheory.lintegral_indicator _ (by measurability),
+      ← MeasureTheory.lintegral_indicator _ (by measurability)]
+    · congr
+      ext y
+      rw [Set.indicator_apply, Set.indicator_apply]
+      by_cases h : y ∈ Set.Ioo 0 1
+      · simp only [h, ↓reduceIte]
+        simp only [Set.mem_Ioo] at h
+        rw [← ENNReal.ofReal_mul, mul_one_div]
+        simp only [neg_mul, Left.nonneg_neg_iff]
+        rw [mul_nonpos_iff]
+        right
+        constructor
+        · apply Real.log_nonpos (by linarith) (by nlinarith)
+        · apply pow_nonneg (by linarith)
+      · simp [h]
+    · apply Measurable.ennreal_ofReal
+      apply Measurable.mul
+      · apply Measurable.neg
+        apply Measurable.log measurable_id
+      · apply Measurable.pow measurable_id measurable_const
+  _ = ENNReal.ofReal (1 / ((k + r + 1) ^ 2 * (k + s + 1))) := by
+    rw [ENN_log_pow_integral, ← ENNReal.ofReal_mul, mul_one_div, div_div]
+    · norm_cast
+    · positivity
+
+lemma aux_lintegral4 (k r s : ℕ) : ∫⁻ (x : ℝ) in Set.Ioo 0 1,
+    ENNReal.ofReal (x ^ (k + r) / (k + s + 1) ^ 2)
+    = ENNReal.ofReal (1 / ((k + r + 1) * (k + s + 1) ^ 2)) := by
+  calc
+  _ = (∫⁻ (x : ℝ) in Set.Ioo 0 1, ENNReal.ofReal (x ^ (k + r))) * ENNReal.ofReal (1 / (k + s + 1) ^ 2) := by
+    rw [← MeasureTheory.lintegral_mul_const, ← MeasureTheory.lintegral_indicator _ (by measurability),
+      ← MeasureTheory.lintegral_indicator _ (by measurability)]
+    · congr
+      ext y
+      rw [Set.indicator_apply, Set.indicator_apply]
+      by_cases h : y ∈ Set.Ioo 0 1
+      · simp only [h, ↓reduceIte]
+        simp only [Set.mem_Ioo] at h
+        rw [← ENNReal.ofReal_mul, mul_one_div]
+        apply pow_nonneg (by linarith)
+      · simp only [h, ↓reduceIte]
+    · apply Measurable.ennreal_ofReal
+      apply Measurable.pow measurable_id measurable_const
+  _ = ENNReal.ofReal (1 / ((k + r + 1) * (k + s + 1) ^ 2)) := by
+    rw [ENN_pow_integral, ← ENNReal.ofReal_mul, mul_one_div, div_div]
+    · norm_cast
+    · positivity
+
+lemma J_ENN_rs_eq_tsum_aux_intergal (r s : ℕ) (k : ℕ):
+    ∫⁻ (x : ℝ × ℝ) in Set.Ioo 0 1 ×ˢ Set.Ioo 0 1,
+    ENNReal.ofReal (- (x.1 * x.2).log * x.1 ^ (k + r) * x.2 ^ (k + s)) = ENNReal.ofReal
+    (1 / ((k + r + 1) ^ 2 * (k + s + 1)) + 1 / ((k + r + 1) * (k + s + 1) ^ 2)) := by
+  rw [MeasureTheory.Measure.volume_eq_prod, ← MeasureTheory.Measure.prod_restrict,
+      MeasureTheory.lintegral_prod]
+  · calc
+    _ = ∫⁻ (x : ℝ) in Set.Ioo 0 1,
+      ENNReal.ofReal (- x.log * x ^ (k + r) / (k + s + 1) + x ^ (k + r) / (k + s + 1) ^ 2) := by
+      rw [← MeasureTheory.lintegral_indicator _ (by measurability),
+        ← MeasureTheory.lintegral_indicator _ (by measurability)]
+      congr
+      ext x
+      rw [Set.indicator_apply, Set.indicator_apply]
+      by_cases h1 : x ∈ Set.Ioo 0 1
+      · simp only [h1, ↓reduceIte, neg_mul]
+        have h2 : ∫⁻ (y : ℝ) in Set.Ioo 0 1, ENNReal.ofReal (-((x * y).log * x ^ (k + r) * y ^ (k + s)))
+          = ∫⁻ (y : ℝ) in Set.Ioo 0 1, ENNReal.ofReal (-(x.log * x ^ (k + r) * y ^ (k + s))) +
+          ENNReal.ofReal (-(y.log * x ^ (k + r) * y ^ (k + s))) := by
+          rw [← MeasureTheory.lintegral_indicator _ (by measurability),
+            ← MeasureTheory.lintegral_indicator _ (by measurability)]
+          congr
+          ext y
+          rw [Set.indicator_apply, Set.indicator_apply]
+          by_cases h2 : y ∈ Set.Ioo 0 1
+          · simp only [h2, ↓reduceIte, ← neg_mul]
+            simp only [Set.mem_Ioo] at h1 h2
+            rw [Real.log_mul (by linarith) (by linarith), neg_add, add_mul, add_mul,
+              ENNReal.ofReal_add]
+            · apply mul_nonneg _ (by apply pow_nonneg (by linarith))
+              apply mul_nonneg _ (by apply pow_nonneg (by linarith))
+              simp only [Left.nonneg_neg_iff]
+              apply Real.log_nonpos (by nlinarith) (by nlinarith)
+            · apply mul_nonneg _ (by apply pow_nonneg (by linarith))
+              apply mul_nonneg _ (by apply pow_nonneg (by linarith))
+              simp only [Left.nonneg_neg_iff]
+              apply Real.log_nonpos (by nlinarith) (by nlinarith)
+          · simp only [h2, ↓reduceIte]
+        rw [h2, MeasureTheory.lintegral_add_left']
+        · simp only [Set.mem_Ioo] at h1
+          rw [aux_lintegral1 k r s x h1, aux_lintegral2 k r s x h1, ENNReal.ofReal_add, neg_mul]
+          · apply div_nonneg _ (by positivity)
+            simp only [Left.nonneg_neg_iff]
+            rw [mul_nonpos_iff]
+            right
+            constructor
+            · apply Real.log_nonpos (by linarith) (by nlinarith)
+            · apply pow_nonneg (by linarith)
+          · apply div_nonneg _ (by positivity)
+            apply pow_nonneg (by linarith)
+        · apply AEMeasurable.ennreal_ofReal
+          apply Measurable.aemeasurable
+          apply Measurable.neg
+          apply Measurable.const_mul
+          exact Measurable.pow_const measurable_id _
+      · simp only [h1, ↓reduceIte]
+    _ = ENNReal.ofReal
+      (1 / ((k + r + 1) ^ 2 * (k + s + 1)) + 1 / ((k + r + 1) * (k + s + 1) ^ 2)) := by
+      have h2 : ∫⁻ (x : ℝ) in Set.Ioo 0 1,
+        ENNReal.ofReal (- x.log * x ^ (k + r) / (k + s + 1) + x ^ (k + r) / (k + s + 1) ^ 2)
+        = ∫⁻ (x : ℝ) in Set.Ioo 0 1,
+        ENNReal.ofReal (-x.log * x ^ (k + r) / (k + s + 1)) + ENNReal.ofReal (x ^ (k + r) / (k + s + 1) ^ 2) := by
+        rw [← MeasureTheory.lintegral_indicator _ (by measurability),
+            ← MeasureTheory.lintegral_indicator _ (by measurability)]
+        congr
+        ext y
+        rw [Set.indicator_apply, Set.indicator_apply]
+        by_cases h2 : y ∈ Set.Ioo 0 1
+        · simp only [h2, ↓reduceIte, ← neg_mul]
+          simp only [Set.mem_Ioo] at h2
+          rw [ENNReal.ofReal_add]
+          · apply div_nonneg _ (by positivity)
+            apply mul_nonneg _ (by apply pow_nonneg (by linarith))
+            simp only [Left.nonneg_neg_iff]
+            apply Real.log_nonpos (by nlinarith) (by nlinarith)
+          · apply div_nonneg _ (by positivity)
+            apply pow_nonneg (by linarith)
+        · simp only [h2, ↓reduceIte]
+      rw [h2, MeasureTheory.lintegral_add_left']
+      · simp only [Set.mem_Ioo] at h2
+        rw [aux_lintegral3 k r s, aux_lintegral4 k r s, ENNReal.ofReal_add]
+        · apply div_nonneg (by norm_num) (by positivity)
+        · apply div_nonneg (by norm_num) (by positivity)
+      · apply AEMeasurable.ennreal_ofReal
+        apply Measurable.aemeasurable
+        apply Measurable.div_const
+        apply Measurable.mul
+        · apply Measurable.neg
+          apply Measurable.log measurable_id
+        · exact Measurable.pow_const measurable_id _
+  · rw [MeasureTheory.Measure.prod_restrict, ← MeasureTheory.Measure.volume_eq_prod]
+    exact AEMeasurable_aux'
+
+lemma J_ENN_rs_eq_tsum (r s : ℕ) : J_ENN r s = ∑' (k : ℕ), ENNReal.ofReal
+    (1 / ((k + r + 1) ^ 2 * (k + s + 1)) + 1 / ((k + r + 1) * (k + s + 1) ^ 2)) := by
+  calc
+  _ = ∫⁻ (x : ℝ × ℝ) in Set.Ioo 0 1 ×ˢ Set.Ioo 0 1,
+    ∑' (k : ℕ), ENNReal.ofReal (- (x.1 * x.2).log * x.1 ^ (k + r) * x.2 ^ (k + s)) := by
+    rw [J_ENN, ← MeasureTheory.lintegral_indicator _ (by measurability),
+        ← MeasureTheory.lintegral_indicator _ (by measurability)]
+    congr
+    ext y
+    rw [Set.indicator_apply, Set.indicator_apply]
+    by_cases h1 : y ∈ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1
+    · simp only [h1, ↓reduceIte, div_eq_mul_inv]
+      simp only [Set.mem_prod, Set.mem_Ioo] at h1
+      rw [← tsum_geometric_of_lt_one]
+      · rw [← tsum_mul_left, ← tsum_mul_right, ← tsum_mul_right, ENNReal.ofReal_tsum_of_nonneg]
+        · simp only [neg_mul, pow_add, mul_pow, ← mul_assoc]
+          congr
+          ext k
+          nth_rw 2 [mul_assoc]
+          nth_rw 4 [mul_assoc]
+          nth_rw 5 [mul_comm]
+        · intro n
+          rw [mul_pow, ← mul_assoc]
+          apply mul_nonneg _ (by apply pow_nonneg (by linarith))
+          apply mul_nonneg _ (by apply pow_nonneg (by linarith))
+          apply mul_nonneg _ (by apply pow_nonneg (by linarith))
+          apply mul_nonneg _ (by apply pow_nonneg (by linarith))
+          simp only [Left.nonneg_neg_iff]
+          apply Real.log_nonpos (by nlinarith) (by nlinarith)
+        · simp_rw [← smul_eq_mul]
+          apply Summable.smul_const (a := y.2 ^ s)
+          apply Summable.smul_const (a := y.1 ^ r)
+          apply Summable.const_smul (b := -(y.1 • y.2).log)
+          apply summable_geometric_of_lt_one <;> rw [smul_eq_mul] <;> nlinarith
+      · nlinarith
+      · nlinarith
+    · simp only [h1, ↓reduceIte]
+  _ = ∑' (k : ℕ), ∫⁻ (x : ℝ × ℝ) in Set.Ioo 0 1 ×ˢ Set.Ioo 0 1,
+    ENNReal.ofReal (- (x.1 * x.2).log * x.1 ^ (k + r) * x.2 ^ (k + s)) := by
+    rw [MeasureTheory.lintegral_tsum]
+    intro n
+    exact AEMeasurable_aux'
+  _ = ∑' (k : ℕ), ENNReal.ofReal
+    (1 / ((k + r + 1) ^ 2 * (k + s + 1)) + 1 / ((k + r + 1) * (k + s + 1) ^ 2)) := by
+    simp_rw [J_ENN_rs_eq_tsum_aux_intergal r s]
 
 lemma J_ENN_rr {r : ℕ} : J_ENN r r = ENNReal.ofReal
     (2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 - 2 * ∑ m in Finset.Icc 1 r, 1 / (m : ℝ) ^ 3) := by
@@ -526,5 +786,6 @@ lemma J_rs' {r s : ℕ} (h : r > s) :
   sorry
 
 lemma J_rs {r s : ℕ} (h : r ≠ s) : J r s =
-    (∑ m in Finset.Icc 1 r, 1 / (m : ℝ) ^ 2 - ∑ m in Finset.Icc 1 s, 1 / (m : ℝ) ^ 2) / (r - s) := by
+    (∑ m in Icc 1 r, 1 / (m : ℝ) ^ 2 - ∑ m in Icc 1 s, 1 / (m : ℝ) ^ 2) / (r - s) := by
+
   sorry
