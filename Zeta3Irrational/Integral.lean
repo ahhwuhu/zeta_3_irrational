@@ -362,7 +362,6 @@ lemma integrableOn_aux (x : ℝ × ℝ) (hx : x ∈ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1
     · apply ContinuousOn.sub continuousOn_const
       apply ContinuousOn.mul continuousOn_const continuousOn_id
     · intro y hy
-
       exact sub_mul_mul_ne_zero y x hx hy h1
   · intro y hy
     have h : 1 / (1 - (1 - x.1 * x.2) * y) =
@@ -757,13 +756,67 @@ lemma J_ENN_rs_eq_tsum (r s : ℕ) : J_ENN r s = ∑' (k : ℕ), ENNReal.ofReal
     (1 / ((k + r + 1) ^ 2 * (k + s + 1)) + 1 / ((k + r + 1) * (k + s + 1) ^ 2)) := by
     simp_rw [J_ENN_rs_eq_tsum_aux_intergal r s]
 
-lemma J_ENN_rr {r : ℕ} : J_ENN r r = ENNReal.ofReal
+lemma J_ENN_rr (r : ℕ) : J_ENN r r = ENNReal.ofReal
     (2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 - 2 * ∑ m in Finset.Icc 1 r, 1 / (m : ℝ) ^ 3) := by
-  sorry
+  have h : J_ENN r r = ∑' (k : ℕ), ENNReal.ofReal (2 / ((k + r + 1) ^ 3)) := by
+    rw [J_ENN_rs_eq_tsum r r]
+    congr
+    ext k
+    rw [← pow_one (a := (k : ℝ) + r + 1), ← pow_mul, ← pow_add, ← pow_add, one_mul]
+    simp only [Nat.reduceAdd, pow_one, ← two_mul, mul_one_div]
+  rw [h]
+  have h1 : ∑' (k : ℕ), 2 / (((k : ℝ) + r + 1) ^ 3) =
+    2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 - 2 * ∑ m in Finset.Icc 1 r, 1 / (m : ℝ) ^ 3 := by
+    symm
+    apply sub_eq_of_eq_add
+    rw [← sum_add_tsum_nat_add' (k := r) (f := fun k => 1 / ((k : ℝ) + 1) ^ 3), mul_add, add_comm,
+      ← tsum_mul_left]
+    · simp only [mul_one_div, ← two_mul, ← mul_assoc, ← mul_add]
+      congr 1
+      · norm_cast
+      · congr 1
+        rw [← Nat.Ico_succ_right, Nat.succ_eq_add_one]
+        have h1 := Finset.sum_Ico_eq_sum_range (m := 1) (n := r + 1) (f := fun k => 1 / (k : ℝ) ^ 3)
+        simp only [add_tsub_cancel_right, Nat.cast_add, Nat.cast_one] at h1
+        simp only [h1, add_comm]
+    · norm_cast
+      simp only [add_assoc, Nat.cast_pow]
+      rw [summable_nat_add_iff (k := r + 1) (f := fun k => 1 / (k ^ 3 : ℝ)),
+        Real.summable_one_div_nat_pow (p := 3)]
+      norm_num
+  rw [← h1, ENNReal.ofReal_tsum_of_nonneg]
+  · intro n
+    positivity
+  · norm_cast
+    simp only [add_assoc, Nat.cast_pow]
+    rw [summable_nat_add_iff (k := r + 1) (f := fun k => 2 / (k ^ 3 : ℝ))]
+    have h2 := Real.summable_one_div_nat_pow (p := 3)
+    simp only [Real.summable_nat_pow_inv, Nat.one_lt_ofNat] at h2
+    apply Iff.symm at h2
+    rw [true_iff_iff, ← summable_mul_left_iff (a := 2) (by norm_num)] at h2
+    simp only [mul_one_div] at h2
+    exact h2
 
 lemma J_rr {r : ℕ} :
     J r r = 2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 - 2 * ∑ m in Finset.Icc 1 r, 1 / (m : ℝ) ^ 3 := by
-  sorry
+  have h := J_ENN_rr r
+  simp only [J_ENN] at h
+  rw [J, MeasureTheory.integral_eq_lintegral_of_nonneg_ae, h, ENNReal.toReal_ofReal_eq_iff]
+  · simp only [sub_nonneg, Nat.ofNat_pos, mul_le_mul_left]
+    rw [← Nat.Ico_succ_right, Nat.succ_eq_add_one]
+    nth_rw 1 [← zero_add (a := 1)]
+    rw [← Finset.sum_Ico_add' (c := 1)]
+    norm_cast
+    apply sum_le_tsum
+    · intro i hi; positivity
+    · norm_cast
+      simp only [add_assoc, Nat.cast_pow]
+      rw [summable_nat_add_iff (k := 1) (f := fun k => 1 / (k ^ 3 : ℝ)),
+        Real.summable_one_div_nat_pow (p := 3)]
+      norm_num
+  ·
+    sorry
+  · sorry
 
 theorem zeta_3 : J 0 0 = 2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
   simp only [J_rr, one_div, zero_lt_one, Finset.Icc_eq_empty_of_lt, Finset.sum_empty, mul_zero,
