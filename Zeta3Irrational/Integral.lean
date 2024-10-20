@@ -797,7 +797,63 @@ lemma J_ENN_rr (r : ℕ) : J_ENN r r = ENNReal.ofReal
     simp only [mul_one_div] at h2
     exact h2
 
-lemma J_rr {r : ℕ} :
+lemma fun_of_J_rr_nonneg (r : ℕ) (x : ℝ × ℝ) (hx : x ∈ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1) :
+    0 ≤ -Real.log (x.1 * x.2) / (1 - x.1 * x.2) * x.1 ^ r * x.2 ^ r := by
+  simp only [Set.mem_prod, Set.mem_Ioo] at hx
+  apply mul_nonneg
+  · apply mul_nonneg
+    · rw [div_nonneg_iff]
+      left
+      constructor
+      · simp only [Left.nonneg_neg_iff]
+        apply Real.log_nonpos <;> nlinarith
+      · nlinarith
+    · apply pow_nonneg (by linarith)
+  · apply pow_nonneg (by linarith)
+
+lemma integrableOn_J_rr (r : ℕ) : MeasureTheory.IntegrableOn
+    (fun x ↦ -Real.log (x.1 * x.2) / (1 - x.1 * x.2) * x.1 ^ r * x.2 ^ r)
+    (Set.Ioo 0 1 ×ˢ Set.Ioo 0 1) MeasureTheory.volume := by
+  have h := J_ENN_rr r
+  simp only [J_ENN] at h
+  rw [MeasureTheory.IntegrableOn, MeasureTheory.Integrable]
+  constructor
+  · apply AEMeasurable.aestronglyMeasurable
+    apply Measurable.aemeasurable
+    · apply Measurable.mul
+      · apply Measurable.mul
+        · apply Measurable.div
+          · apply Measurable.neg (Measurable.log (Measurable.mul measurable_fst measurable_snd))
+          · apply Measurable.const_sub (Measurable.mul measurable_fst measurable_snd)
+        · apply Measurable.pow measurable_fst measurable_const
+      · apply Measurable.pow measurable_snd measurable_const
+  · rw [MeasureTheory.hasFiniteIntegral_iff_norm]
+    have h1 : ∫⁻ (a : ℝ × ℝ) in Set.Ioo 0 1 ×ˢ Set.Ioo 0 1,
+      ENNReal.ofReal ‖-Real.log (a.1 * a.2) / (1 - a.1 * a.2) * a.1 ^ r * a.2 ^ r‖ =
+      ∫⁻ (a : ℝ × ℝ) in Set.Ioo 0 1 ×ˢ Set.Ioo 0 1,
+      ENNReal.ofReal (-Real.log (a.1 * a.2) / (1 - a.1 * a.2) * a.1 ^ r * a.2 ^ r) := by
+      rw [← MeasureTheory.lintegral_indicator _ (by measurability),
+        ← MeasureTheory.lintegral_indicator _ (by measurability)]
+      congr
+      ext x
+      rw [Set.indicator_apply, Set.indicator_apply]
+      by_cases hx : x ∈ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1
+      · simp only [hx, ↓reduceIte, norm_mul, norm_div, norm_neg, Real.norm_eq_abs, norm_pow]
+        simp only [Set.mem_prod, Set.mem_Ioo] at hx
+        rw [ENNReal.ofReal_eq_ofReal_iff]
+        · congr 3
+          · simp only [abs_eq_neg_self]
+            apply Real.log_nonpos <;> nlinarith
+          · simp only [abs_eq_self, sub_nonneg]; nlinarith
+          · simp only [abs_eq_self]; nlinarith
+          · simp only [abs_eq_self]; nlinarith
+        · positivity
+        · exact fun_of_J_rr_nonneg r x hx
+      · simp only [hx, ↓reduceIte]
+    rw [h1, h]
+    simp only [one_div, ENNReal.ofReal_lt_top]
+
+lemma J_rr (r : ℕ) :
     J r r = 2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 - 2 * ∑ m in Finset.Icc 1 r, 1 / (m : ℝ) ^ 3 := by
   have h := J_ENN_rr r
   simp only [J_ENN] at h
@@ -808,15 +864,30 @@ lemma J_rr {r : ℕ} :
     rw [← Finset.sum_Ico_add' (c := 1)]
     norm_cast
     apply sum_le_tsum
-    · intro i hi; positivity
+    · intro i _; positivity
     · norm_cast
       simp only [add_assoc, Nat.cast_pow]
       rw [summable_nat_add_iff (k := 1) (f := fun k => 1 / (k ^ 3 : ℝ)),
         Real.summable_one_div_nat_pow (p := 3)]
       norm_num
-  ·
-    sorry
-  · sorry
+  · apply MeasureTheory.ae_nonneg_restrict_of_forall_setIntegral_nonneg_inter
+    · exact integrableOn_J_rr r
+    · rintro x hx -
+      apply MeasureTheory.setIntegral_nonneg (by measurability)
+      intro y hy
+      by_cases h : y ∈ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1
+      · exact fun_of_J_rr_nonneg r y h
+      · rw [Set.mem_inter_iff] at hy
+        tauto
+  · apply AEMeasurable.aestronglyMeasurable
+    apply Measurable.aemeasurable
+    · apply Measurable.mul
+      · apply Measurable.mul
+        · apply Measurable.div
+          · apply Measurable.neg (Measurable.log (Measurable.mul measurable_fst measurable_snd))
+          · apply Measurable.const_sub (Measurable.mul measurable_fst measurable_snd)
+        · apply Measurable.pow measurable_fst measurable_const
+      · apply Measurable.pow measurable_snd measurable_const
 
 theorem zeta_3 : J 0 0 = 2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
   simp only [J_rr, one_div, zero_lt_one, Finset.Icc_eq_empty_of_lt, Finset.sum_empty, mul_zero,
@@ -840,5 +911,4 @@ lemma J_rs' {r s : ℕ} (h : r > s) :
 
 lemma J_rs {r s : ℕ} (h : r ≠ s) : J r s =
     (∑ m in Icc 1 r, 1 / (m : ℝ) ^ 2 - ∑ m in Icc 1 s, 1 / (m : ℝ) ^ 2) / (r - s) := by
-
   sorry
