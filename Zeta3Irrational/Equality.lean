@@ -5,24 +5,6 @@ import Zeta3Irrational.Integral
 open scoped Nat
 open BigOperators Polynomial
 
-lemma integral1 {a : ℝ} (ha : 0 < a) (ha1 : a < 1) :
-    ∫ (z : ℝ) in (0)..1, 1 / (1 - (1 - a) * z) = - a.log / (1 - a) := by
-  rw[← sub_pos] at ha1
-  have eq1 := intervalIntegral.integral_comp_mul_left (a := 0) (b := 1) (c := 1 - a)
-    (f := fun z ↦ (1 - z)⁻¹) (by positivity)
-  have eq2 := intervalIntegral.mul_integral_comp_sub_mul (a := 0) (b := 1 - a) (f := fun x ↦ (x)⁻¹)
-    (c := 1) (d := 1)
-  have eq3 := integral_inv_of_pos (a := a) (b := 1) ha (by norm_num)
-  simp only [mul_zero, mul_one, smul_eq_mul] at eq1
-  simp only [one_div]
-  rw [eq1, inv_mul_eq_div]
-  field_simp
-  simp only [one_div]
-  simp only [one_mul, intervalIntegral.integral_comp_sub_left, sub_sub_cancel, sub_zero,
-    mul_zero] at eq2
-  rw[eq3]
-  simp
-
 lemma integral_equality_help (s t : ℝ) (s0 : 0 < s) (s1 : s < 1) (t0 : 0 < t) (t1 : t < 1) :
     ∫ (u : ℝ) in (0)..1, 1 / ((1 - (1 - u) * s) * (1 - (1 - t) * u)) =
     ∫ (u : ℝ) in (0)..1, 1 / (1 - (1 - s) * t) * (s / (1 - (1 - u) * s) + (1 - t) / (1 - (1 - t) * u)) := by

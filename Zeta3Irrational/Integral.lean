@@ -797,8 +797,8 @@ lemma J_ENN_rr (r : ℕ) : J_ENN r r = ENNReal.ofReal
     simp only [mul_one_div] at h2
     exact h2
 
-lemma fun_of_J_rr_nonneg (r : ℕ) (x : ℝ × ℝ) (hx : x ∈ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1) :
-    0 ≤ -Real.log (x.1 * x.2) / (1 - x.1 * x.2) * x.1 ^ r * x.2 ^ r := by
+lemma fun_of_J_nonneg (r s: ℕ) (x : ℝ × ℝ) (hx : x ∈ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1) :
+    0 ≤ -Real.log (x.1 * x.2) / (1 - x.1 * x.2) * x.1 ^ r * x.2 ^ s := by
   simp only [Set.mem_prod, Set.mem_Ioo] at hx
   apply mul_nonneg
   · apply mul_nonneg
@@ -848,7 +848,7 @@ lemma integrableOn_J_rr (r : ℕ) : MeasureTheory.IntegrableOn
           · simp only [abs_eq_self]; nlinarith
           · simp only [abs_eq_self]; nlinarith
         · positivity
-        · exact fun_of_J_rr_nonneg r x hx
+        · exact fun_of_J_nonneg r r x hx
       · simp only [hx, ↓reduceIte]
     rw [h1, h]
     simp only [one_div, ENNReal.ofReal_lt_top]
@@ -876,7 +876,7 @@ lemma J_rr (r : ℕ) :
       apply MeasureTheory.setIntegral_nonneg (by measurability)
       intro y hy
       by_cases h : y ∈ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1
-      · exact fun_of_J_rr_nonneg r y h
+      · exact fun_of_J_nonneg r r y h
       · rw [Set.mem_inter_iff] at hy
         tauto
   · apply AEMeasurable.aestronglyMeasurable
@@ -893,22 +893,289 @@ theorem zeta_3 : J 0 0 = 2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
   simp only [J_rr, one_div, zero_lt_one, Finset.Icc_eq_empty_of_lt, Finset.sum_empty, mul_zero,
     sub_zero]
 
-lemma J_ENN_rr' {r : ℕ} (h : 0 < r) : J_ENN r r = ENNReal.ofReal
-    (2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 - 2 * ∑ m in Finset.Icc 1 r, 1 / (m : ℝ) ^ 3) := by
-  sorry
+lemma positivity_aux (r s : ℕ) (h : r > s) :
+    ∀ (i : ℕ), 0 ≤ 1 / ((r : ℝ) - s) * (1 / (i + s + 1) ^ 2 - 1 / (i + r + 1) ^ 2) := by
+  intro n
+  apply mul_nonneg
+  · simp only [one_div, inv_nonneg, sub_nonneg, Nat.cast_le]; linarith
+  · simp only [sub_nonneg]
+    rw [div_le_div_iff (by positivity) (by positivity)]
+    simp only [one_mul]
+    apply pow_le_pow_left (by linarith)
+    simp only [add_le_add_iff_right, add_le_add_iff_left, Nat.cast_le]
+    linarith
 
-lemma J_rr' {r : ℕ} (h : 0 < r) :
-    J r r = 2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 - 2 * ∑ m in Finset.Icc 1 r, 1 / (m : ℝ) ^ 3 := by
-  sorry
+lemma summable_aux (r : ℕ) : Summable fun (b : ℕ) ↦ 1 / ((b : ℝ) + r + 1) ^ 2 := by
+  norm_cast
+  simp only [add_assoc, Nat.cast_pow]
+  rw [summable_nat_add_iff (k := r + 1) (f := fun k => 1 / (k ^ 2 : ℝ)),
+    Real.summable_one_div_nat_pow (p := 2)]
+  norm_num
 
-lemma J_ENN_rs' {r s : ℕ} (h : r > s) :
+lemma J_ENN_rs' (r s : ℕ) (h : r > s) :
     J_ENN r s = ENNReal.ofReal ((∑ k in Finset.Ioc s r, 1 / (k : ℝ) ^ 2) / (r - s)) := by
-  sorry
+  calc
+  _ = ∑' (k : ℕ), ENNReal.ofReal (1 / (r - s) * (1 / (k + s + 1) ^ 2 - 1 / (k + r + 1) ^ 2)) := by
+    rw [J_ENN_rs_eq_tsum]
+    congr
+    ext k
+    set x := (k : ℝ) + r + 1
+    set y := (k : ℝ) + s + 1
+    have hy : y > 0 := by positivity
+    have hxy : x - y > 0 := by
+      rw [show (x : ℝ) - y = r - s by ring]
+      simp only [gt_iff_lt, sub_pos, Nat.cast_lt]
+      linarith
+    rw [show r - s = (x : ℝ) - y by ring, ENNReal.ofReal_eq_ofReal_iff]
+    · rw [div_add_div]
+      · rw [div_sub_div]
+        · rw [div_mul_div_comm, div_eq_div_iff]
+          · ring
+          · suffices 0 < x ^ 2 * y * (x * y ^ 2) by linarith
+            positivity
+          · suffices (x - y) * (y ^ 2 * x ^ 2) > 0 by linarith
+            positivity
+        · positivity
+        · positivity
+      · suffices x ^ 2 * y > 0 by linarith
+        positivity
+      · suffices x * y ^ 2 > 0 by linarith
+        positivity
+    · positivity
+    · apply mul_nonneg (by positivity)
+      simp only [sub_nonneg]
+      rw [div_le_div_iff (by positivity) (by positivity)]
+      simp only [one_mul]
+      apply pow_le_pow_left (by linarith) (by linarith)
+  _ = ENNReal.ofReal ((∑ k in Finset.Ioc s r, 1 / (k : ℝ) ^ 2) / (r - s)) := by
+    rw [← ENNReal.ofReal_tsum_of_nonneg]
+    · rw [ENNReal.ofReal_eq_ofReal_iff]
+      · simp only [mul_sub]
+        · rw [tsum_sub]
+          · simp only [sum_div, div_div, ← one_div_mul_one_div_rev]
+            apply sub_eq_of_eq_add
+            rw [← sum_add_tsum_nat_add' (f := fun n => 1 / (r - s) * (1 / (n + (s : ℝ) + 1) ^ 2)) (k := r - s)]
+            · congr 1
+              · simp only [← Nat.cast_add, add_comm]
+                rw [← Finset.sum_Ico_eq_sum_range (n := r) (m := s)
+                  (f := fun k => 1 / (r - s) * (1 / ((k : ℝ) + 1) ^ 2)), ← Nat.Ico_succ_succ,
+                  Nat.succ_eq_add_one, ← Finset.sum_Ico_add' (c := 1) (b := r) (a := s)]
+                norm_cast
+              · congr
+                ext n
+                congr 1
+                norm_cast
+                rw [show n + (r - s) + s + 1 = n + r + 1 by omega]
+            · simp_rw [← smul_eq_mul]
+              apply Summable.const_smul
+              simp only [Nat.cast_add]
+              rw [Nat.cast_sub (n := r) (m := s) (by linarith)]
+              simp only [add_sub, sub_add_cancel]
+              exact summable_aux r
+          · simp_rw [← smul_eq_mul]
+            apply Summable.const_smul
+            exact summable_aux s
+          · simp_rw [← smul_eq_mul]
+            apply Summable.const_smul
+            exact summable_aux r
+      · apply tsum_nonneg
+        exact positivity_aux r s h
+      · rw [sum_div]
+        apply sum_nonneg
+        intro i _
+        rw [div_nonneg_iff]
+        left
+        simp only [one_div, inv_nonneg, Nat.cast_nonneg, pow_nonneg, sub_nonneg, Nat.cast_le,
+          true_and]
+        linarith
+    · exact positivity_aux r s h
+    · simp_rw [← smul_eq_mul]
+      apply Summable.const_smul
+      apply Summable.sub
+      · exact summable_aux s
+      · exact summable_aux r
 
-lemma J_rs' {r s : ℕ} (h : r > s) :
+lemma integrableOn_J_rs' (r s : ℕ) (h : r > s) : MeasureTheory.IntegrableOn
+    (fun x ↦ -Real.log (x.1 * x.2) / (1 - x.1 * x.2) * x.1 ^ r * x.2 ^ s)
+    (Set.Ioo 0 1 ×ˢ Set.Ioo 0 1) MeasureTheory.volume := by
+  have h₀ := J_ENN_rs' r s h
+  simp only [J_ENN] at h₀
+  rw [MeasureTheory.IntegrableOn, MeasureTheory.Integrable]
+  constructor
+  · apply AEMeasurable.aestronglyMeasurable
+    apply Measurable.aemeasurable
+    · apply Measurable.mul
+      · apply Measurable.mul
+        · apply Measurable.div
+          · apply Measurable.neg (Measurable.log (Measurable.mul measurable_fst measurable_snd))
+          · apply Measurable.const_sub (Measurable.mul measurable_fst measurable_snd)
+        · apply Measurable.pow measurable_fst measurable_const
+      · apply Measurable.pow measurable_snd measurable_const
+  · rw [MeasureTheory.hasFiniteIntegral_iff_norm]
+    have h1 : ∫⁻ (a : ℝ × ℝ) in Set.Ioo 0 1 ×ˢ Set.Ioo 0 1,
+      ENNReal.ofReal ‖-Real.log (a.1 * a.2) / (1 - a.1 * a.2) * a.1 ^ r * a.2 ^ s‖ =
+      ∫⁻ (a : ℝ × ℝ) in Set.Ioo 0 1 ×ˢ Set.Ioo 0 1,
+      ENNReal.ofReal (-Real.log (a.1 * a.2) / (1 - a.1 * a.2) * a.1 ^ r * a.2 ^ s) := by
+      rw [← MeasureTheory.lintegral_indicator _ (by measurability),
+        ← MeasureTheory.lintegral_indicator _ (by measurability)]
+      congr
+      ext x
+      rw [Set.indicator_apply, Set.indicator_apply]
+      by_cases hx : x ∈ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1
+      · simp only [hx, ↓reduceIte, norm_mul, norm_div, norm_neg, Real.norm_eq_abs, norm_pow]
+        simp only [Set.mem_prod, Set.mem_Ioo] at hx
+        rw [ENNReal.ofReal_eq_ofReal_iff]
+        · congr 3
+          · simp only [abs_eq_neg_self]
+            apply Real.log_nonpos <;> nlinarith
+          · simp only [abs_eq_self, sub_nonneg]; nlinarith
+          · simp only [abs_eq_self]; nlinarith
+          · simp only [abs_eq_self]; nlinarith
+        · positivity
+        · exact fun_of_J_nonneg r s x hx
+      · simp only [hx, ↓reduceIte]
+    rw [h1, h₀]
+    simp only [one_div, ENNReal.ofReal_lt_top]
+
+lemma J_rs' (r s : ℕ) (h : r > s) :
     J r s = (∑ k in Finset.Ioc s r, 1 / (k : ℝ) ^ 2) / (r - s) := by
-  sorry
+  have h₀ := J_ENN_rs' r s h
+  simp only [J_ENN] at h₀
+  rw [J, MeasureTheory.integral_eq_lintegral_of_nonneg_ae, h₀, ENNReal.toReal_ofReal_eq_iff]
+  · rw [sum_div]
+    apply sum_nonneg
+    intro i _
+    rw [div_nonneg_iff]
+    left
+    simp only [one_div, inv_nonneg, Nat.cast_nonneg, pow_nonneg, sub_nonneg, Nat.cast_le,
+      true_and]
+    linarith
+  · apply MeasureTheory.ae_nonneg_restrict_of_forall_setIntegral_nonneg_inter
+    · exact integrableOn_J_rs' r s h
+    · rintro x hx -
+      apply MeasureTheory.setIntegral_nonneg (by measurability)
+      intro y hy
+      by_cases h : y ∈ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1
+      · exact fun_of_J_nonneg r s y h
+      · rw [Set.mem_inter_iff] at hy
+        tauto
+  · apply AEMeasurable.aestronglyMeasurable
+    apply Measurable.aemeasurable
+    · apply Measurable.mul
+      · apply Measurable.mul
+        · apply Measurable.div
+          · apply Measurable.neg (Measurable.log (Measurable.mul measurable_fst measurable_snd))
+          · apply Measurable.const_sub (Measurable.mul measurable_fst measurable_snd)
+        · apply Measurable.pow measurable_fst measurable_const
+      · apply Measurable.pow measurable_snd measurable_const
+
+lemma J_ENN_rs_symm (r s : ℕ) : J_ENN r s = J_ENN s r := by
+  simp only [J_ENN_rs_eq_tsum, add_comm, mul_comm]
+
+lemma integrableOn_J_rs (r s : ℕ) : MeasureTheory.IntegrableOn
+    (fun x ↦ -Real.log (x.1 * x.2) / (1 - x.1 * x.2) * x.1 ^ r * x.2 ^ s)
+    (Set.Ioo 0 1 ×ˢ Set.Ioo 0 1) MeasureTheory.volume := by
+  by_cases h : r > s
+  · exact integrableOn_J_rs' r s h
+  · by_cases h1 : s = r
+    · rw [h1]
+      exact integrableOn_J_rr r
+    · have h2 : s > r := by
+        by_contra!; apply h1; linarith
+      rw [MeasureTheory.IntegrableOn, MeasureTheory.Integrable]
+      constructor
+      · apply AEMeasurable.aestronglyMeasurable
+        apply Measurable.aemeasurable
+        · apply Measurable.mul
+          · apply Measurable.mul
+            · apply Measurable.div
+              · apply Measurable.neg (Measurable.log (Measurable.mul measurable_fst measurable_snd))
+              · apply Measurable.const_sub (Measurable.mul measurable_fst measurable_snd)
+            · apply Measurable.pow measurable_fst measurable_const
+          · apply Measurable.pow measurable_snd measurable_const
+      · rw [MeasureTheory.hasFiniteIntegral_iff_norm]
+        have h1 : ∫⁻ (a : ℝ × ℝ) in Set.Ioo 0 1 ×ˢ Set.Ioo 0 1,
+          ENNReal.ofReal ‖-Real.log (a.1 * a.2) / (1 - a.1 * a.2) * a.1 ^ r * a.2 ^ s‖ =
+          ∫⁻ (a : ℝ × ℝ) in Set.Ioo 0 1 ×ˢ Set.Ioo 0 1,
+          ENNReal.ofReal (-Real.log (a.1 * a.2) / (1 - a.1 * a.2) * a.1 ^ r * a.2 ^ s) := by
+          rw [← MeasureTheory.lintegral_indicator _ (by measurability),
+            ← MeasureTheory.lintegral_indicator _ (by measurability)]
+          congr
+          ext x
+          rw [Set.indicator_apply, Set.indicator_apply]
+          by_cases hx : x ∈ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1
+          · simp only [hx, ↓reduceIte, norm_mul, norm_div, norm_neg, Real.norm_eq_abs, norm_pow]
+            simp only [Set.mem_prod, Set.mem_Ioo] at hx
+            rw [ENNReal.ofReal_eq_ofReal_iff]
+            · congr 3
+              · simp only [abs_eq_neg_self]
+                apply Real.log_nonpos <;> nlinarith
+              · simp only [abs_eq_self, sub_nonneg]; nlinarith
+              · simp only [abs_eq_self]; nlinarith
+              · simp only [abs_eq_self]; nlinarith
+            · positivity
+            · exact fun_of_J_nonneg r s x hx
+          · simp only [hx, ↓reduceIte]
+        have h₀ := J_ENN_rs' s r h2
+        rw [J_ENN_rs_symm s r] at h₀
+        simp only [J_ENN] at h₀
+        rw [h1, h₀]
+        simp only [one_div, ENNReal.ofReal_lt_top]
+
+lemma J_eq_toReal_J_ENN (r s : ℕ) : J r s = (J_ENN r s).toReal := by
+  rw [J, J_ENN, MeasureTheory.integral_eq_lintegral_of_nonneg_ae]
+  · apply MeasureTheory.ae_nonneg_restrict_of_forall_setIntegral_nonneg_inter
+    · exact integrableOn_J_rs r s
+    · rintro x hx -
+      apply MeasureTheory.setIntegral_nonneg (by measurability)
+      intro y hy
+      by_cases h : y ∈ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1
+      · exact fun_of_J_nonneg r s y h
+      · rw [Set.mem_inter_iff] at hy
+        tauto
+  · apply AEMeasurable.aestronglyMeasurable
+    apply Measurable.aemeasurable
+    · apply Measurable.mul
+      · apply Measurable.mul
+        · apply Measurable.div
+          · apply Measurable.neg (Measurable.log (Measurable.mul measurable_fst measurable_snd))
+          · apply Measurable.const_sub (Measurable.mul measurable_fst measurable_snd)
+        · apply Measurable.pow measurable_fst measurable_const
+      · apply Measurable.pow measurable_snd measurable_const
+
+lemma J_rs_symm (r s : ℕ) : J r s = J s r := by
+  rw [J_eq_toReal_J_ENN, J_eq_toReal_J_ENN, J_ENN_rs_symm]
 
 lemma J_rs {r s : ℕ} (h : r ≠ s) : J r s =
     (∑ m in Icc 1 r, 1 / (m : ℝ) ^ 2 - ∑ m in Icc 1 s, 1 / (m : ℝ) ^ 2) / (r - s) := by
-  sorry
+  by_cases h1 : r > s
+  · simp only [J_rs' r s h1, sub_div, sum_div]
+    rw [← Nat.Ico_succ_succ, Finset.sum_Ico_eq_sub]
+    · congr 1
+      · rw [← Finset.sum_range_add_sum_Ico (n := r + 1) (m := 1) _ (by omega)]
+        simp only [range_one, one_div, sum_singleton, CharP.cast_eq_zero, ne_eq,
+          OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, inv_zero, zero_div, zero_add]
+        rw [ Nat.Ico_succ_right]
+      · rw [← Finset.sum_range_add_sum_Ico (n := s + 1) (m := 1) _ (by omega)]
+        simp only [range_one, one_div, sum_singleton, CharP.cast_eq_zero, ne_eq,
+          OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, inv_zero, zero_div, zero_add]
+        rw [ Nat.Ico_succ_right]
+    · linarith
+  · simp only [gt_iff_lt, not_lt] at h1
+    have h2 : s > r := by
+      by_contra!; apply h; linarith
+    rw [J_rs_symm, J_rs' s r h2]
+    nth_rw 2 [← neg_div_neg_eq]
+    simp only [neg_sub]
+    congr 1
+    rw [← Nat.Ico_succ_succ, Finset.sum_Ico_eq_sub]
+    · congr 1
+      · rw [← Finset.sum_range_add_sum_Ico (n := s + 1) (m := 1) _ (by omega)]
+        simp only [range_one, one_div, sum_singleton, CharP.cast_eq_zero, ne_eq,
+          OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, inv_zero, zero_div, zero_add]
+        rw [ Nat.Ico_succ_right]
+      · rw [← Finset.sum_range_add_sum_Ico (n := r + 1) (m := 1) _ (by omega)]
+        simp only [range_one, one_div, sum_singleton, CharP.cast_eq_zero, ne_eq,
+          OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, inv_zero, zero_div, zero_add]
+        rw [ Nat.Ico_succ_right]
+    · linarith
