@@ -1,62 +1,59 @@
 import Mathlib
 
+/-!
+# Legendre Polynomials
+
+In this file, we define the shiftedLegendre polynomials `shiftedLegendre n` for `n : ℕ` as a
+polynomial in `ℤ[X]`. We prove some basic properties of the shiftedLegendre polynomials.
+
+-/
+
 open scoped Nat
-open BigOperators
+open BigOperators Finset
+
+variable {R : Type*}
 
 namespace Polynomial
 
-noncomputable abbrev legendre (n : ℕ) : ℝ[X] :=
-  C (1 / n ! : ℝ) * derivative^[n] (X ^ n * (1 - X) ^ n)
+/--  `shiftedLegendre n` is the polynomial defined in terms of derivatives of order n.  -/
+noncomputable def shiftedLegendre (n : ℕ) : ℝ[X] :=
+  C (n ! : ℝ)⁻¹ * derivative^[n] (X ^ n * (1 - X) ^ n)
 
-lemma sub_pow{R : Type u_1} [CommRing R] (x : R) (y : R) (n : ℕ) :
-    (x - y) ^ n = (Finset.range (n + 1)).sum fun (m : ℕ) => (n.choose m) • x ^ m * (- 1) ^ (n - m) * y ^ (n - m) := by
-  rw [← Mathlib.Tactic.RingNF.add_neg, add_pow]
-  apply Finset.sum_congr rfl
-  intro m _
-  field_simp
-  have eq1 : (-y) ^ (n - m) = (-1) ^ (n - m) * y ^ (n - m) := by
-    rw[neg_pow]
-  rw[eq1]
-  ring_nf
+lemma Finsum_iterate_deriv [CommRing R] (k : ℕ) (h : ℕ → ℕ) :
+    derivative^[k] (∑ m in Finset.range (k + 1), (h m) • ((- 1) ^ m : R[X]) * X ^ (k + m)) =
+    ∑ m in Finset.range (k + 1), (h m) • (- 1) ^ m * derivative^[k] (X ^ (k + m)) := by
+  induction' k + 1 with n hn
+  · simp only [Nat.zero_eq, Finset.range_zero, Finset.sum_empty, iterate_map_zero]
+  · rw[Finset.sum_range, Finset.sum_range, Fin.sum_univ_castSucc, Fin.sum_univ_castSucc] at *
+    simp only [Fin.coe_castSucc, Fin.val_last, iterate_map_add, hn, add_right_inj]
+    rw [nsmul_eq_mul, mul_assoc, ← nsmul_eq_mul, Polynomial.iterate_derivative_smul, nsmul_eq_mul,
+      mul_assoc]
+    rcases n.even_or_odd with (hn1 | hn2)
+    · simp_all only [nsmul_eq_mul, Int.even_coe_nat, Even.neg_pow, one_pow, one_mul]
+    · rw [Odd.neg_one_pow]
+      simp only [neg_mul, one_mul, iterate_map_neg, mul_neg]
+      exact_mod_cast hn2
 
-lemma sub_pow_special{R : Type u_1} [CommRing R] (x : R) (n : ℕ) :
-    (x - x ^ 2) ^ n = (Finset.range (n + 1)).sum fun (m : ℕ) => (n.choose m) • (- 1) ^ m * x ^ (n + m) := by
-  rw[sub_eq_add_neg, add_comm, add_pow]
-  apply Finset.sum_congr rfl
-  intro m hm
-  rw[neg_pow, pow_two, mul_pow,← mul_assoc, mul_comm, mul_assoc, pow_mul_pow_sub, mul_assoc,
-    ← pow_add, ← mul_assoc, nsmul_eq_mul, add_comm]
-  rw[Finset.mem_range] at hm
-  linarith
-
-theorem iterate_derivative_finset_sum {R : Type u_1} [CommRing R] (k : ℕ) (h : ℕ → ℕ) :
-    derivative^[k] (∑ m in Finset.range (k + 1), (h m * (-1 : R) ^ m) • X ^ (k + m)) =
-    ∑ m in Finset.range (k + 1), ((h m * (-1 : R) ^ m) • (derivative^[k] (X ^ (k + m))) : R[X]):= by
-  simp only [nsmul_eq_mul, ← LinearMap.pow_apply, map_sum]
-  congr! 1 with i _
-  rw [← smul_eq_mul, map_smul]
-
-lemma legendre_eq_sum (n : ℕ) : legendre n = ∑ k in Finset.range (n + 1),
+/-- The expand of `shiftedLegendre n`. -/
+theorem shiftedLegendre_eq_sum (n : ℕ) : shiftedLegendre n = ∑ k in Finset.range (n + 1),
     C ((- 1) ^ k : ℝ) • (Nat.choose n k) * (Nat.choose (n + k) n) * X ^ k := by
-  have h : derivative^[n] (∑ m ∈ Finset.range (n + 1), n.choose m • (-1 : ℝ[X]) ^ m * X ^ (n + m)) =
-    ∑ m ∈ Finset.range (n + 1), n.choose m • (-1) ^ m * derivative^[n] (X ^ (n + m)) := by
-    have (n m k : ℕ) : (n * (-1 : ℝ) ^ m) • (X : ℝ[X]) ^ k = n • (-1 : ℝ[X]) ^ m * X ^ k := by
-      rw [Algebra.smul_def]; simp
-    simp_rw [← this]
-    rw [iterate_derivative_finset_sum]
-    congr! 1 with i _
-    rw [Algebra.smul_def]; simp
-  rw [legendre, ← mul_pow, mul_one_sub, ← pow_two, sub_pow_special, h,
+  have h : ((X : ℝ[X]) - X ^ 2) ^ n =
+    ∑ m ∈ range (n + 1), n.choose m • (- 1) ^ m * X ^ (n + m) := by
+    rw[sub_eq_add_neg, add_comm, add_pow]
+    congr! 1 with m hm
+    rw[neg_pow, pow_two, mul_pow,← mul_assoc, mul_comm, mul_assoc, pow_mul_pow_sub, mul_assoc,
+      ← pow_add, ← mul_assoc, nsmul_eq_mul, add_comm]
+    rw[Finset.mem_range] at hm
+    linarith
+  rw [shiftedLegendre, ← mul_pow, mul_one_sub, ← pow_two, h, Finsum_iterate_deriv,
     Finset.mul_sum]
-  apply Finset.sum_congr rfl
-  intro x _
+  congr! 1 with x _
   rw [← mul_assoc, Polynomial.iterate_derivative_X_pow_eq_smul, Nat.descFactorial_eq_div
     (by omega), show n + x - n = x by omega, smul_eq_mul, nsmul_eq_mul, ← mul_assoc, mul_assoc,
     mul_comm]
   simp only [Int.reduceNeg, map_pow, map_neg, map_one]
   rw [Algebra.smul_def, algebraMap_eq, map_natCast, ← mul_assoc, ← mul_assoc, add_comm,
-    Nat.add_choose]
-  rw [mul_assoc, mul_assoc, mul_assoc, mul_assoc, mul_assoc, mul_comm]
+    Nat.add_choose, mul_assoc, mul_assoc, mul_assoc, mul_assoc, mul_assoc, mul_comm]
   nth_rewrite 5 [mul_comm]
   congr 1
   nth_rewrite 2 [mul_comm]
@@ -68,8 +65,8 @@ lemma legendre_eq_sum (n : ℕ) : legendre n = ∑ k in Finset.range (n + 1),
   intro m
   simp only [one_div, coeff_mul_C, coeff_natCast_ite, Nat.cast_ite, CharP.cast_eq_zero, ite_mul,
     zero_mul]
-  if h : m = 0 then
-    simp [h]
+  by_cases h : m = 0
+  · simp [h]
     rw [Nat.cast_div]
     · rw [← one_div, ← div_mul_eq_div_mul_one_div]
       norm_cast
@@ -79,36 +76,34 @@ lemma legendre_eq_sum (n : ℕ) : legendre n = ∑ k in Finset.range (n + 1),
         apply mul_ne_zero (Nat.factorial_ne_zero x) (Nat.factorial_ne_zero n)
     · exact Nat.factorial_dvd_factorial (by omega)
     · norm_cast; exact Nat.factorial_ne_zero x
-  else
-    simp [h]
+  · simp only [h, ↓reduceIte]
 
-lemma legendre_eq_intpoly (n : ℕ) : ∃ a : ℕ → ℤ, legendre n = ∑ k in Finset.range (n + 1),
-    (a k) • X ^ k := by
-  simp_rw [legendre_eq_sum]
+/-- `shiftedLegendre n` is an integer polynomial. -/
+lemma shiftedLegendre_eq_int_poly (n : ℕ) : ∃ a : ℕ → ℤ, shiftedLegendre n =
+    ∑ k in Finset.range (n + 1), (a k) • X ^ k := by
+  simp_rw [shiftedLegendre_eq_sum]
   use fun k => (- 1) ^ k * (Nat.choose n k) * (Nat.choose (n + k) n)
-  apply Finset.sum_congr rfl
-  intro x _
+  congr! 1 with x
   simp
 
 lemma deriv_one_sub_X {n i : ℕ} : (⇑derivative)^[i] ((1 - X) ^ n : ℝ[X]) =
     (-1) ^ i * (n.descFactorial i) • ((1 - X) ^ (n - i)) := by
   rw [show (1 - X : ℝ[X]) ^ n = (X ^ n : ℝ[X]).comp (1 - X) by simp,
     Polynomial.iterate_derivative_comp_one_sub_X (p := X ^ n),
-    Polynomial.iterate_derivative_X_pow_eq_smul]
-  rw [Algebra.smul_def, algebraMap_eq, map_natCast]
+    Polynomial.iterate_derivative_X_pow_eq_smul, Algebra.smul_def, algebraMap_eq, map_natCast]
   simp
 
-lemma legendre_eval_symm {n : ℕ} {x : ℝ} : eval x (legendre n) =
-    (-1) ^ n * eval (1 - x) (legendre n) := by
+/-- The values ​​of the shiftedLegendre polynomial at x and 1-x differ by a factor (-1)ⁿ. -/
+lemma shiftedLegendre_eval_symm (n : ℕ) (x : ℝ) :
+    eval x (shiftedLegendre n) = (-1) ^ n * eval (1 - x) (shiftedLegendre n) := by
   rw [mul_comm]
-  simp only [eval_mul, one_div, eval_C]
+  simp only [shiftedLegendre, eval_mul, one_div, eval_C]
   rw [mul_assoc]
   simp only [mul_eq_mul_left_iff, inv_eq_zero, Nat.cast_eq_zero]; left
   rw [Polynomial.iterate_derivative_mul]
   simp only [Nat.succ_eq_add_one, nsmul_eq_mul]
   rw [Polynomial.eval_finset_sum, Polynomial.eval_finset_sum, ← Finset.sum_flip, Finset.sum_mul]
-  apply Finset.sum_congr rfl
-  intro i hi
+  congr! 1 with i hi
   simp only [Polynomial.iterate_derivative_X_pow_eq_smul, eval_mul, eval_natCast,
     Algebra.smul_mul_assoc, eval_smul, eval_mul, eval_pow, eval_X, smul_eq_mul]
   simp only [Finset.mem_range, Nat.lt_add_one_iff] at hi
@@ -124,7 +119,7 @@ lemma legendre_eval_symm {n : ℕ} {x : ℝ} : eval x (legendre n) =
   rw [← mul_assoc, ← mul_assoc, mul_assoc]
   congr 1
   rw [← pow_add, show i + n = n - i + 2 * i by omega, pow_add]
-  simp
+  simp only [even_two, Even.mul_right, Even.neg_pow, one_pow, mul_one]
 
 theorem differentiableAt_inv_special {x a : ℝ} {n : ℕ}
     (ha : a > 0) (hx : 1 - a * x = 0) :
@@ -247,7 +242,7 @@ lemma n_derivative {a : ℝ} (n : ℕ) (ha : a > 0) : deriv^[n] (fun x ↦ 1 / (
           · apply differentiableAt_id
       · exact pow_ne_zero (n + 1) hne
 
-lemma legendre_poly_eval_zero_eq_zero {m : ℕ} (h : m < n) :
+lemma shiftedLegendre_poly_eval_zero_eq_zero {m : ℕ} (h : m < n) :
     eval 0 ((⇑derivative)^[m] (X ^ n * (1 - X) ^ n) : ℝ[X]) = 0 := by
   rw [Polynomial.iterate_derivative_mul, Polynomial.eval_finset_sum]
   apply Finset.sum_eq_zero
@@ -265,7 +260,7 @@ lemma legendre_poly_eval_zero_eq_zero {m : ℕ} (h : m < n) :
     m - x ≤ m := by simp
     _ < n := by exact h
 
-lemma legendre_poly_eval_one_eq_zero {m : ℕ} (h : m < n) :
+lemma shiftedLegendre_poly_eval_one_eq_zero {m : ℕ} (h : m < n) :
     eval 1 ((⇑derivative)^[m] (X ^ n * (1 - X) ^ n) : ℝ[X]) = 0 := by
   rw [Polynomial.iterate_derivative_mul, Polynomial.eval_finset_sum]
   apply Finset.sum_eq_zero
@@ -285,7 +280,7 @@ lemma legendre_poly_eval_one_eq_zero {m : ℕ} (h : m < n) :
   simp only [gt_iff_lt, tsub_pos_iff_lt]
   linarith
 
-lemma legendre_continuousOn {n m : ℕ} : ContinuousOn
+lemma shiftedLegendre_continuousOn {n m : ℕ} : ContinuousOn
     (fun x ↦ eval x ((⇑derivative)^[n - m] (X ^ n * (1 - X) ^ n : ℝ[X]))) (Set.uIcc 0 1) := by
   simp_rw [Polynomial.iterate_derivative_mul, Polynomial.eval_finset_sum]
   apply continuousOn_finset_sum
@@ -317,7 +312,7 @@ lemma special_deriv_div_continuousOn {m : ℕ} {a : ℝ} (h : 0 < a ∧ a < 1) :
     simp only [ge_iff_le, zero_le_one, Set.uIcc_of_le, Set.mem_Icc] at hx
     apply pow_ne_zero; nlinarith
 
-lemma integral_legendre_mul_smooth_eq_aux {n : ℕ} {a : ℝ} (m : ℕ) (h : m ≤ n) (ha : 0 < a ∧ a < 1):
+lemma integral_shiftedLegendre_mul_smooth_eq_aux {n : ℕ} {a : ℝ} (m : ℕ) (h : m ≤ n) (ha : 0 < a ∧ a < 1):
     ∫ (x : ℝ) in (0)..1, eval x ((⇑derivative)^[n] (X ^ n * (1 - X) ^ n)) * (fun x ↦ 1 / (1 - a * x)) x =
     (-1) ^ m * ∫ (x : ℝ) in (0)..1, eval x ((⇑derivative)^[n - m] (X ^ n * (1 - X) ^ n)) *
     (deriv^[m] fun x ↦ 1 / (1 - a * x)) x := by
@@ -333,9 +328,9 @@ lemma integral_legendre_mul_smooth_eq_aux {n : ℕ} {a : ℝ} (m : ℕ) (h : m �
       (u := fun x ↦ eval x ((⇑derivative)^[n - (m + 1)] (X ^ n * (1 - X) ^ n : ℝ[X])))
       (u' := fun x ↦ eval x (derivative ((⇑derivative)^[n - (m + 1)] (X ^ n * (1 - X) ^ n : ℝ[X]))))
       (v := fun x ↦ (deriv^[m] fun x ↦ 1 / (1 - a * x)) x)]
-    · rw [legendre_poly_eval_one_eq_zero h₁, legendre_poly_eval_zero_eq_zero h₁]
+    · rw [shiftedLegendre_poly_eval_one_eq_zero h₁, shiftedLegendre_poly_eval_zero_eq_zero h₁]
       simp only [zero_mul, sub_self, zero_sub, Function.iterate_succ_apply']
-    · apply legendre_continuousOn
+    · apply shiftedLegendre_continuousOn
     · apply special_deriv_div_continuousOn ha
     · intro x _
       simp_rw [Polynomial.iterate_derivative_mul, Polynomial.eval_finset_sum]
@@ -435,24 +430,24 @@ lemma integral_legendre_mul_smooth_eq_aux {n : ℕ} {a : ℝ} (m : ℕ) (h : m �
       apply special_deriv_div_continuousOn ha
 
 lemma integral_legendre_mul_smooth_eq {n : ℕ} {a : ℝ} (h : 0 < a ∧ a < 1):
-  ∫ (x : ℝ) in (0)..1, eval x (legendre n) * (fun x ↦ 1 / (1 - a * x)) x =
+  ∫ (x : ℝ) in (0)..1, eval x (shiftedLegendre n) * (fun x ↦ 1 / (1 - a * x)) x =
   (- 1) ^ n / n ! * ∫ (x : ℝ) in (0)..1, x ^ n * (1 - x) ^ n * (deriv^[n] fun x ↦ 1 / (1 - a * x)) x := by
-  simp only [eval_mul, one_div, eval_C]
+  simp only [eval_mul, one_div, eval_C, shiftedLegendre]
   simp_rw [mul_assoc, intervalIntegral.integral_const_mul]
   rw [← mul_one_div, one_div]
   nth_rw 4 [mul_comm]
   rw [mul_assoc]
   congr
-  obtain h := integral_legendre_mul_smooth_eq_aux (n := n) (a := a) (m := n) (by norm_num) h
+  obtain h := integral_shiftedLegendre_mul_smooth_eq_aux (n := n) (a := a) (m := n) (by norm_num) h
   simp only [one_div, ge_iff_le, le_refl, tsub_eq_zero_of_le, Function.iterate_zero, id_eq,
     eval_mul, eval_pow, eval_X, eval_sub, eval_one] at h
   rw [h]
   simp_rw [← mul_assoc]
 
-lemma legendre_integral_special {a : ℝ} (ha : 0 < a ∧ a < 1) : ∫ (x : ℝ) in (0)..1, eval x (legendre n) / (1 - a * x) =
+lemma legendre_integral_special {a : ℝ} (ha : 0 < a ∧ a < 1) : ∫ (x : ℝ) in (0)..1, eval x (shiftedLegendre n) / (1 - a * x) =
     (-1) ^ n * ∫ (x : ℝ) in (0)..1, x ^ n * (1 - x) ^ n * a ^ n / (1 - a * x) ^ (n + 1) := by
-  have : ∫ (x : ℝ) in (0)..1, eval x (legendre n) / (1 - a * x) =
-    ∫ (x : ℝ) in (0)..1, eval x (legendre n) * (1 / (1 - a * x)) := by
+  have : ∫ (x : ℝ) in (0)..1, eval x (shiftedLegendre n) / (1 - a * x) =
+    ∫ (x : ℝ) in (0)..1, eval x (shiftedLegendre n) * (1 / (1 - a * x)) := by
     rw [intervalIntegral.integral_of_le (by norm_num), intervalIntegral.integral_of_le (by norm_num),
       MeasureTheory.integral_Ioc_eq_integral_Ioo, MeasureTheory.integral_Ioc_eq_integral_Ioo]
     apply MeasureTheory.setIntegral_congr (by simp)
