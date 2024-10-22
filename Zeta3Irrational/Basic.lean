@@ -17,6 +17,16 @@ noncomputable abbrev JJ (n : ℕ) : ℝ :=
     ∫ (x : ℝ × ℝ) in Set.Ioo 0 1 ×ˢ Set.Ioo 0 1,
     (-(x.1 * x.2).log / (1 - x.1 * x.2) * (shiftedLegendre n).eval x.1 * (shiftedLegendre n).eval x.2)
 
+noncomputable abbrev JJ' (n : ℕ) : ℝ :=
+    ∫ (x : ℝ × ℝ × ℝ) in Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1,
+    (x.2.1 * (1 - x.2.1) * x.2.2 * (1 - x.2.2) * x.1 * (1 - x.1) /
+    (1 - (1 - x.2.1 * x.2.2) * x.1)) ^ n / (1 - (1 - x.2.1 * x.2.2) * x.1)
+
+noncomputable abbrev JJENN (n : ℕ) : ENNReal :=
+    ∫⁻ (x : ℝ × ℝ × ℝ) in Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1, ENNReal.ofReal
+    ((x.2.1 * (1 - x.2.1) * x.2.2 * (1 - x.2.2) * x.1 * (1 - x.1) /
+    (1 - (1 - x.2.1 * x.2.2) * x.1)) ^ n / (1 - (1 - x.2.1 * x.2.2) * x.1))
+
 noncomputable abbrev fun1 (n : ℕ) : ℝ := (d (Finset.Icc 1 n)) ^ 3 * JJ n
 
 lemma linear_int (n : ℕ) : ∃ a b : ℕ → ℤ,
@@ -78,281 +88,174 @@ theorem integral_Ioo_congr {f g : ℝ → ℝ} (h : ∀ x ∈ Set.Ioo 0 1, f x =
      MeasureTheory.integral_Ioc_eq_integral_Ioo, MeasureTheory.integral_Ioc_eq_integral_Ioo]
   exact MeasureTheory.setIntegral_congr (by simp) h
 
--- lemma integralable (n : ℕ): MeasureTheory.IntegrableOn
---     (fun (xyz : ℝ × ℝ × ℝ) ↦
---       1 / ((1 - (1 - xyz.2.2) * xyz.1) * (1 - xyz.2.1 * xyz.2.2)))
---     (Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1)
---     (MeasureTheory.volume.prod (MeasureTheory.volume.prod MeasureTheory.volume)) := by
---   rw [MeasureTheory.IntegrableOn, MeasureTheory.Integrable]
---   constructor
---   · apply ContinuousOn.aestronglyMeasurable
---     swap
---     measurability
---     apply ContinuousOn.div
---     · exact continuousOn_const
---     · apply ContinuousOn.mul
---       · apply ContinuousOn.sub continuousOn_const
---         apply ContinuousOn.mul
---         · apply ContinuousOn.sub
---           exact continuousOn_const
---           rw [ContinuousOn]
---           apply ContinuousOn.snd
---           apply ContinuousOn.snd
---           exact continuousOn_id' (Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1)
---         · exact continuousOn_fst
---       · apply ContinuousOn.sub continuousOn_const
---         apply ContinuousOn.mul
---         · apply ContinuousOn.fst
---           apply ContinuousOn.snd
---           exact continuousOn_id' (Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1)
---         · apply ContinuousOn.snd
---           apply ContinuousOn.snd
---           exact continuousOn_id' (Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1)
---     · rintro ⟨x, y, z⟩ h
---       simp only [Set.mem_prod, Set.mem_Ioo] at h
---       simp only [ne_eq, mul_eq_zero, not_or]
---       constructor <;> nlinarith
---   · rw [MeasureTheory.hasFiniteIntegral_iff_ofReal]
---     -- calc
---     -- _ = ∫⁻ (a : ℝ × ℝ × ℝ) in Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1, ENNReal.ofReal ((1 : ℝ) / ((1 - (1 - a.2.2) * a.1) * (1 - a.2.1 * a.2.2)))
---     --   ∂MeasureTheory.volume.prod (MeasureTheory.volume.prod MeasureTheory.volume) := by
---     --   apply MeasureTheory.setLIntegral_congr_fun
---     --   measurability
---     --   simp only [Set.mem_prod, Set.mem_Ioo, one_div, mul_inv_rev, nnnorm_mul, nnnorm_inv,
---     --     ENNReal.coe_mul, and_imp]
---     --   sorry
---     -- _ < (⊤ : ENNReal) := by sorry
---     · rw [lt_top_iff_ne_top]
+lemma JJ_eq_form (n : ℕ) : JJ n = JJ' n := by
+  simp only [JJ, JJ']
+  calc
+  _ = ∫ (x : ℝ × ℝ) in Set.Ioo 0 1 ×ˢ Set.Ioo 0 1,
+    eval x.1 (shiftedLegendre n) * eval x.2 (shiftedLegendre n) * (∫ (z : ℝ) in (0)..1, (1 / (1 - (1 - x.1 * x.2) * z))) := by
+    apply MeasureTheory.setIntegral_congr (by measurability)
+    intro x hx
+    simp only [Set.mem_prod, Set.mem_Ioo] at hx ⊢
+    rw [mul_assoc, mul_comm, ← integral1] <;> nlinarith
+  _ = ∫ (x : ℝ) (y : ℝ) in (0)..1, eval x (shiftedLegendre n) * (-1) ^ n * eval y (shiftedLegendre n) *
+      ∫ (z : ℝ) in (0)..1, 1 /((1 - (1 - z) * x) * (1 - (1 - y) * z)):= by
+    sorry
+  _ = ∫ (z : ℝ) (x : ℝ) (y : ℝ) in (0)..1,
+      ( x * (1 - x) * y * (1 - y) * z * (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n /
+      ((1 - (1 - z) * x) * (1 - y * z)) := by
+    sorry
+  _ = ∫ (x : ℝ × ℝ × ℝ) in Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1,
+    (x.2.1 * (1 - x.2.1) * x.2.2 * (1 - x.2.2) * x.1 * (1 - x.1) / (1 - (1 - x.2.1 * x.2.2) * x.1)) ^ n /
+      (1 - (1 - x.2.1 * x.2.2) * x.1) := by
+    sorry
 
---       sorry
---     · rw [Filter.EventuallyLE, MeasureTheory.ae_restrict_iff']
---       · apply MeasureTheory.ae_of_all
---         rintro ⟨x, y, z⟩ h
---         simp only [Set.mem_prod, Set.mem_Ioo, Pi.zero_apply, one_div, mul_inv_rev] at *
---         suffices h : 0 < (1 - y * z)⁻¹ * (1 - (1 - z) * x)⁻¹ by linarith
---         apply mul_pos
---         · rw [← one_div]
---           apply div_pos <;> nlinarith
---         · rw [← one_div]
---           apply div_pos <;> nlinarith
---       · measurability
+lemma JJENN_upper (n : ℕ) : JJENN n ≤
+    ENNReal.ofReal (2 * (1 / 24) ^ n * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3) := by
+  calc
+  _ ≤ ∫⁻ (x : ℝ × ℝ × ℝ) in Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1,
+    ENNReal.ofReal ((1 / 24) ^ n / (1 - (1 - x.2.1 * x.2.2) * x.1)) := by
+    rw [JJENN, ← MeasureTheory.lintegral_indicator _ (by measurability),
+        ← MeasureTheory.lintegral_indicator _ (by measurability)]
+    apply MeasureTheory.lintegral_mono
+    intro x
+    rw [Set.indicator_apply, Set.indicator_apply]
+    by_cases h : x ∈ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1
+    · simp only [h, ↓reduceIte]
+      simp only [Set.mem_prod, Set.mem_Ioo] at h
+      apply ENNReal.ofReal_le_ofReal
+      rw [div_le_div_right]
+      · apply pow_le_pow_left
+        · apply div_nonneg
+          · apply mul_nonneg _ (by linarith)
+            apply mul_nonneg _ (by linarith)
+            apply mul_nonneg _ (by linarith)
+            apply mul_nonneg _ (by linarith)
+            apply mul_nonneg (by linarith) (by linarith)
+          · simp only [sub_nonneg]
+            suffices (1 - x.2.1 * x.2.2) * x.1 < x.1 by linarith
+            rw [mul_lt_iff_lt_one_left]
+            · simp only [sub_lt_self_iff]
+              nlinarith
+            · nlinarith
+        · suffices x.2.1 * (1 - x.2.1) * x.2.2 * (1 - x.2.2) * x.1 * (1 - x.1) /
+            (1 - (1 - x.2.1 * x.2.2) * x.1) < (1 / 24 : ℝ)by linarith
+          apply bound' <;> linarith
+      · simp only [sub_pos]
+        suffices (1 - x.2.1 * x.2.2) * x.1 < x.1 by linarith
+        rw [mul_lt_iff_lt_one_left]
+        · simp only [sub_lt_self_iff]
+          nlinarith
+        · nlinarith
+    · simp only [h, ↓reduceIte, le_refl]
+  _ = ENNReal.ofReal ((1 / 24) ^ n) * ∫⁻ (x : ℝ × ℝ × ℝ) in Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1,
+    ENNReal.ofReal (1 / (1 - (1 - x.2.1 * x.2.2) * x.1)) := by
+    rw [← MeasureTheory.lintegral_const_mul]
+    · rw [← MeasureTheory.lintegral_indicator _ (by measurability),
+        ← MeasureTheory.lintegral_indicator _ (by measurability)]
+      congr
+      ext x
+      rw [Set.indicator_apply, Set.indicator_apply]
+      by_cases h : x ∈ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1
+      · simp only [h, ↓reduceIte]
+        rw [← ENNReal.ofReal_mul, ← mul_one_div]
+        apply pow_nonneg (by norm_num)
+      · simp only [h, ↓reduceIte]
+    · apply Measurable.ennreal_ofReal
+      apply Measurable.const_div
+      apply Measurable.const_sub
+      apply Measurable.mul _ measurable_fst
+      apply Measurable.const_sub
+      apply Measurable.mul
+      apply Measurable.comp' measurable_fst measurable_snd
+      apply Measurable.comp' measurable_snd measurable_snd
+  _ = ENNReal.ofReal (2 * (1 / 24) ^ n * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3) := by
+    have h := JENN_eq_triple 0 0
+    simp only [pow_zero, mul_one] at h
+    rw [← h, J_ENN_rr]
+    simp only [one_div, inv_pow, zero_lt_one, Finset.Icc_eq_empty_of_lt, Finset.sum_empty, mul_zero,
+      sub_zero]
+    rw [← ENNReal.ofReal_mul (by norm_num), ← mul_assoc]
+    nth_rw 2 [mul_comm]
 
-
-
--- lemma intervalIntegral_eq_setInteral' (n : ℕ) :
---     ∫ (z : ℝ) (x : ℝ) (y : ℝ) in (0)..1,
---     (x * (1 - x) * y * (1 - y) * z *
---     (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n / ((1 - (1 - z) * x) * (1 - y * z)) =
---     ∫ (zxy : ℝ × ℝ × ℝ) in (Set.Ioo 0 1) ×ˢ ((Set.Ioo 0 1) ×ˢ (Set.Ioo 0 1)),
---       (zxy.2.1 * (1 - zxy.2.1) * zxy.2.2 * (1 - zxy.2.2) * zxy.1 * (1 - zxy.1) / ((1 - (1 - zxy.1) * zxy.2.1) * (1 - zxy.2.2 * zxy.1))) ^ n /
---       ((1 - (1 - zxy.1) * zxy.2.1) * (1 - zxy.2.2 * zxy.1))
---       ∂MeasureTheory.volume := by
---   sorry
-
--- lemma intervalIntegral_eq_setInteral (n : ℕ) :
---     ∫ (x : ℝ) (y : ℝ) (z : ℝ) in (0)..1,
---     ( x * (1 - x) * y * (1 - y) * z * (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n / ((1 - (1 - z) * x) * (1 - y * z)) =
---     ∫ (xyz : ℝ × ℝ × ℝ) in (Set.Ioo 0 1) ×ˢ ((Set.Ioo 0 1) ×ˢ (Set.Ioo 0 1)),
---       (xyz.1 * (1 - xyz.1) * xyz.2.1 * (1 - xyz.2.1) * xyz.2.2 * (1 - xyz.2.2) / ((1 - (1 - xyz.2.2) * xyz.1) * (1 - xyz.2.1 * xyz.2.2))) ^ n /
---       ((1 - (1 - xyz.2.2) * xyz.1) * (1 - xyz.2.1 * xyz.2.2))
---       ∂MeasureTheory.volume := by
---   rw [intervalIntegral.integral_of_le (by norm_num),
---     MeasureTheory.integral_Ioc_eq_integral_Ioo]
---   rw [MeasureTheory.Measure.volume_eq_prod]
---   rw [MeasureTheory.setIntegral_prod]
---   swap
---   ·
---     sorry -- everything is continuous
---   refine MeasureTheory.setIntegral_congr (by simp) ?_
---   intro x hx
---   simp only
---   rw [intervalIntegral.integral_of_le (by norm_num), MeasureTheory.integral_Ioc_eq_integral_Ioo]
---   rw [MeasureTheory.Measure.volume_eq_prod]
---   rw [MeasureTheory.setIntegral_prod]
---   swap
---   · sorry -- everything is continuous
---   refine MeasureTheory.setIntegral_congr (by simp) ?_
---   intro y hy
---   simp only
---   rw [intervalIntegral.integral_of_le (by norm_num), MeasureTheory.integral_Ioc_eq_integral_Ioo]
-
--- lemma integral_comm1 (n : ℕ) : ∫ (x : ℝ) (y : ℝ) in (0)..1, eval x (legendre n) * (-1) ^ n *
---     eval y (legendre n) * ∫ (z : ℝ) in (0)..1, 1 / ((1 - (1 - z) * x) * (1 - (1 - y) * z)) =
---     ∫ (z : ℝ) (x : ℝ) (y : ℝ) in (0)..1, eval x (legendre n) * eval (1 - y) (legendre n) * 1 /
---     ((1 - (1 - z) * x) * (1 - (1 - y) * z)) := by
---   sorry
-
--- lemma integral_comm2 (n : ℕ) : ∫ (z : ℝ) (x : ℝ) (y : ℝ) in (0)..1, (x * (1 - x) * y * (1 - y) * z *
---     (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n / ((1 - (1 - z) * x) * (1 - y * z)) =
---     ∫ (x : ℝ) (y : ℝ) (z : ℝ) in (0)..1, (x * (1 - x) * y * (1 - y) * z * (1 - z) / ((1 - (1 - z) *
---     x) * (1 - y * z))) ^ n / ((1 - (1 - z) * x) * (1 - y * z)) := by
---   rw [intervalIntegral_eq_setInteral, intervalIntegral_eq_setInteral',
---     MeasureTheory.Measure.volume_eq_prod, MeasureTheory.Measure.volume_eq_prod]
---   rw [MeasureTheory.setIntegral_prod, MeasureTheory.setIntegral_prod]
---   pick_goal 2
---   · sorry
---   pick_goal 2
---   · sorry
-
---   change ∫ (z : ℝ) in Set.Ioo 0 1, ∫ (xy : ℝ × ℝ) in Set.Ioo 0 1 ×ˢ Set.Ioo 0 1, _ = ∫ x in _, ∫ (yz) in _, _
---   dsimp
---   rw [MeasureTheory.integral_integral_swap]
---   pick_goal 2
---   · sorry
-
---   change ∫ xy in _, ∫ z in _,  _ = _
---   rw [MeasureTheory.Measure.volume_eq_prod, MeasureTheory.setIntegral_prod]
---   pick_goal 2
---   · sorry
-
---   refine MeasureTheory.setIntegral_congr (by simp) ?_
---   intro x hx
---   dsimp
---   rw [MeasureTheory.setIntegral_prod]
---   sorry
-
-lemma JJ_eq_form (n : ℕ) : JJ n = ∫ (x : ℝ × ℝ × ℝ) in Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1,
-    ( x.1 * (1 - x.1) * x.2.1 * (1 - x.2.1) * x.2.2 * (1 - x.2.2) /
-    ((1 - (1 - x.2.2) * x.1) * (1 - x.2.1 * x.2.2))) ^ n / ((1 - (1 - x.2.2) * x.1) * (1 - x.2.1 * x.2.2)) := by
-  simp [JJ]
-  sorry
-  -- calc
-  -- _ = ∫ (x : ℝ) (y : ℝ) in (0)..1, eval (1 - x) (shiftedLegendre n) * eval y (legendre n) * (∫ (z : ℝ) in (0)..1, (1 / (1 - (1 - (1 - x) * y) * z))) := by
-  --   simp_rw [← intervalIntegral.integral_neg, ← neg_div, neg_mul_eq_mul_neg, JJ_upper_aux]
-  --   have eq := intervalIntegral.mul_integral_comp_sub_mul (a := 0) (b := 1)
-  --     (f := fun x ↦ ∫ (y : ℝ) in (0)..1, eval x (legendre n) * eval y (legendre n) * ∫ (z : ℝ) in (0)..1, 1 / (1 - (1 - x * y) * z)) 1 1
-  --   simp only [one_mul, mul_one, sub_self, mul_zero, sub_zero] at eq
-  --   exact eq.symm
-  -- _ = ∫ (x : ℝ) (y : ℝ) in (0)..1, eval x (legendre n) * (-1) ^ n * eval y (legendre n) *
-  --     ∫ (z : ℝ) in (0)..1, 1 /((1 - (1 - z) * x) * (1 - (1 - y) * z)):= by
-  --   apply integral_Ioo_congr
-  --   intro x hx
-  --   apply integral_Ioo_congr
-  --   intro y hy
-  --   simp_all only [Set.mem_Ioo]
-  --   rw [legendre_eval_symm, show 1 - (1 - x) = x by simp, integral_equality x y hx.1 hx.2 hy.1 hy.2]
-  --   ring_nf
-  -- _ = ∫ (z : ℝ) (x : ℝ) (y : ℝ) in (0)..1, eval x (legendre n) * eval (1 - y) (legendre n) *
-  --     1 /((1 - (1 - z) * x) * (1 - (1 - y) * z)):= by
-  --   exact integral_comm1 n
-  -- _ = ∫ (z : ℝ) (x : ℝ) (y : ℝ) in (0)..1, eval x (legendre n) * eval y (legendre n) *
-  --     1 /((1 - (1 - z) * x) * (1 - y * z)):= by
-  --   apply integral_Ioo_congr
-  --   intro z _
-  --   apply integral_Ioo_congr
-  --   intro x _
-  --   have eq := intervalIntegral.mul_integral_comp_sub_mul (a := 0) (b := 1)
-  --     (f := fun y ↦ eval x (legendre n) * eval (1 - y) (legendre n) * 1 / ((1 - (1 - z) * x) * (1 - (1 - y) * z))) 1 1
-  --   simp only [one_mul, sub_sub_cancel, mul_one, sub_self, mul_zero, sub_zero] at eq
-  --   simp_all only [Set.mem_Ioo, eval_mul, one_div, eval_C, mul_one]
-  -- _ = ∫ (z : ℝ) in (0)..1, (∫ (x : ℝ) in (0)..1, eval x (legendre n) / ((1 - (1 - z) * x))) *
-  --     (∫ (y : ℝ) in (0)..1, eval y (legendre n) / ((1 - y * z))) := by
-  --   apply integral_Ioo_congr
-  --   intro z _
-  --   rw [← intervalIntegral.integral_mul_const]
-  --   simp_rw [← intervalIntegral.integral_const_mul, ← mul_div_mul_comm]
-  --   simp
-  -- _ = ∫ (z : ℝ) (x : ℝ) (y : ℝ) in (0)..1,
-  --     ( x * (1 - x) * y * (1 - y) * z * (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n /
-  --     ((1 - (1 - z) * x) * (1 - y * z)) := by
-  --   apply integral_Ioo_congr
-  --   intro z hz
-  --   simp only [Set.mem_Ioo] at hz
-  --   have hz1 : 0 < (1 - z) ∧ (1 - z) < 1 := by constructor <;> linarith
-  --   simp_rw [legendre_integral_special hz1, mul_comm, legendre_integral_special hz]
-  --   rw [mul_mul_mul_comm, ← pow_add, ← two_mul, pow_mul]
-  --   simp only [even_two, Even.neg_pow, one_pow, one_mul, div_pow]
-  --   simp_rw [← intervalIntegral.integral_mul_const]
-  --   rw [intervalIntegral.integral_of_le (by norm_num), MeasureTheory.integral_Ioc_eq_integral_Ioo]
-  --   symm
-  --   rw [intervalIntegral.integral_of_le (by norm_num), MeasureTheory.integral_Ioc_eq_integral_Ioo]
-  --   apply MeasureTheory.setIntegral_congr (by simp)
-  --   intro x hx
-  --   simp only
-  --   rw [← intervalIntegral.integral_const_mul]
-  --   apply integral_Ioo_congr
-  --   intro y hy
-  --   simp_all only [div_div, Set.mem_Ioo]
-  --   rw [← mul_div_mul_comm, div_eq_div_iff]
-  --   · simp only [mul_pow]; ring
-  --   · suffices ((1 - z * y) * (1 - x * (1 - z))) ^ n * ((1 - z * y) * (1 - x * (1 - z))) > 0 by linarith
-  --     rw [mul_pow]
-  --     apply mul_pos <;> apply mul_pos
-  --     · apply pow_pos; nlinarith
-  --     · apply pow_pos; nlinarith
-  --     · nlinarith
-  --     · nlinarith
-  --   · suffices (1 - x * (1 - z)) ^ (n + 1) * (1 - z * y) ^ (n + 1) > 0 by linarith
-  --     apply mul_pos <;> apply pow_pos <;> nlinarith
-  -- _ = ∫ (x : ℝ) (y : ℝ) (z : ℝ) in (0)..1,
-  --     ( x * (1 - x) * y * (1 - y) * z * (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n /
-  --     ((1 - (1 - z) * x) * (1 - y * z)) := by
-  --   exact integral_comm2 n
-
--- lemma IntervalIntegrable1 : IntervalIntegrable
---     (fun x ↦ ∫ (y : ℝ) (z : ℝ) in (0)..1,
---     (x * (1 - x) * y * (1 - y) * z * (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n /
---     ((1 - (1 - z) * x) * (1 - y * z))) MeasureTheory.volume 0 1 := by
---   -- apply IntervalIntegrable.mono_fun'
---   -- apply MeasureTheory.continuous_integral_integral
---   rw [intervalIntegrable_iff, MeasureTheory.IntegrableOn, MeasureTheory.Integrable]
---   constructor
---   · sorry
---   · rw [MeasureTheory.HasFiniteIntegral]
---     sorry
-
--- lemma IntervalIntegrable2 {x : ℝ} (hx : x ∈ Set.Ioo 0 1) : IntervalIntegrable
---     (fun y ↦ ∫ (z : ℝ) in (0)..1,
---     (x * (1 - x) * y * (1 - y) * z * (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n /
---     ((1 - (1 - z) * x) * (1 - y * z))) MeasureTheory.volume 0 1 := by
---   apply Continuous.intervalIntegrable
---   simp_rw [intervalIntegral.integral_of_le (show 0 ≤ 1 by norm_num), ← MeasureTheory.integral_Icc_eq_integral_Ioc]
---   apply continuous_parametric_integral_of_continuous
---   · rw [continuous_iff_continuousAt]
---     intro y Y hy
---     sorry
---   · rw [← Set.uIcc_of_le (by norm_num)]
---     exact isCompact_uIcc
-
--- lemma IntervalIntegrable3 {x y : ℝ} (hx : x ∈ Set.Ioo 0 1) (hy : y ∈ Set.Ioo 0 1): IntervalIntegrable
---   (fun z ↦ (x * (1 - x) * y * (1 - y) * z * (1 - z) / ((1 - (1 - z) * x) * (1 - y * z))) ^ n /
---       ((1 - (1 - z) * x) * (1 - y * z)))
---   MeasureTheory.volume 0 1 := by
---   apply IntervalIntegrable.continuousOn_mul
---   · apply intervalIntegral.intervalIntegrable_inv
---     · intro z hz
---       suffices (1 - (1 - z) * x) * (1 - y * z) > 0 by linarith
---       apply mul_pos <;> simp_all only [Set.mem_Ioo, ge_iff_le, zero_le_one, Set.uIcc_of_le,
---         Set.mem_Icc, sub_pos] <;> nlinarith
---     · apply ContinuousOn.mul
---       · apply ContinuousOn.sub continuousOn_const
---         apply ContinuousOn.mul
---         · apply ContinuousOn.sub continuousOn_const continuousOn_id
---         · exact continuousOn_const
---       · apply ContinuousOn.sub continuousOn_const
---         apply ContinuousOn.mul continuousOn_const continuousOn_id
---   · apply ContinuousOn.pow
---     apply ContinuousOn.div
---     · apply ContinuousOn.mul _ (ContinuousOn.sub continuousOn_const continuousOn_id)
---       apply ContinuousOn.mul continuousOn_const continuousOn_id
---     · apply ContinuousOn.mul
---       · apply ContinuousOn.sub continuousOn_const
---         apply ContinuousOn.mul _ continuousOn_const
---         apply ContinuousOn.sub continuousOn_const continuousOn_id
---       · apply ContinuousOn.sub continuousOn_const
---         apply ContinuousOn.mul continuousOn_const continuousOn_id
---     · intro z hz
---       suffices (1 - (1 - z) * x) * (1 - y * z) > 0 by linarith
---       apply mul_pos <;>
---       simp_all only [Set.mem_Ioo, ge_iff_le, zero_le_one, Set.uIcc_of_le, Set.mem_Icc, sub_pos] <;>
---       nlinarith
+lemma integrableOn_JJ' (n : ℕ) : MeasureTheory.Integrable (fun (x : ℝ × ℝ × ℝ) ↦
+    (x.2.1 * (1 - x.2.1) * x.2.2 * (1 - x.2.2) * x.1 * (1 - x.1) / (1 - (1 - x.2.1 * x.2.2) * x.1)) ^ n /
+    (1 - (1 - x.2.1 * x.2.2) * x.1)) (MeasureTheory.volume.restrict (Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1)) := by
+  rw [MeasureTheory.Integrable]
+  constructor
+  · apply AEMeasurable.aestronglyMeasurable
+    rw [← aemeasurable_indicator_iff (by measurability)]
+    apply AEMeasurable.indicator _ (by measurability)
+    apply AEMeasurable.div
+    · apply AEMeasurable.pow_const
+      apply AEMeasurable.div
+      · apply AEMeasurable.mul _ (AEMeasurable.const_sub (AEMeasurable.fst (f := id) aemeasurable_id) _)
+        apply AEMeasurable.mul _ (AEMeasurable.fst (f := id) aemeasurable_id)
+        apply AEMeasurable.mul _ (AEMeasurable.const_sub (AEMeasurable.snd (f := fun (x : ℝ × ℝ) => x.2)
+          (AEMeasurable.snd (f := id) aemeasurable_id)) _)
+        apply AEMeasurable.mul _ (AEMeasurable.snd (f := fun (x : ℝ × ℝ) => x.2)
+          (AEMeasurable.snd (f := id) aemeasurable_id))
+        apply AEMeasurable.mul _ (AEMeasurable.const_sub (AEMeasurable.snd (f := fun (x : ℝ × ℝ) => x.1)
+          (AEMeasurable.fst (f := id) aemeasurable_id)) _)
+        exact (AEMeasurable.snd (f := fun (x : ℝ × ℝ) => x.1)
+          (AEMeasurable.fst (f := id) aemeasurable_id))
+      · apply AEMeasurable.const_sub
+        apply AEMeasurable.mul _ (AEMeasurable.fst (f := id) aemeasurable_id)
+        apply AEMeasurable.const_sub
+        apply AEMeasurable.mul _ (AEMeasurable.snd (f := fun (x : ℝ × ℝ) => x.2)
+          (AEMeasurable.snd (f := id) aemeasurable_id))
+        exact (AEMeasurable.snd (f := fun (x : ℝ × ℝ) => x.1)
+          (AEMeasurable.fst (f := id) aemeasurable_id))
+    · apply AEMeasurable.const_sub
+      apply AEMeasurable.mul _ (AEMeasurable.fst (f := id) aemeasurable_id)
+      apply AEMeasurable.const_sub
+      apply AEMeasurable.mul _ (AEMeasurable.snd (f := fun (x : ℝ × ℝ) => x.2)
+        (AEMeasurable.snd (f := id) aemeasurable_id))
+      exact (AEMeasurable.snd (f := fun (x : ℝ × ℝ) => x.1)
+        (AEMeasurable.fst (f := id) aemeasurable_id))
+  · rw [MeasureTheory.hasFiniteIntegral_iff_norm]
+    set k := _
+    change k < ⊤
+    have : k = JJENN n := by
+      simp only [k, JJENN]
+      rw [← MeasureTheory.lintegral_indicator _ (by measurability),
+        ← MeasureTheory.lintegral_indicator _ (by measurability)]
+      congr
+      ext x
+      rw [Set.indicator_apply, Set.indicator_apply]
+      by_cases hx : x ∈ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1
+      · simp only [hx, ↓reduceIte, norm_mul, norm_div, norm_neg, Real.norm_eq_abs, norm_pow]
+        simp only [Set.mem_prod, Set.mem_Ioo] at hx
+        rw [ENNReal.ofReal_eq_ofReal_iff]
+        · congr 3
+          · rw [abs_eq_self.2, abs_eq_self.2, abs_eq_self.2, abs_eq_self.2, abs_eq_self.2,
+              abs_eq_self.2] <;> nlinarith
+          · simp only [abs_eq_self, sub_nonneg]
+            apply mul_le_one (by nlinarith) (by linarith) (by linarith)
+          · simp only [abs_eq_self, sub_nonneg]
+            apply mul_le_one (by nlinarith) (by linarith) (by linarith)
+        · positivity
+        · apply div_nonneg
+          · apply pow_nonneg
+            apply div_nonneg
+            · apply mul_nonneg _ (by linarith)
+              apply mul_nonneg _ (by linarith)
+              apply mul_nonneg _ (by linarith)
+              apply mul_nonneg _ (by linarith)
+              apply mul_nonneg (by linarith) (by linarith)
+            · simp only [abs_eq_self, sub_nonneg]
+              apply mul_le_one (by nlinarith) (by linarith) (by linarith)
+          · simp only [abs_eq_self, sub_nonneg]
+            apply mul_le_one (by nlinarith) (by linarith) (by linarith)
+      · simp only [hx, ↓reduceIte]
+    rw [this]
+    apply LE.le.trans_lt (JJENN_upper n)
+    simp only [one_div, inv_pow, ENNReal.ofReal_lt_top]
 
 lemma JJ_pos (n : ℕ) : 0 < JJ n := by
-  rw [JJ_eq_form]
+  rw [JJ_eq_form, JJ']
   rw [MeasureTheory.integral_pos_iff_support_of_nonneg_ae]
   · set F := _;
     change 0 < MeasureTheory.volume.restrict _ (Function.support F)
-
     have subset : Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 ⊆ Function.support F := by
       intro a ha
       change F a ≠ 0
@@ -369,8 +272,21 @@ lemma JJ_pos (n : ℕ) : 0 < JJ n := by
           rcases h with (h | h); swap; nlinarith
           rcases h with (h | h) <;> nlinarith
         · intro h
-          rcases h with (h | h) <;> nlinarith
-      · constructor <;> nlinarith
+          suffices ¬1 - (1 - a.2.1 * a.2.2) * a.1 = 0 by tauto
+          suffices 1 - (1 - a.2.1 * a.2.2) * a.1 > 0 by linarith
+          simp only [gt_iff_lt, sub_pos]
+          suffices (1 - a.2.1 * a.2.2) * a.1 < a.1 by linarith
+          rw [mul_lt_iff_lt_one_left]
+          · simp only [sub_lt_self_iff]
+            nlinarith
+          · exact hx0
+      · suffices 1 - (1 - a.2.1 * a.2.2) * a.1 > 0 by linarith
+        simp only [gt_iff_lt, sub_pos]
+        suffices (1 - a.2.1 * a.2.2) * a.1 < a.1 by linarith
+        rw [mul_lt_iff_lt_one_left]
+        · simp only [sub_lt_self_iff]
+          nlinarith
+        · exact hx0
     rw [MeasureTheory.Measure.restrict_apply']
     rw [Set.inter_eq_right.2 subset]
     simp only [MeasureTheory.Measure.volume_eq_prod, MeasureTheory.Measure.prod_prod]
@@ -387,8 +303,8 @@ lemma JJ_pos (n : ℕ) : 0 < JJ n := by
         and_imp]
       contrapose!
       rintro ⟨hx0, hx1, hy0, hy1, hz0, hz1⟩
-      suffices 0 < (x * (1 - x) * y * (1 - y) * z * (1 - z)) ^ n / ((1 - (1 - z) * x) * (1 - y * z)) ^ n /
-      ((1 - (1 - z) * x) * (1 - y * z)) by linarith
+      suffices 0 < (y * (1 - y) * z * (1 - z) * x * (1 - x)) ^ n / (1 - (1 - y * z) * x) ^ n /
+        (1 - (1 - y * z) * x) by linarith
       apply div_pos
       · apply div_pos
         · apply pow_pos
@@ -396,50 +312,23 @@ lemma JJ_pos (n : ℕ) : 0 < JJ n := by
           apply mul_pos; swap; linarith
           apply mul_pos; swap; linarith
           apply mul_pos; swap; linarith
-          apply mul_pos hx0; linarith
+          apply mul_pos hy0; linarith
         · apply pow_pos
-          apply mul_pos <;> nlinarith
-      · apply mul_pos <;> nlinarith
+          simp only [sub_pos]
+          suffices (1 - y * z) * x < x by linarith
+          rw [mul_lt_iff_lt_one_left]
+          · simp only [sub_lt_self_iff]
+            nlinarith
+          · exact hx0
+      · simp only [sub_pos]
+        suffices (1 - y * z) * x < x by linarith
+        rw [mul_lt_iff_lt_one_left]
+        · simp only [sub_lt_self_iff]
+          nlinarith
+        · exact hx0
     · exact MeasureTheory.OuterMeasureClass.measure_empty MeasureTheory.volume
     . measurability
-  · sorry
-  -- apply intervalIntegral.intervalIntegral_pos_of_pos_on IntervalIntegrable1 _ (by simp)
-  -- · intro x hx
-  --   apply intervalIntegral.intervalIntegral_pos_of_pos_on (IntervalIntegrable2 hx) _ (by simp)
-  --   · intro y hy
-  --     apply intervalIntegral.intervalIntegral_pos_of_pos_on (IntervalIntegrable3 hx hy) _ (by simp)
-  --     · intro z hz
-  --       simp_all only [Set.mem_Ioo]
-  --       cases' hx with hx1 hx2
-  --       cases' hy with hy1 hy2
-  --       cases' hz with hz1 hz2
-  --       rw [← sub_pos] at hx2 hy2 hz2
-  --       apply div_pos
-  --       · rw [div_pow]
-  --         apply div_pos
-  --         · apply pow_pos; positivity
-  --         · apply pow_pos
-  --           apply mul_pos <;> nlinarith
-  --       · apply mul_pos <;> nlinarith
-
-theorem JJ_upper (n : ℕ) : JJ n ≤ 2 * (1 / 30) ^ n * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
-  rw [JJ_eq_form, mul_rotate, mul_assoc]
-  nth_rewrite 2 [mul_comm]
-  rw [← zeta_3_eq_form, mul_comm, ← smul_eq_mul, ← integral_smul_const]
-
-
-  sorry
-
--- lemma upper_tendsto_zero : Filter.Tendsto (fun n ↦ (2 * (21 / 30) ^ n * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3)) Filter.atTop (nhds 0) := by
---   rw [show (0 : ℝ) = 2 * 0 by simp]
---   simp_rw [mul_assoc]
---   apply Filter.Tendsto.const_mul (b := 2) (f := fun n ↦ (21 / 30) ^ n * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3)
---     (c := 0) (l := Filter.atTop)
---   rw [show (0 : ℝ) = 0 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 by simp]
---   apply Filter.Tendsto.mul_const (b := ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3) (f := fun n ↦ (21 / 30) ^ n)
---     (c := 0) (l := Filter.atTop)
---   apply tendsto_pow_atTop_nhds_zero_of_lt_one (r := (21 / 30 : ℝ)) <;>
---   norm_num
+  · exact integrableOn_JJ' n
 
 lemma Summable_of_zeta_two' : Summable (fun (n : ℕ) ↦ 1 / ((n : ℝ) + 1) ^ 2) := by
   rw [Summable]
@@ -499,6 +388,68 @@ lemma zeta_3_pos : 0 < ∑' (n : ℕ), 1 / ((n : ℝ) + 1) ^ 3 := by
     simp only [one_div, pow_succ, add_comm, add_left_comm]
     positivity
   · positivity
+
+theorem JJ_upper (n : ℕ) : JJ n ≤ 2 * (1 / 24) ^ n * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 := by
+  rw [JJ_eq_form, JJ', MeasureTheory.integral_eq_lintegral_of_nonneg_ae]
+  · trans (ENNReal.ofReal (2 * (1 / 24 : ℝ) ^ n * ∑' (n : ℕ), 1 / ((n : ℝ) + 1) ^ 3)).toReal
+    · apply ENNReal.toReal_mono
+      · exact ENNReal.ofReal_ne_top
+      · exact JJENN_upper n
+    · rw [ENNReal.toReal_ofReal]
+      apply mul_nonneg (by norm_num)
+      linarith [zeta_3_pos]
+  · apply MeasureTheory.ae_nonneg_restrict_of_forall_setIntegral_nonneg_inter
+    · rw [MeasureTheory.IntegrableOn]
+      exact integrableOn_JJ' n
+    · rintro s hs -
+      apply MeasureTheory.setIntegral_nonneg (by measurability)
+      intro x hx
+      by_cases h : x ∈ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1
+      · simp only [Set.mem_prod, Set.mem_Ioo] at h
+        apply div_nonneg
+        · apply pow_nonneg
+          apply div_nonneg
+          · apply mul_nonneg _ (by linarith)
+            apply mul_nonneg _ (by linarith)
+            apply mul_nonneg _ (by linarith)
+            apply mul_nonneg _ (by linarith)
+            apply mul_nonneg (by linarith) (by linarith)
+          · simp only [abs_eq_self, sub_nonneg]
+            apply mul_le_one (by nlinarith) (by linarith) (by linarith)
+        · simp only [abs_eq_self, sub_nonneg]
+          apply mul_le_one (by nlinarith) (by linarith) (by linarith)
+      · rw [Set.mem_inter_iff] at hx
+        tauto
+  · apply AEMeasurable.aestronglyMeasurable
+    rw [← aemeasurable_indicator_iff (by measurability)]
+    apply AEMeasurable.indicator _ (by measurability)
+    apply AEMeasurable.div
+    · apply AEMeasurable.pow_const
+      apply AEMeasurable.div
+      · apply AEMeasurable.mul _ (AEMeasurable.const_sub (AEMeasurable.fst (f := id) aemeasurable_id) _)
+        apply AEMeasurable.mul _ (AEMeasurable.fst (f := id) aemeasurable_id)
+        apply AEMeasurable.mul _ (AEMeasurable.const_sub (AEMeasurable.snd (f := fun (x : ℝ × ℝ) => x.2)
+          (AEMeasurable.snd (f := id) aemeasurable_id)) _)
+        apply AEMeasurable.mul _ (AEMeasurable.snd (f := fun (x : ℝ × ℝ) => x.2)
+          (AEMeasurable.snd (f := id) aemeasurable_id))
+        apply AEMeasurable.mul _ (AEMeasurable.const_sub (AEMeasurable.snd (f := fun (x : ℝ × ℝ) => x.1)
+          (AEMeasurable.fst (f := id) aemeasurable_id)) _)
+        exact (AEMeasurable.snd (f := fun (x : ℝ × ℝ) => x.1)
+          (AEMeasurable.fst (f := id) aemeasurable_id))
+      · apply AEMeasurable.const_sub
+        apply AEMeasurable.mul _ (AEMeasurable.fst (f := id) aemeasurable_id)
+        apply AEMeasurable.const_sub
+        apply AEMeasurable.mul _ (AEMeasurable.snd (f := fun (x : ℝ × ℝ) => x.2)
+          (AEMeasurable.snd (f := id) aemeasurable_id))
+        exact (AEMeasurable.snd (f := fun (x : ℝ × ℝ) => x.1)
+          (AEMeasurable.fst (f := id) aemeasurable_id))
+    · apply AEMeasurable.const_sub
+      apply AEMeasurable.mul _ (AEMeasurable.fst (f := id) aemeasurable_id)
+      apply AEMeasurable.const_sub
+      apply AEMeasurable.mul _ (AEMeasurable.snd (f := fun (x : ℝ × ℝ) => x.2)
+        (AEMeasurable.snd (f := id) aemeasurable_id))
+      exact (AEMeasurable.snd (f := fun (x : ℝ × ℝ) => x.1)
+        (AEMeasurable.fst (f := id) aemeasurable_id))
 
 lemma zeta3_le_zeta2 : ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 < ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 2 := by
   apply tsum_lt_tsum_of_nonneg (f := fun n => 1 / ((n : ℝ) + 1) ^ 3) (g := fun n => 1 / ((n : ℝ) + 1) ^ 2) (i := 2)
@@ -590,7 +541,7 @@ theorem fun1_tendsto_zero : Filter.Tendsto (fun n ↦ ENNReal.ofReal (fun1 n)) F
     delta fun1
     rw [show ε = ENNReal.ofReal ε.toReal by simp [h]]
     obtain ⟨N, hN⟩ := eventuallyN_of_le
-    obtain h := ENNReal.tendsto_pow_atTop_nhds_zero_of_lt_one (r := (ENNReal.ofReal (21 / 30 : ℝ)))
+    obtain h := ENNReal.tendsto_pow_atTop_nhds_zero_of_lt_one (r := (ENNReal.ofReal (21 / 24 : ℝ)))
       (by simp only [ENNReal.ofReal_lt_one]; norm_num)
     rw [ENNReal.tendsto_atTop_zero] at h
     specialize h (ε / (ENNReal.ofReal (2 * (∑' n : ℕ , 1 / ((n : ℝ)+ 1) ^ 3))))
@@ -600,15 +551,15 @@ theorem fun1_tendsto_zero : Filter.Tendsto (fun n ↦ ENNReal.ofReal (fun1 n)) F
     use N.max N1
     intro n hn
     rw [ENNReal.ofReal_le_ofReal_iff (by simp)]
-    suffices ↑(d (Finset.Icc 1 n)) ^ 3 * 2 * (1 / 30) ^ n * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 ≤ ε.toReal by
-      trans ↑(d (Finset.Icc 1 n)) ^ 3 * 2 * (1 / 30) ^ n * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3
+    suffices ↑(d (Finset.Icc 1 n)) ^ 3 * 2 * (1 / 24) ^ n * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 ≤ ε.toReal by
+      trans ↑(d (Finset.Icc 1 n)) ^ 3 * 2 * (1 / 24) ^ n * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3
       swap
       exact this
       rw [mul_assoc, mul_assoc]
       apply mul_le_mul_of_nonneg_left _ (by simp)
       linarith [JJ_upper n]
     calc
-    _ ≤ 2 * (21 / 30 : ℝ) ^ n * (∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3) := by
+    _ ≤ 2 * (21 / 24 : ℝ) ^ n * (∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3) := by
       apply mul_le_mul_of_nonneg_right _ (by linarith[zeta_3_pos])
       nth_rewrite 2 [mul_comm, div_eq_mul_one_div]
       rw [mul_pow, ← mul_assoc]
