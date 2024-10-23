@@ -242,6 +242,110 @@ lemma n_derivative {a : ℝ} (n : ℕ) (ha : a > 0) : deriv^[n] (fun x ↦ 1 / (
           · apply differentiableAt_id
       · exact pow_ne_zero (n + 1) hne
 
+theorem differentiableAt_inv_special' (c x y z : ℝ) (n : ℕ) (hc : c ≠ 0) (hx : x ∈ Set.Ioo 0 1)
+    (hz : z ∈ Set.Ioo 0 1) (h1 : 1 - (1 - x * y) * z = 0) :
+    ¬DifferentiableAt ℝ (fun y ↦ c / (1 - (1 - x * y) * z) ^ (n + 1)) y := by
+  intro h
+  obtain q := h.continuousAt
+  simp [Metric.continuousAt_iff, Real.dist_eq, h1] at q
+  simp only [Set.mem_Ioo] at hx hz
+  have h₁ : |c| > 0 := by simp [hc]
+  specialize q (|c|) h₁
+  rcases q with ⟨q, ⟨qq, qqq⟩⟩
+  set d := min (q / 2 + y) (1 / |x * z| + y)
+  set d' := min (q / 2) (1 / |x * z|)
+  have h' : d = d' + y := by
+    simp only [d, d']
+    rw [min_add_add_right]
+  have hd : |d - y| < q := by
+    rw [h', show d' + y - y = d' by ring]
+    suffices |d'| ≤ q / 2 by linarith
+    rw [abs_of_nonneg (by positivity)]
+    exact min_le_left (q / 2) (1 / |x * z|)
+  have hd' : 1 - (1 - x * d) * z ≠ 0 := by
+    suffices 1 - (1 - x * d) * z > 0 by linarith
+    rw [h', show 1 - (1 - x * (d' + y)) * z = 1 - (1 - x * y) * z + x * z * d' by ring, h1, zero_add]
+    apply mul_pos
+    apply mul_pos (by linarith) (by linarith)
+    simp only [d']
+    apply lt_min (by positivity)
+    simp only [one_div, inv_pos, abs_pos, ne_eq, mul_eq_zero, not_or]
+    constructor <;> linarith
+  specialize qqq hd
+  rw [div_lt_iff] at qqq
+  · rw [lt_mul_iff_one_lt_right h₁, h', show 1 - (1 - x * (d' + y)) * z =
+      1 - (1 - x * y) * z + x * z * d' by ring, h1, zero_add,
+      one_lt_pow_iff_of_nonneg (by positivity) (by norm_num)] at qqq
+    have contra : |x * z * d'| ≤ 1 := by
+      calc
+      _ = |x * z| * |d'| := by rw [abs_mul]
+      _ ≤ |x * z| * (1 / |x * z|) := by
+        apply mul_le_mul (by linarith) _ (abs_nonneg _) (abs_nonneg _)
+        rw [← abs_one_div]
+        apply abs_le_abs_of_nonneg (by positivity)
+        simp only [d']
+        rw [abs_of_nonneg (a := x * z)]
+        exact min_le_right (q / 2) (1 / (x * z))
+        exact mul_nonneg (by linarith) (by linarith)
+      _ = 1 := by
+        rw [mul_div, mul_one, div_self]
+        simp only [ne_eq, abs_eq_zero, mul_eq_zero, not_or]
+        constructor <;> linarith
+    linarith
+  · apply pow_pos
+    simp only [abs_pos]
+    exact hd'
+
+lemma n_derivative' {x z : ℝ} (n : ℕ) (hx : x ∈ Set.Ioo 0 1) (hz : z ∈ Set.Ioo 0 1) :
+    (deriv^[n] fun y ↦ 1 / (1 - (1 - x * y) * z)) =
+    (fun y ↦ (-1) ^ n * (n) ! * (x * z) ^ n / (1 - (1 - x * y) * z) ^ (n + 1)) := by
+  induction' n with n hn
+  · simp
+  · ext y
+    rcases eq_or_ne (1 - (1 - x * y) * z) 0 with (h | hne)
+    · simp only [h, ne_eq, add_eq_zero, one_ne_zero, and_false, not_false_eq_true,
+      zero_pow, div_zero]
+      simp only [Set.mem_Ioo, Set.mem_Icc] at hx hz
+      rw [Function.iterate_succ_apply', hn]
+      apply deriv_zero_of_not_differentiableAt
+      set c := (-1) ^ n * ↑n ! * (x * z) ^ n
+      have hc : c ≠ 0 := by
+        simp only [c]
+        apply mul_ne_zero
+        · simp only [ne_eq, mul_eq_zero, pow_eq_zero_iff', neg_eq_zero, one_ne_zero, false_and,
+            Nat.cast_eq_zero, Nat.factorial_ne_zero, or_self, not_false_eq_true]
+        · apply pow_ne_zero
+          nlinarith
+      exact differentiableAt_inv_special' c x y z n hc hx hz h
+    · rw [Function.iterate_succ_apply', hn, deriv_div]
+      · simp only [differentiableAt_const, deriv_mul, deriv_const', zero_mul, deriv_pow'',
+        mul_zero, add_zero, zero_sub]
+        have h : (fun y ↦ (1 - (1 - x * y) * z) ^ (n + 1)) = fun y ↦ (1 - z + x * z * y) ^ (n + 1) := by
+          ext _; ring
+        rw [div_eq_div_iff]
+        · rw [h, deriv_pow'', deriv_const_add, deriv_const_mul]
+          · simp only [Nat.cast_add, Nat.cast_one, add_tsub_cancel_right, deriv_id'', mul_one,
+              ← neg_mul]
+            rw [show -(-1) ^ n = (-1 : ℝ) ^ (n + 1) by ring,
+              show ((n + 1)! : ℝ) = (((n : ℕ) + 1) : ℝ) * (n !) by rw [Nat.factorial_succ]; norm_cast]
+            ring
+          · apply differentiableAt_id
+          · apply DifferentiableAt.add
+            · apply differentiableAt_const
+            · apply DifferentiableAt.mul
+              · apply differentiableAt_const
+              · apply differentiableAt_id
+        · apply pow_ne_zero
+          exact pow_ne_zero (n + 1) hne
+        · exact pow_ne_zero (n + 1 + 1) hne
+      · apply differentiableAt_const
+      · apply DifferentiableAt.pow
+        apply DifferentiableAt.const_sub
+        apply DifferentiableAt.mul_const
+        apply DifferentiableAt.const_sub
+        apply DifferentiableAt.const_mul differentiableAt_id
+      · exact pow_ne_zero (n + 1) hne
+
 lemma shiftedLegendre_poly_eval_zero_eq_zero {m : ℕ} (h : m < n) :
     eval 0 ((⇑derivative)^[m] (X ^ n * (1 - X) ^ n) : ℝ[X]) = 0 := by
   rw [Polynomial.iterate_derivative_mul, Polynomial.eval_finset_sum]
@@ -303,19 +407,30 @@ lemma shiftedLegendre_continuousOn {n m : ℕ} : ContinuousOn
       refine ContinuousOn.mul continuousOn_const (ContinuousOn.mul continuousOn_const ?_)
       apply ContinuousOn.pow (ContinuousOn.sub continuousOn_const continuousOn_id)
 
-lemma special_deriv_div_continuousOn {m : ℕ} {a : ℝ} (h : 0 < a ∧ a < 1) : ContinuousOn
-    (fun x ↦ (deriv^[m] (fun x ↦ 1 / (1 - a * x))) x) (Set.uIcc 0 1) := by
-  simp_rw [n_derivative m h.1]
+lemma special_deriv_div_continuousOn {m : ℕ} {x z: ℝ} (hx : x ∈ Set.Ioo 0 1) (hz : z ∈ Set.Ioo 0 1) :
+    ContinuousOn (fun u ↦ (deriv^[m] fun y ↦ 1 / (1 - (1 - x * y) * z)) u) (Set.uIcc 0 1) := by
+  simp_rw [n_derivative' m hx hz]
   apply ContinuousOn.div continuousOn_const
-  · apply ContinuousOn.pow (ContinuousOn.sub continuousOn_const (ContinuousOn.mul continuousOn_const continuousOn_id))
-  · intro x hx
-    simp only [ge_iff_le, zero_le_one, Set.uIcc_of_le, Set.mem_Icc] at hx
-    apply pow_ne_zero; nlinarith
+  · apply ContinuousOn.pow
+    apply ContinuousOn.sub continuousOn_const
+    apply ContinuousOn.mul _ continuousOn_const
+    apply ContinuousOn.sub continuousOn_const
+    apply ContinuousOn.mul continuousOn_const continuousOn_id
+  · intro y hy
+    simp only [zero_le_one, Set.uIcc_of_le, Set.mem_Icc, Set.mem_Ioo] at hy hx hz
+    apply pow_ne_zero
+    suffices 1 - (1 - x * y) * z > 0 by linarith
+    simp only [sub_pos]
+    suffices (1 - x * y) * z ≤ z by linarith
+    apply mul_le_of_le_one_left (by linarith)
+    simp only [tsub_le_iff_right, le_add_iff_nonneg_right]
+    nlinarith
 
-lemma integral_shiftedLegendre_mul_smooth_eq_aux {n : ℕ} {a : ℝ} (m : ℕ) (h : m ≤ n) (ha : 0 < a ∧ a < 1):
-    ∫ (x : ℝ) in (0)..1, eval x ((⇑derivative)^[n] (X ^ n * (1 - X) ^ n)) * (fun x ↦ 1 / (1 - a * x)) x =
-    (-1) ^ m * ∫ (x : ℝ) in (0)..1, eval x ((⇑derivative)^[n - m] (X ^ n * (1 - X) ^ n)) *
-    (deriv^[m] fun x ↦ 1 / (1 - a * x)) x := by
+lemma integral_shiftedLegendre_mul_smooth_eq_aux {x z : ℝ} (n m : ℕ) (h : m ≤ n)
+    (hx : x ∈ Set.Ioo 0 1) (hz : z ∈ Set.Ioo 0 1) : ∫ (y : ℝ) in (0)..1,
+    eval y ((⇑derivative)^[n] (X ^ n * (1 - X) ^ n)) * (fun y ↦ 1 / (1 - (1 - x * y) * z)) y =
+    (- 1) ^ m * ∫ (y : ℝ) in (0)..1, eval y ((⇑derivative)^[n - m] (X ^ n * (1 - X) ^ n)) *
+    (deriv^[m] fun y ↦ 1 / (1 - (1 - x * y) * z)) y:= by
   induction' m with m hm
   · simp
   · have h₀ : m < n := by linarith
@@ -325,13 +440,14 @@ lemma integral_shiftedLegendre_mul_smooth_eq_aux {n : ℕ} {a : ℝ} (m : ℕ) (
     symm
     rw [show n - m = n - (m + 1) + 1 by omega, Function.iterate_succ_apply']
     rw [neg_one_mul, neg_eq_iff_eq_neg, intervalIntegral.integral_mul_deriv_eq_deriv_mul_of_hasDerivAt
-      (u := fun x ↦ eval x ((⇑derivative)^[n - (m + 1)] (X ^ n * (1 - X) ^ n : ℝ[X])))
-      (u' := fun x ↦ eval x (derivative ((⇑derivative)^[n - (m + 1)] (X ^ n * (1 - X) ^ n : ℝ[X]))))
-      (v := fun x ↦ (deriv^[m] fun x ↦ 1 / (1 - a * x)) x)]
+      (u := fun u ↦ eval u ((⇑derivative)^[n - (m + 1)] (X ^ n * (1 - X) ^ n : ℝ[X])))
+      (u' := fun u ↦ eval u (derivative ((⇑derivative)^[n - (m + 1)] (X ^ n * (1 - X) ^ n : ℝ[X]))))
+      (v := fun u ↦ (deriv^[m] fun y ↦ 1 / (1 - (1 - x * y) * z)) u)]
     · rw [shiftedLegendre_poly_eval_one_eq_zero h₁, shiftedLegendre_poly_eval_zero_eq_zero h₁]
-      simp only [zero_mul, sub_self, zero_sub, Function.iterate_succ_apply']
+      simp only [one_mul, one_div, zero_mul, sub_zero, sub_self, zero_sub,
+        Function.iterate_succ_apply', neg_inj]
     · apply shiftedLegendre_continuousOn
-    · apply special_deriv_div_continuousOn ha
+    · apply special_deriv_div_continuousOn hx hz
     · intro x _
       simp_rw [Polynomial.iterate_derivative_mul, Polynomial.eval_finset_sum]
       simp only [Nat.succ_eq_add_one, nsmul_eq_mul, eval_mul, eval_natCast, map_sum, eval_finset_sum]
@@ -367,39 +483,55 @@ lemma integral_shiftedLegendre_mul_smooth_eq_aux {n : ℕ} {a : ℝ} (m : ℕ) (
         apply HasDerivAt.pow
         apply HasDerivAt.const_sub
         apply hasDerivAt_id
-    · intro x hx
-      simp only [ge_iff_le, zero_le_one, min_eq_left, max_eq_right, Set.mem_Ioo] at hx
-      have (x : ℝ) : deriv (deriv^[m] fun x ↦ 1 / (1 - a * x)) x = Function.eval x (deriv (deriv^[m] fun x ↦ 1 / (1 - a * x))) := by
+    · intro y hy
+      simp only [Set.mem_Ioo, zero_le_one, min_eq_left, max_eq_right] at hx hy hz
+      have hh : 1 - (1 - x * y) * z ≠ 0 := by
+        suffices 1 - (1 - x * y) * z > 0 by linarith
+        simp only [sub_pos]
+        suffices (1 - x * y) * z ≤ z by linarith
+        apply mul_le_of_le_one_left (by linarith)
+        simp only [tsub_le_iff_right, le_add_iff_nonneg_right]
+        nlinarith
+      have (u : ℝ) : deriv (deriv^[m] fun y ↦ 1 / (1 - (1 - x * y) * z)) u =
+        Function.eval u (deriv (deriv^[m] fun y ↦ 1 / (1 - (1 - x * y) * z))) := by
         simp only [one_div, Function.eval]
       simp_rw [this]
-      simp_rw [← Function.iterate_succ_apply', Nat.succ_eq_add_one, Function.eval, n_derivative _ ha.1]
-      have : ↑(m + 1)! * a ^ (m + 1) / (1 - a * x) ^ (m + 1 + 1) =
-          ((deriv (fun _ ↦ (↑m ! * a ^ m : ℝ)) x) * (1 - a * x) ^ (m + 1) - (↑m ! * a ^ m : ℝ) *
-          deriv (fun x ↦ (1 - a * x) ^ (m + 1)) x) / ((1 - a * x) ^ (m + 1)) ^ 2:= by
+      simp_rw [← Function.iterate_succ_apply', Nat.succ_eq_add_one, Function.eval, n_derivative' _ hx hz]
+      have : (-1) ^ (m + 1) * ↑(m + 1)! * (x * z) ^ (m + 1) / (1 - (1 - x * y) * z) ^ (m + 1 + 1)
+        = (0 * (1 - (1 - x * y) * z) ^ (m + 1) -
+        (-1) ^ m * ↑m ! * (x * z) ^ m * ((m + 1) * (x * z) * (1 - (1 - x * y) * z) ^ m)) /
+        ((1 - (1 - x * y) * z) ^ (m + 1)) ^ 2 := by
+        simp only [zero_mul, zero_sub]
         rw [div_eq_div_iff]
-        · simp only [differentiableAt_const, deriv_mul, deriv_const', zero_mul, deriv_pow'',
-          mul_zero, add_zero, zero_sub]
-          rw [← neg_mul, deriv_pow'', deriv_const_sub , deriv_const_mul]
-          · simp only [Nat.cast_add, Nat.cast_one, add_tsub_cancel_right, deriv_id'', mul_one,
-              mul_neg, neg_mul, neg_neg]
-            norm_cast
-            rw [Nat.factorial_succ, ← pow_mul', Nat.cast_mul]
-            ring
-          · apply differentiableAt_id
-          · apply DifferentiableAt.const_sub
-            apply DifferentiableAt.const_mul differentiableAt_id
-        · apply pow_ne_zero; nlinarith
-        · apply pow_ne_zero; apply pow_ne_zero; nlinarith
+        · simp only [pow_add, ← neg_mul]
+          rw [show -(-1 : ℝ) ^ m = (-1 : ℝ) ^ m * (-1) ^ 1 by ring,
+            show ((m + 1)! : ℝ) = (((m : ℕ) + 1) : ℝ) * (m !) by rw [Nat.factorial_succ]; norm_cast]
+          ring
+        · apply pow_ne_zero _ hh
+        · apply pow_ne_zero
+          apply pow_ne_zero _ hh
       rw [this]
       apply HasDerivAt.div
-      · simp only [differentiableAt_const, deriv_mul, deriv_const', zero_mul, deriv_pow'',
-        mul_zero, add_zero]
-        apply hasDerivAt_const
-      · simp only [hasDerivAt_deriv_iff]
+      · apply hasDerivAt_const
+      · have : (↑m + 1) * (x * z) * (1 - (1 - x * y) * z) ^ m = deriv (fun y ↦ (1 - (1 - x * y) * z) ^ (m + 1)) y := by
+          simp only [show 1 - (1 - x * y) * z = 1 - z + x * z * y by ring]
+          rw [deriv_pow'', show (fun y ↦ 1 - (1 - x * y) * z) = (fun y ↦ 1 - z + x * z * y) by ext _; ring]
+          · rw[deriv_const_add, deriv_const_mul]
+            · simp only [Nat.cast_add, Nat.cast_one, add_tsub_cancel_right, deriv_id'', mul_one]
+              norm_cast
+              ring
+            · exact differentiableAt_id'
+          · apply DifferentiableAt.const_sub
+            apply DifferentiableAt.mul_const
+            · apply DifferentiableAt.const_sub
+              apply DifferentiableAt.const_mul differentiableAt_id
+        simp only [this, hasDerivAt_deriv_iff]
         apply DifferentiableAt.pow
         apply DifferentiableAt.const_sub
-        apply DifferentiableAt.const_mul differentiableAt_id
-      · apply pow_ne_zero; nlinarith
+        apply DifferentiableAt.mul_const
+        · apply DifferentiableAt.const_sub
+          apply DifferentiableAt.const_mul differentiableAt_id
+      · apply pow_ne_zero _ hh
     · simp_rw [← Function.iterate_succ_apply', Polynomial.iterate_derivative_mul, Polynomial.eval_finset_sum]
       simp only [Nat.succ_eq_add_one, nsmul_eq_mul, eval_mul, eval_natCast]
       apply ContinuousOn.intervalIntegrable_of_Icc (by norm_num)
@@ -418,60 +550,69 @@ lemma integral_shiftedLegendre_mul_smooth_eq_aux {n : ℕ} {a : ℝ} (m : ℕ) (
             Set.uIcc_of_le]
           refine ContinuousOn.mul continuousOn_const (ContinuousOn.mul continuousOn_const ?_)
           apply ContinuousOn.pow (ContinuousOn.sub continuousOn_const continuousOn_id)
-    · have : deriv (deriv^[m] fun x ↦ 1 / (1 - a * x)) =
-        (Function.eval · (deriv (deriv^[m] fun x ↦ 1 / (1 - a * x)))) := by
+    · have : deriv (deriv^[m] fun y ↦ 1 / (1 - (1 - x * y) * z)) =
+        (Function.eval · (deriv (deriv^[m] fun y ↦ 1 / (1 - (1 - x * y) * z)))) := by
         ext x
         simp only [one_div, Function.eval]
-
       rw [this]
       simp_rw [← Function.iterate_succ_apply', Nat.succ_eq_add_one, Function.eval]
       apply ContinuousOn.intervalIntegrable_of_Icc (by norm_num)
       rw [← Set.uIcc_of_le (by norm_num)]
-      apply special_deriv_div_continuousOn ha
+      apply special_deriv_div_continuousOn hx hz
 
-lemma integral_legendre_mul_smooth_eq {n : ℕ} {a : ℝ} (h : 0 < a ∧ a < 1):
-  ∫ (x : ℝ) in (0)..1, eval x (shiftedLegendre n) * (fun x ↦ 1 / (1 - a * x)) x =
-  (- 1) ^ n / n ! * ∫ (x : ℝ) in (0)..1, x ^ n * (1 - x) ^ n * (deriv^[n] fun x ↦ 1 / (1 - a * x)) x := by
+lemma integral_legendre_mul_smooth_eq {x z : ℝ} (n : ℕ) (hx : x ∈ Set.Ioo 0 1) (hz : z ∈ Set.Ioo 0 1) :
+    ∫ (y : ℝ) in (0)..1, eval y (shiftedLegendre n) * (fun y ↦ 1 / (1 - (1 - x * y) * z)) y =
+    (- 1) ^ n / n ! * ∫ (y : ℝ) in (0)..1, y ^ n * (1 - y) ^ n *
+    (deriv^[n] fun y ↦ 1 / (1 - (1 - x * y) * z)) y := by
   simp only [eval_mul, one_div, eval_C, shiftedLegendre]
   simp_rw [mul_assoc, intervalIntegral.integral_const_mul]
   rw [← mul_one_div, one_div]
   nth_rw 4 [mul_comm]
   rw [mul_assoc]
   congr
-  obtain h := integral_shiftedLegendre_mul_smooth_eq_aux (n := n) (a := a) (m := n) (by norm_num) h
+  obtain h := integral_shiftedLegendre_mul_smooth_eq_aux (n := n) (m := n) (by norm_num) hx hz
   simp only [one_div, ge_iff_le, le_refl, tsub_eq_zero_of_le, Function.iterate_zero, id_eq,
     eval_mul, eval_pow, eval_X, eval_sub, eval_one] at h
   rw [h]
   simp_rw [← mul_assoc]
 
-lemma legendre_integral_special {a : ℝ} (ha : 0 < a ∧ a < 1) : ∫ (x : ℝ) in (0)..1, eval x (shiftedLegendre n) / (1 - a * x) =
-    (-1) ^ n * ∫ (x : ℝ) in (0)..1, x ^ n * (1 - x) ^ n * a ^ n / (1 - a * x) ^ (n + 1) := by
-  have : ∫ (x : ℝ) in (0)..1, eval x (shiftedLegendre n) / (1 - a * x) =
-    ∫ (x : ℝ) in (0)..1, eval x (shiftedLegendre n) * (1 / (1 - a * x)) := by
-    rw [intervalIntegral.integral_of_le (by norm_num), intervalIntegral.integral_of_le (by norm_num),
-      MeasureTheory.integral_Ioc_eq_integral_Ioo, MeasureTheory.integral_Ioc_eq_integral_Ioo]
-    apply MeasureTheory.setIntegral_congr (by simp)
-    intro _ _
-    group
-  rw [this, integral_legendre_mul_smooth_eq ha, ← intervalIntegral.integral_const_mul,
-    ← intervalIntegral.integral_const_mul, intervalIntegral.integral_of_le (by norm_num),
-    intervalIntegral.integral_of_le (by norm_num), ← MeasureTheory.integral_Icc_eq_integral_Ioc,
-    ← MeasureTheory.integral_Icc_eq_integral_Ioc]
+lemma legendre_integral_special {x z : ℝ} (n : ℕ) (hx : x ∈ Set.Ioo 0 1) (hz : z ∈ Set.Ioo 0 1) :
+    ∫ (y : ℝ) in (0)..1, eval y (shiftedLegendre n) * (1 / (1 - (1 - x * y) * z)) =
+    ∫ (y : ℝ) in (0)..1, (x * y * z) ^ n * (1 - y) ^ n / (1 - (1 - x * y) * z) ^ (n + 1) := by
+  rw [integral_legendre_mul_smooth_eq n hx hz, ← intervalIntegral.integral_const_mul,
+    intervalIntegral.integral_of_le (by norm_num), intervalIntegral.integral_of_le (by norm_num),
+    ← MeasureTheory.integral_Icc_eq_integral_Ioc, ← MeasureTheory.integral_Icc_eq_integral_Ioc]
   apply MeasureTheory.setIntegral_congr (by simp)
-  intro x hx
+  intro y hy
   simp only
-  rw [n_derivative _ ha.1]
+  rw [n_derivative' n hx hz]
   simp_all only [Set.mem_Ioo, Set.mem_Icc]
-  rw [← mul_assoc, mul_div, mul_div, div_eq_div_iff]
+  rw [← mul_assoc, mul_div, div_eq_div_iff]
   · rw [mul_assoc, mul_assoc, mul_assoc, mul_comm, mul_div]
     symm
     rw [eq_div_iff]
-    · ring
+    · symm
+      calc
+      _ = y ^ n * ((1 - y) ^ n * (↑n ! * (x * z) ^ n * (1 - (1 - x * y) * z) ^ (n + 1))) *
+        ((-1) ^ n * (-1) ^ n) := by
+        ring
+      _ = (x * y * z) ^ n * (1 - y) ^ n * (1 - (1 - x * y) * z) ^ (n + 1) * ↑n ! := by
+        rw [← pow_add, ← two_mul, pow_mul]
+        simp only [even_two, Even.neg_pow, one_pow, mul_one]
+        ring
     · norm_cast
       exact Nat.factorial_ne_zero n
-  · suffices (1 - a * x) ^ (n + 1) > 0 by linarith
+  · suffices (1 - (1 - x * y) * z) ^ (n + 1) > 0 by linarith
     apply pow_pos
+    simp only [sub_pos]
+    suffices (1 - x * y) * z ≤ z by linarith
+    apply mul_le_of_le_one_left (by linarith)
+    simp only [tsub_le_iff_right, le_add_iff_nonneg_right]
     nlinarith
-  · suffices (1 - a * x) ^ (n + 1) > 0 by linarith
+  · suffices (1 - (1 - x * y) * z) ^ (n + 1) > 0 by linarith
     apply pow_pos
+    simp only [sub_pos]
+    suffices (1 - x * y) * z ≤ z by linarith
+    apply mul_le_of_le_one_left (by linarith)
+    simp only [tsub_le_iff_right, le_add_iff_nonneg_right]
     nlinarith
