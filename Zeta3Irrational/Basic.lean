@@ -384,9 +384,55 @@ lemma integrableOn_JJ2 (n : ℕ) : MeasureTheory.Integrable (Function.uncurry fu
                     apply shiftedLegendre_bound _ _ hx.2.1
                   rw [abs_eq_self]
                   positivity
-                ·
+                · rcases x with ⟨x, ⟨y, z⟩⟩
+                  simp only at hx ⊢
+                  rcases hx with ⟨⟨hx0, hx1⟩, ⟨hy0, hy1⟩, ⟨hz0, hz1⟩⟩
+                  rw [← div_pow, ← mul_pow, abs_pow]
+                  suffices ineq1 : |y * z * x * ((1 - z) / (1 - (1 - y * z) * x))| ≤ 1 from
+                    pow_le_one _ (abs_nonneg _) ineq1
 
-                  sorry
+                  rw [show (1 - (1 - y * z) * x) = 1 - x + y * z * x by ring]
+                  by_cases ineq : 1 - x + y * z * x = 0
+                  · rw [ineq]
+                    simp only [div_zero, mul_zero, abs_zero, zero_le_one]
+                  · rw [
+                    show y * z * x * ((1 - z) / (1 - x + y * z * x)) = (1-z)/((1-x)/(y*z*x) + 1) by
+                      rw [mul_div, div_eq_div_iff]
+                      · rw [mul_comm _ (1 - z), mul_assoc _ (y * z * x), mul_add, mul_div_cancel₀]
+                        · ring
+                        · apply mul_ne_zero
+                          · apply mul_ne_zero
+                            · linarith
+                            · linarith
+                          · linarith
+                      · exact ineq
+                      · rw [div_add_one]
+                        intro r
+                        rw [_root_.div_eq_zero_iff] at r
+                        · refine ineq <| r.resolve_right ?_
+                          apply mul_ne_zero
+                          · apply mul_ne_zero <;> linarith
+                          · linarith
+                        · apply mul_ne_zero
+                          · apply mul_ne_zero <;> linarith
+                          · linarith, abs_div]
+                    trans |1 - z|
+                    · apply div_le_self (abs_nonneg _)
+                      rw [abs_of_nonneg, le_add_iff_nonneg_left]
+                      · apply div_nonneg
+                        · linarith
+                        · apply mul_nonneg
+                          · apply mul_nonneg <;> linarith
+                          · linarith
+                      · apply add_nonneg
+                        · apply div_nonneg
+                          · linarith
+                          · apply mul_nonneg
+                            · apply mul_nonneg <;> linarith
+                            · linarith
+                        · linarith
+                    rw [abs_le]
+                    exact ⟨by linarith, by linarith⟩
               · simp only [pow_one]
                 exact le_abs_self (1 - (1 - x.2.1 * x.2.2) * x.1)
             · simp only [abs_pos]; linarith [pos_aux x hx]
