@@ -386,11 +386,10 @@ lemma integrableOn_JJ2 (n : ℕ) : MeasureTheory.Integrable (Function.uncurry fu
                   positivity
                 · rcases x with ⟨x, ⟨y, z⟩⟩
                   simp only at hx ⊢
-                  rcases hx with ⟨⟨hx0, hx1⟩, ⟨hy0, hy1⟩, ⟨hz0, hz1⟩⟩
+                  rcases hx with ⟨⟨hx0, hx1⟩, ⟨hy0, _⟩, ⟨hz0, hz1⟩⟩
                   rw [← div_pow, ← mul_pow, abs_pow]
                   suffices ineq1 : |y * z * x * ((1 - z) / (1 - (1 - y * z) * x))| ≤ 1 from
                     pow_le_one _ (abs_nonneg _) ineq1
-
                   rw [show (1 - (1 - y * z) * x) = 1 - x + y * z * x by ring]
                   by_cases ineq : 1 - x + y * z * x = 0
                   · rw [ineq]
