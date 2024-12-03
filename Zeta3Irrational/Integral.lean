@@ -617,7 +617,7 @@ lemma aux_lintegral4 (k r s : ℕ) : ∫⁻ (x : ℝ) in Set.Ioo 0 1,
     · norm_cast
     · positivity
 
-lemma J_ENN_rs_eq_tsum_aux_intergal (r s : ℕ) (k : ℕ):
+lemma J_ENN_rs_eq_tsum_aux_intergal (r s k : ℕ):
     ∫⁻ (x : ℝ × ℝ) in Set.Ioo 0 1 ×ˢ Set.Ioo 0 1,
     ENNReal.ofReal (- (x.1 * x.2).log * x.1 ^ (k + r) * x.2 ^ (k + s)) = ENNReal.ofReal
     (1 / ((k + r + 1) ^ 2 * (k + s + 1)) + 1 / ((k + r + 1) * (k + s + 1) ^ 2)) := by
@@ -853,7 +853,7 @@ lemma integrableOn_J_rr (r : ℕ) : MeasureTheory.IntegrableOn
     rw [h1, h]
     simp only [one_div, ENNReal.ofReal_lt_top]
 
-lemma J_rr (r : ℕ) :
+theorem J_rr (r : ℕ) :
     J r r = 2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 - 2 * ∑ m in Finset.Icc 1 r, 1 / (m : ℝ) ^ 3 := by
   have h := J_ENN_rr r
   simp only [J_ENN] at h
@@ -912,7 +912,7 @@ lemma summable_aux (r : ℕ) : Summable fun (b : ℕ) ↦ 1 / ((b : ℝ) + r + 1
     Real.summable_one_div_nat_pow (p := 2)]
   norm_num
 
-lemma J_ENN_rs' (r s : ℕ) (h : r > s) :
+lemma J_ENN_rs (r s : ℕ) (h : r > s) :
     J_ENN r s = ENNReal.ofReal ((∑ k in Finset.Ioc s r, 1 / (k : ℝ) ^ 2) / (r - s)) := by
   calc
   _ = ∑' (k : ℕ), ENNReal.ofReal (1 / (r - s) * (1 / (k + s + 1) ^ 2 - 1 / (k + r + 1) ^ 2)) := by
@@ -998,7 +998,7 @@ lemma J_ENN_rs' (r s : ℕ) (h : r > s) :
 lemma integrableOn_J_rs' (r s : ℕ) (h : r > s) : MeasureTheory.IntegrableOn
     (fun x ↦ -Real.log (x.1 * x.2) / (1 - x.1 * x.2) * x.1 ^ r * x.2 ^ s)
     (Set.Ioo 0 1 ×ˢ Set.Ioo 0 1) MeasureTheory.volume := by
-  have h₀ := J_ENN_rs' r s h
+  have h₀ := J_ENN_rs r s h
   simp only [J_ENN] at h₀
   rw [MeasureTheory.IntegrableOn, MeasureTheory.Integrable]
   constructor
@@ -1039,7 +1039,7 @@ lemma integrableOn_J_rs' (r s : ℕ) (h : r > s) : MeasureTheory.IntegrableOn
 
 lemma J_rs' (r s : ℕ) (h : r > s) :
     J r s = (∑ k in Finset.Ioc s r, 1 / (k : ℝ) ^ 2) / (r - s) := by
-  have h₀ := J_ENN_rs' r s h
+  have h₀ := J_ENN_rs r s h
   simp only [J_ENN] at h₀
   rw [J, MeasureTheory.integral_eq_lintegral_of_nonneg_ae, h₀, ENNReal.toReal_ofReal_eq_iff]
   · rw [sum_div]
@@ -1116,7 +1116,7 @@ lemma integrableOn_J_rs (r s : ℕ) : MeasureTheory.IntegrableOn
             · positivity
             · exact fun_of_J_nonneg r s x hx
           · simp only [hx, ↓reduceIte]
-        have h₀ := J_ENN_rs' s r h2
+        have h₀ := J_ENN_rs s r h2
         rw [J_ENN_rs_symm s r] at h₀
         simp only [J_ENN] at h₀
         rw [h1, h₀]
@@ -1146,7 +1146,7 @@ lemma J_eq_toReal_J_ENN (r s : ℕ) : J r s = (J_ENN r s).toReal := by
 lemma J_rs_symm (r s : ℕ) : J r s = J s r := by
   rw [J_eq_toReal_J_ENN, J_eq_toReal_J_ENN, J_ENN_rs_symm]
 
-lemma J_rs {r s : ℕ} (h : r ≠ s) : J r s =
+theorem J_rs {r s : ℕ} (h : r ≠ s) : J r s =
     (∑ m in Icc 1 r, 1 / (m : ℝ) ^ 2 - ∑ m in Icc 1 s, 1 / (m : ℝ) ^ 2) / (r - s) := by
   by_cases h1 : r > s
   · simp only [J_rs' r s h1, sub_div, sum_div]

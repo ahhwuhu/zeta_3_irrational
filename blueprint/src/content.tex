@@ -8,18 +8,19 @@
 
 \chapter{Introduction}
 
-证明一个实数$\xi$是无理数, 我们通常采用构造非零序列$\{a_n + b_n\xi\}$趋于$0$, 当$n \rightarrow \infty$时, 其中$a_n, b_n \in \mathbb{Z}$.
+To show a real number $\xi$ is irrational, we usually construct a non-zero sequence 
+$\{a_n + b_n\xi\} \rightarrow 0$, when $n \rightarrow \infty$, where$a_n, b_n \in \mathbb{Z}$.
 
-因为如果$\xi$是有理数$\frac{p}{q}$, 则上述序列有下界$\frac{1}{q}$.
+Cause if $\xi$ is rational number $\frac{p}{q}$, then the sequence has a low bound $\frac{1}{q}$.
 
 \chapter{Proof}
 
-\begin{definition}\label{Legendre_poly}
+\begin{definition}\label{shiftedLegendre}
     \leanok
     \[ P_n(x):=\frac{1}{n!}\frac{d^n}{dx^n}[x^n(1-x)^n] \]
 \end{definition}
 
-\begin{lemma}\label{Legendre_poly_is_int}
+\begin{lemma}\label{shiftedLegendre_eq_sum}
     \[ P_n(x)=\sum\limits_{k=0}^{n}(-1)^k\binom{n}{k}\binom{n+k}{n}x^k \]
 \end{lemma}
 \begin{proof}
@@ -35,7 +36,7 @@
     \end{align*}
 \end{proof}
 
-\begin{lemma}\label{Legendre_poly_sym}
+\begin{lemma}\label{shiftedLegendre_eval_symm}
     \[ P_n(1-x)=(-1)^nP_n(x) \]
 \end{lemma}
 \begin{proof}
@@ -45,39 +46,86 @@
 
 \begin{lemma}\label{Legendre_poly_mul_frac_integral}
     \uses{frac_partial_n}
-    For all $ 0 < a < 1$, one has
-    \[ \int_{0}^{1}\frac{P_n(x)}{1 - ax} \, dx =(-1)^n \int_{0}^{1} x^n(1-x)^n\frac{a^n}{(1 - ax)^{n+1}} \, dx \]
+    For all $ 0 < x, z < 1$, one has
+    \[ \int_{0}^{1}\frac{P_n(y)}{1 - (1-xy)z} \, dx =(-1)^n \int_{0}^{1} \frac{(xyz)^n(1-y)^n}{(1 - (1-xy)z)^{n+1}} \, dx \]
 \end{lemma}
 \begin{proof}
     \leanok
     By induction.
 \end{proof}
 
+
+
+\begin{lemma}\label{log_pow_integral}
+    For all $n \in \mathbb{R}, n > -1$,
+    \[ \int_{0}^{1} -{\rm ln}(x) x^n = \frac{1}{(n + 1)^2} \, dx \]
+\end{lemma}
+\begin{proof}
+    \leanok
+    \begin{align*}
+        \int_{0}^{1} -{\rm ln}(x)\cdot x^n =& \frac{x^{n+1}}{(n+1)^2} - \frac{{\rm ln}(x) x^{n+1}}{n+1} |_0^1 \\
+        =& \frac{1}{(n+1)^2}
+    \end{align*}
+\end{proof}
+
+\begin{lemma}\label{J_rs_eq_sum_aux}
+    \uses{log_pow_integral}
+    For all $k,s,r \in \mathbb{N}$,
+    \[-\int_{0}^{1}\int_{0}^{1} {\rm ln}(xy)x^{k+r}y^{k+s}\, dx \, dy = \frac{1}{((k+r+1)^2(k+s+1))}+\frac{1}{((k+r+1)(k+s+1)^2)}\]
+\end{lemma}
+\begin{proof}
+    \leanok
+    \begin{align*}
+         &-\int_{0}^{1}\int_{0}^{1} {\rm ln}(xy)x^{k+r}y^{k+s}\, dx \, dy \\
+        =& \int_{0}^{1}\int_{0}^{1} -{\rm ln}(x)x^{k+r}y^{k+s}\, dx \, dy + \int_{0}^{1}\int_{0}^{1} -{\rm ln}(y)x^{k+r}y^{k+s}\, dx \, dy \\
+        =& \int_{0}^{1} \frac{-{\rm ln}(x)x^{k+r}}{k+s+1} \, dx + \int_{0}^{1}\int_{0}^{1} \frac{x^{k+r}}{(k+s+1)^2}\, dx\\
+        =& \frac{1}{((k+r+1)^2(k+s+1))} + \frac{1}{((k+r+1)(k+s+1)^2)}
+    \end{align*}
+\end{proof}
+
+\begin{lemma}\label{J_rs_eq_tsum}
+    \uses{J_rs_eq_sum_aux}
+    For all $r,s \in \mathbb{N}$,
+    \[ J_rs = \sum_{k \in \mathbb{N}} \frac{1}{((k+r+1)^2(k+s+1))}+\frac{1}{((k+r+1)(k+s+1)^2)}\]
+\end{lemma}
+\begin{proof}
+    \leanok
+    \begin{align*}
+        J_rs =& -\int_{0}^{1}\int_{0}^{1} x^ry^s{\rm ln}(xy) \sum_{k=0}^{\infty} (xy)^k \, dx \, dy \\
+       =& \sum_{k=0}^{\infty} -\int_{0}^{1}\int_{0}^{1} x^ry^s{\rm ln}(xy)(xy)^k \, dx \, dy \\
+       =& \sum_{k=0}^{\infty} -\int_{0}^{1}\int_{0}^{1} {\rm ln}(xy)x^{k+r}y^{k+s} \, dx \, dy \\
+       =& \sum_{n \in \mathbb{N}} \frac{1}{((k+r+1)^2(k+s+1))}+\frac{1}{((k+r+1)(k+s+1)^2)}
+   \end{align*}
+\end{proof}
+
 \begin{lemma}\label{integral_zeta_3}
+    \uses{J_rs_eq_tsum}
     \[ J_{00} := -\int_{0}^{1}\int_{0}^{1} \frac{{\rm ln}(xy)}{1-xy} \, dx \, dy = 2\zeta(3) \]
 \end{lemma}
-
-\begin{lemma}\label{I_rr}
-    for all integers $r > 0$
-    \[ I_{rr} := -\int_{0}^{1}\int_{0}^{1} x^ry^r\frac{1}{1-xy} \, dx \, dy = \sum\limits_{m = 1}^{\infty}\frac{1}{(m+r)^2} \]
-\end{lemma}
+\begin{proof}
+    \leanok
+    Obvious.
+\end{proof}
 
 \begin{lemma}\label{J_rr}
-    \uses{I_rr}
+    \uses{J_rs_eq_tsum}
     for all integers $r > 0$
     \[ J_{rr} := -\int_{0}^{1}\int_{0}^{1} x^ry^r\frac{{\rm ln}(xy)}{1-xy} \, dx \, dy = 2\zeta(3) - 2 \sum\limits_{m = 1}^{r}\frac{1}{m^3} \]
 \end{lemma}
-
-\begin{lemma}\label{I_rs}
-    Let $r$ and $s$ be non-negative integers, with $r \neq s$, then
-    \[ I_{rs} := -\int_{0}^{1}\int_{0}^{1} x^ry^s\frac{1}{1-xy} \, dx \, dy = \sum\limits_{m = 1}^{\infty}\frac{1}{m+r}\frac{1}{m+s} \]
-\end{lemma}
+\begin{proof}
+    \leanok
+    By Simplification.
+\end{proof}
 
 \begin{lemma}\label{J_rs}
-    \uses{I_rs}
+    \uses{J_rs_eq_tsum}
     Let $r$ and $s$ be non-negative integers, with $r \neq s$, then
     \[ J_{rs} := -\int_{0}^{1}\int_{0}^{1} x^ry^s\frac{{\rm ln}(xy)}{1-xy} \, dx \, dy = \frac{\sum\limits_{m = 1}^{r}\frac{1}{m^2} - \sum\limits_{m = 1}^{s}\frac{1}{m^2}}{r - s} \]
 \end{lemma}
+\begin{proof}
+    \leanok
+    By Simplification.
+\end{proof}
 
 \begin{lemma}\label{d_r_3}
     For all $r \in \mathbb{N}^*, d_n$ is lcm of $\{1, 2, \ldots, n\}.$ 

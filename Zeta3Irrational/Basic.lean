@@ -912,7 +912,7 @@ lemma double_integral_eq3 (n : ℕ) (z : ℝ) (hz : z ∈ Set.Ioo 0 1) : ∫ (x 
   · exact eq3_integrableOn_aux n z hz
   · exact eq3_integrableOn_aux n z hz
 
-lemma JJ_eq_form (n : ℕ) : JJ n = JJ' n := by
+theorem JJ_eq_form (n : ℕ) : JJ n = JJ' n := by
   simp only [JJ, JJ']
   calc
   _ = ∫ (x : ℝ × ℝ) in Set.Ioo 0 1 ×ˢ Set.Ioo 0 1,
@@ -987,7 +987,7 @@ lemma JJ_eq_form (n : ℕ) : JJ n = JJ' n := by
     · rw [MeasureTheory.Measure.prod_restrict, ← MeasureTheory.Measure.volume_eq_prod]
       exact integrableOn_JJ' n
 
-lemma JJ_pos (n : ℕ) : 0 < JJ n := by
+theorem JJ_pos (n : ℕ) : 0 < JJ n := by
   rw [JJ_eq_form, JJ']
   rw [MeasureTheory.integral_pos_iff_support_of_nonneg_ae]
   · set F := _;

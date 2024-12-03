@@ -36,7 +36,7 @@ lemma Finsum_iterate_deriv [CommRing R] (k : ℕ) (h : ℕ → ℕ) :
 
 /-- The expand of `shiftedLegendre n`. -/
 theorem shiftedLegendre_eq_sum (n : ℕ) : shiftedLegendre n = ∑ k in Finset.range (n + 1),
-    C ((- 1) ^ k : ℝ) • (Nat.choose n k) * (Nat.choose (n + k) n) * X ^ k := by
+    C ((- 1) ^ k : ℝ) * (Nat.choose n k : ℝ[X]) * (Nat.choose (n + k) n : ℝ[X]) * X ^ k := by
   have h : ((X : ℝ[X]) - X ^ 2) ^ n =
     ∑ m ∈ range (n + 1), n.choose m • (- 1) ^ m * X ^ (n + m) := by
     rw[sub_eq_add_neg, add_comm, add_pow]
@@ -49,7 +49,7 @@ theorem shiftedLegendre_eq_sum (n : ℕ) : shiftedLegendre n = ∑ k in Finset.r
     Finset.mul_sum]
   congr! 1 with x _
   rw [← mul_assoc, Polynomial.iterate_derivative_X_pow_eq_smul, Nat.descFactorial_eq_div
-    (by omega), show n + x - n = x by omega, smul_eq_mul, nsmul_eq_mul, ← mul_assoc, mul_assoc,
+    (by omega), show n + x - n = x by omega, nsmul_eq_mul, ← mul_assoc, mul_assoc,
     mul_comm]
   simp only [Int.reduceNeg, map_pow, map_neg, map_one]
   rw [Algebra.smul_def, algebraMap_eq, map_natCast, ← mul_assoc, ← mul_assoc, add_comm,
@@ -80,7 +80,7 @@ theorem shiftedLegendre_eq_sum (n : ℕ) : shiftedLegendre n = ∑ k in Finset.r
 
 /-- `shiftedLegendre n` is an integer polynomial. -/
 lemma shiftedLegendre_eq_int_poly (n : ℕ) : ∃ a : ℕ → ℤ, shiftedLegendre n =
-    ∑ k in Finset.range (n + 1), (a k) • X ^ k := by
+    ∑ k in Finset.range (n + 1), (a k : ℝ[X]) * X ^ k := by
   simp_rw [shiftedLegendre_eq_sum]
   use fun k => (- 1) ^ k * (Nat.choose n k) * (Nat.choose (n + k) n)
   congr! 1 with x
