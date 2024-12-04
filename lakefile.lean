@@ -21,6 +21,6 @@ require mathlib from git
 require «PrimeNumberTheoremAnd» from git
   "https://github.com/AlexKontorovich/PrimeNumberTheoremAnd.git" @ "main"
 
-meta if get_config? env = some "dev" then
+-- meta if get_config? env = some "dev" then
 require «doc-gen4» from git
   "https://github.com/leanprover/doc-gen4" @ "b6ae1cf"
