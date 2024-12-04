@@ -22,6 +22,7 @@ Cause if $\xi$ is rational number $\frac{p}{q}$, then the sequence has a low bou
 
 \begin{lemma}\label{shiftedLegendre_eq_sum}
     \[ P_n(x)=\sum\limits_{k=0}^{n}(-1)^k\binom{n}{k}\binom{n+k}{n}x^k \]
+    Hence $P_n(x)$ is integer polynomial.
 \end{lemma}
 \begin{proof}
     \leanok
@@ -44,6 +45,15 @@ Cause if $\xi$ is rational number $\frac{p}{q}$, then the sequence has a low bou
     By definition.
 \end{proof}
 
+\begin{lemma}\label{frac_partial_n}
+    For $ 0 < x, z < 1$,,
+    \[ \frac{\partial^n}{\partial y^n}(\frac{1}{1 - (1-xy)z}) = \frac{(-1)^nn!(xz)^n}{(1 - (1-xy)z)^{n+1}} \]
+\end{lemma}
+\begin{proof}
+    \leanok
+    By definition.
+\end{proof}
+
 \begin{lemma}\label{Legendre_poly_mul_frac_integral}
     \uses{frac_partial_n}
     For all $ 0 < x, z < 1$, one has
@@ -51,10 +61,8 @@ Cause if $\xi$ is rational number $\frac{p}{q}$, then the sequence has a low bou
 \end{lemma}
 \begin{proof}
     \leanok
-    By induction.
+    By induction and integration by parts.
 \end{proof}
-
-
 
 \begin{lemma}\label{log_pow_integral}
     For all $n \in \mathbb{R}, n > -1$,
@@ -167,7 +175,7 @@ Cause if $\xi$ is rational number $\frac{p}{q}$, then the sequence has a low bou
     By computing.
 \end{proof}
 
-\begin{lemma}\label{one_var_substitution}
+\begin{lemma}\label{integral1}
     \[ \int_{0}^{1} \frac{1}{1 - (1 - x)z} \, dz= -\frac{{\rm ln}x}{1 - x} \]
 \end{lemma}
 \begin{proof}
@@ -182,109 +190,164 @@ Cause if $\xi$ is rational number $\frac{p}{q}$, then the sequence has a low bou
     \end{align*}
 \end{proof}
 
-\begin{lemma}\label{two_var_substitution}
-    \uses{one_var_substitution}
-    Given $s, t \in \mathbb{R}_{(0,1)}$, the following equality holds:
-    \[ \int_{0}^{1} \frac{1}{1 - [1 - (1 - s)t]u} \, du = \int_{0}^{1} \frac{1}{[1 - (1 - u)s][1 - (1 - t)u]} \, du \]
-\end{lemma}
-\begin{proof}
-    \leanok
-    Let $x = (1 - s)t$ in the previous lemma, then we can get 
-    \[ \int_{0}^{1} \frac{1}{1 - [1 - (1 - s)t]u} \, du = -\frac{{\rm ln}[(1 - s)t]}{1 - (1 - s)t}\]
-    We can also find that
-    \[ \frac{1}{[1 - (1 - u)s][1 - (1 - t)u]} = \frac{1}{1 - (1 - s)t}\left[\frac{s}{1 - (1 - u)s} + \frac{1-t}{1 - (1 - t)u} \right] \]
-    Then we can see the integral on the right side of the equal:
-    \begin{align*}
-        &\int_{0}^{1} \frac{1}{[1 - (1 - u)s][1 - (1 - t)u]} \, du \\
-        =&\frac{1}{1 - (1 - s)t}\int_{0}^{1} \left[\frac{s}{1 - (1 - u)s} + \frac{1-t}{1 - (1 - t)u} \right] \, du \\
-        =&\frac{1}{1 - (1 - s)t}\int_{0}^{1} \left[\frac{s}{1 - us} + \frac{1-t}{1 - (1 - t)u} \right] \, du \\
-        =&\frac{1}{1 - (1 - s)t}\left[-{\rm ln}(1-su)-{\rm ln}(1-(1-t)u) \right]_{0}^{1}\\
-        =&\frac{1}{1 - (1 - s)t}\left[-{\rm ln}(1-s)-{\rm ln}(t)+{\rm ln}(1)-{\rm ln}(1) \right]\\
-        =&\frac{1}{1 - (1 - s)t}\left[-{\rm ln}(1-s)-{\rm ln}(t) \right]\\
-        =&-\frac{{\rm ln}[(1 - s)t]}{1 - (1 - s)t}
-    \end{align*}
-    Immediately we can see the lemma.
-\end{proof}
+% \begin{lemma}\label{two_var_substitution}
+%     \uses{one_var_substitution}
+%     Given $s, t \in \mathbb{R}_{(0,1)}$, the following equality holds:
+%     \[ \int_{0}^{1} \frac{1}{1 - [1 - (1 - s)t]u} \, du = \int_{0}^{1} \frac{1}{[1 - (1 - u)s][1 - (1 - t)u]} \, du \]
+% \end{lemma}
+% \begin{proof}
+%     \leanok
+%     Let $x = (1 - s)t$ in the previous lemma, then we can get 
+%     \[ \int_{0}^{1} \frac{1}{1 - [1 - (1 - s)t]u} \, du = -\frac{{\rm ln}[(1 - s)t]}{1 - (1 - s)t}\]
+%     We can also find that
+%     \[ \frac{1}{[1 - (1 - u)s][1 - (1 - t)u]} = \frac{1}{1 - (1 - s)t}\left[\frac{s}{1 - (1 - u)s} + \frac{1-t}{1 - (1 - t)u} \right] \]
+%     Then we can see the integral on the right side of the equal:
+%     \begin{align*}
+%         &\int_{0}^{1} \frac{1}{[1 - (1 - u)s][1 - (1 - t)u]} \, du \\
+%         =&\frac{1}{1 - (1 - s)t}\int_{0}^{1} \left[\frac{s}{1 - (1 - u)s} + \frac{1-t}{1 - (1 - t)u} \right] \, du \\
+%         =&\frac{1}{1 - (1 - s)t}\int_{0}^{1} \left[\frac{s}{1 - us} + \frac{1-t}{1 - (1 - t)u} \right] \, du \\
+%         =&\frac{1}{1 - (1 - s)t}\left[-{\rm ln}(1-su)-{\rm ln}(1-(1-t)u) \right]_{0}^{1}\\
+%         =&\frac{1}{1 - (1 - s)t}\left[-{\rm ln}(1-s)-{\rm ln}(t)+{\rm ln}(1)-{\rm ln}(1) \right]\\
+%         =&\frac{1}{1 - (1 - s)t}\left[-{\rm ln}(1-s)-{\rm ln}(t) \right]\\
+%         =&-\frac{{\rm ln}[(1 - s)t]}{1 - (1 - s)t}
+%     \end{align*}
+%     Immediately we can see the lemma.
+% \end{proof}
 
-\begin{definition}\label{J_n}
+\begin{definition}\label{JJ_n}
     \leanok
-    \[ J_n := - \int_{0}^{1}\int_{0}^{1} P_n(x)P_n(y)\frac{{\rm ln}(xy)}{1-xy} \, dx \, dy \]
+    \[ JJ_n := - \int_{0}^{1}\int_{0}^{1} P_n(x)P_n(y)\frac{{\rm ln}(xy)}{1-xy} \, dx \, dy \]
 \end{definition}
 
 \begin{lemma}\label{J_n_integers_an_bn}
-    \uses{J_n, integral_zeta_3, Jrr_linear_form, Jrs_postive_rational, Legendre_poly_is_int}
+    \uses{JJ_n, integral_zeta_3, Jrr_linear_form, Jrs_postive_rational, shiftedLegendre_eq_sum}
     For some integers $a_n$ and $b_n$,
-    \[ J_n = \frac{a_n}{d_n^3} + b_n\zeta(3) \]
+    \[ JJ_n = \frac{a_n}{d_n^3} + b_n\zeta(3) \]
 \end{lemma}
 \begin{proof}
     \leanok
     Since $P_n(x) \in \mathbb{Z}[x]$. Suppose $P_n(x) = \sum\limits_{k=0}^{n}a_kx^k$, where $a_k \in \mathbb{Z}$.\\
     Then 
     \begin{align*}
-        J_n &= -\int_{0}^{1}\int_{0}^{1} P_n(x)P_n(y)\frac{{\rm ln}(xy)}{1-xy} \, dx \, dy \\
+        JJ_n &= -\int_{0}^{1}\int_{0}^{1} P_n(x)P_n(y)\frac{{\rm ln}(xy)}{1-xy} \, dx \, dy \\
         &= -\int_{0}^{1}\int_{0}^{1} \sum\limits_{i=0}^{n}a_ix^i \sum\limits_{j=0}^{n}a_jy^j \frac{{\rm ln}(xy)}{1-xy} \, dx \, dy\\
         &= \sum\limits_{i=0}^{n}\sum\limits_{j=0}^{n}a_i a_j -\int_{0}^{1}\int_{0}^{1} x^i y^j \frac{{\rm ln}(xy)}{1-xy} \, dx \, dy\\
         &= \sum\limits_{i=0}^{n}\sum\limits_{j=0}^{n}a_i a_j J_{ij}\\
     \end{align*}
     We have $J_{rr}$ and $J_{rs} \in \mathbb{Z}\zeta(3) + \frac{\mathbb{Z}}{d_n^3}$.\\
-    So $J_n \in \mathbb{Z}\zeta(3) + \frac{\mathbb{Z}}{d_n^3}$.
+    So $JJ_n \in \mathbb{Z}\zeta(3) + \frac{\mathbb{Z}}{d_n^3}$.
 \end{proof}
 
-\begin{lemma}\label{frac_partial_n}
-    For $a \in \mathbb{R}_{>0}$,
-    \[ \frac{\partial^n}{\partial x^n}(\frac{1}{1-ax}) = \frac{n!a^n}{(1-ax)^n} \]
-\end{lemma}
-\begin{proof}
+\begin{definition}\label{fun1}
     \leanok
-    By definition.
-\end{proof}
+    \[ fun1_n := JJ_n * d_n^3 \]
+\end{definition}
+
+\begin{definition}\label{JJ'_n}
+    \leanok
+    \[ JJ'_n := - \int_{0}^{1}\int_{0}^{1}\int_{0}^{1} (\frac{x(1-x)y(1-y)z(1-z)}{1-(1-yz)x})^n \frac{1}{1-(1-yz)x} \, dx \, dy \, dz \]
+\end{definition}
 
 \begin{lemma}\label{bound}
     Let $D = \{(x,y,z)|x,y,z\in (0,1)\}$, then
-    \[ \frac{x(1-x)y(1-y)z(1-z)}{[1-(1-z)x](1-yz)} < \frac{1}{30} \]
+    \[ \frac{x(1-x)y(1-y)z(1-z)}{(1-(1-xy)z)} < \frac{1}{24} \]
 \end{lemma}
 \begin{proof}
     \leanok
-    We have two inequalities
-    \[ 1-(1-z)x = 1-x+xz \geqslant 2\sqrt{1-x}\sqrt{xz} \]
-    and
-    \[ 1-yz= 1-y+y-yz = 1-y+(1-z)y \geqslant 2\sqrt{1-y}\sqrt{(1-z)y} \]
+    We have an inequality
+    \[ 1-(1-xy)z = 1-z + xyz \geqslant 2\sqrt{1-z}\sqrt{xyz} \]
     Then we can deduce that for $(x,y,z) \in D$,
     \begin{align*}
-        \frac{x(1-x)y(1-y)z(1-z)}{[1-(1-z)x](1-yz)} \leqslant& \frac{x(1-x)y(1-y)z(1-z)}{2\sqrt{1-x}\sqrt{xz}\cdot2\sqrt{1-y}\sqrt{(1-z)y}}\\
-        =&\frac{x(1-x)y(1-y)z(1-z)}{4\sqrt{1-x}\sqrt{x}\sqrt{z}\sqrt{1-y}\sqrt{1-z}\sqrt{y}}\\
-        =&\frac{\sqrt{x}\sqrt{1-x}\sqrt{y}\sqrt{1-y}\sqrt{z}\sqrt{1-z}}{4}
+        \frac{x(1-x)y(1-y)z(1-z)}{(1-(1-xy)z)} \leqslant& \frac{x(1-x)y(1-y)z(1-z)}{2\sqrt{1-z}\sqrt{xyz}}\\
+        =&\frac{\sqrt{x}(1-x)\sqrt{y}(1-y)\sqrt{z}\sqrt{1-z}}{2}
     \end{align*}
-    For $x\in (0,1)$, the max value of $\sqrt{x}\sqrt{1-x} = \sqrt{x(1-x)}$ is got at $x=\frac{1}{2}$. So do $y, z$.
+    For $z\in (0,1)$, the max value of $\sqrt{z}\sqrt{1-z} = \sqrt{z(1-z)}$ is got at $z=\frac{1}{2}$.
+    And for $y \in (0,1)$, we have $y(1-y)^2 - \frac{4}{27} = (y - \frac{4}{3})(y - \frac{1}{3})^2 \leqslant 0$. Then
+    \[ \sqrt{y}(1-y) = \sqrt{y(1-y)^2} \leqslant \sqrt{\frac{4}{27}} \leqslant \sqrt{\frac{4}{25}} = \frac{2}{5}\]
     Then we have
     \begin{align*}
-        \frac{x(1-x)y(1-y)z(1-z)}{[1-(1-z)x](1-yz)} \leqslant& \frac{1}{4}\cdot\sqrt{\frac{1}{2}}\sqrt{1-\frac{1}{2}}\cdot\sqrt{\frac{1}{2}}\sqrt{1-\frac{1}{2}}\cdot\sqrt{\frac{1}{2}}\sqrt{1-\frac{1}{2}} \\
-        =& \frac{1}{32} < \frac{1}{30} 
+        \frac{x(1-x)y(1-y)z(1-z)}{(1-(1-xy)z)} \leqslant& \frac{2}{5}\cdot\frac{2}{5}\cdot\frac{1}{2}\cdot\frac{1}{2} \\
+        =& \frac{1}{25} < \frac{1}{24} 
     \end{align*}
 \end{proof}
 
-\begin{lemma}\label{Jn_abs_upper}
-    \uses{bound, one_var_substitution, two_var_substitution, Legendre_poly_sym, Legendre_poly_mul_frac_integral}
-    \[ J_n \leqslant (\frac{1}{30})^n\cdot 2\zeta(3) \]
+\begin{lemma}\label{double_integral_eq1}
+    For $0 < z < 1$, 
+    \[ \int_{0}^{1}\int_{0}^{1} P_n(x)P_n(y) \frac{1}{1 - (1 - xy)z} \, dx \, dy = \int_{0}^{1}\int_{0}^{1} \frac{P_n(x)(xyz)^n(1-y)^n}{(1-(1-xy)z)^{n + 1}} \, dx \, dy \]
 \end{lemma}
 \begin{proof}
+    \leanok
+\end{proof}
+
+\begin{lemma}\label{double_integral_eq2}
+    For $0 < x, y < 1$, 
+    \[ \int_{0}^{1} \frac{P_n(x)(xyz)^n(1-y)^n}{(1-(1-xy)z)^{n + 1}} \, dz = \int_{0}^{1} \frac{P_n(x)(1-z)^n(1-y)^n}{1-(1-xy)z}  \, dz \]
+\end{lemma}
+\begin{proof}
+    \leanok
+\end{proof}
+
+\begin{lemma}\label{double_integral_eq3}
+    For $0 < z < 1$, 
+    \[ \int_{0}^{1}\int_{0}^{1} \frac{P_n(x)(1-y)^n}{1-(1-xy)z} \, dx \, dy = \int_{0}^{1}\int_{0}^{1} \frac{(xyz(1-x)(1-y))^n}{(1-(1-xy)z)^{n+1}} \, dx \, dy \]
+\end{lemma}
+\begin{proof}
+    \leanok
+\end{proof}
+
+\begin{theorem}\label{JJ_eq_form}
+    \uses{JJ_n, integral1, double_integral_eq1, double_integral_eq2, double_integral_eq3, JJ'_n}
+    \[ JJ_n = JJ'_n \]
+\end{theorem}
+\begin{proof}
+    \leanok
     \begin{align*}
-        J_n &= \int_{0}^{1}\int_{0}^{1} P_n(x)P_n(y)\frac{-{\rm ln}(xy)}{1-xy} \, dx \, dy \\
-        &= \int_{0}^{1}\int_{0}^{1} P_n(x)P_n(y) \left[ \int_{0}^{1} \frac{1}{1 - (1 - xy)z} \, dz\right]\, dx \, dy \\
-        &= \int_{0}^{1}\int_{0}^{1} P_n(1-x)P_n(y) \left[ \int_{0}^{1} \frac{1}{1 - (1 - (1-x)y)z} \, dz\right]\, dx \, dy \\
-        &= \int_{0}^{1}\int_{0}^{1} (-1)^nP_n(x)P_n(y) \left[ \int_{0}^{1} \frac{1}{[1 - (1 - z)x][1 - (1 - y)z]} \, dz\right]\, dx \, dy \\
-        &= \int_{0}^{1}\int_{0}^{1}\int_{0}^{1} \frac{P_n(x)P_n(1-y)}{[1 - (1 - z)x][1 - (1 - y)z]} \, dx \, dy \, dz \\
-        &= \int_{0}^{1}\int_{0}^{1}\int_{0}^{1} \frac{P_n(x)P_n(y)}{[1 - (1 - z)x][1 - yz]} \, dx \, dy \, dz \\
-        &= \int_{0}^{1} \left( \int_{0}^{1} \frac{P_n(x)}{1 - (1 - z)x} \, dx \int_{0}^{1} \frac{P_n(y)}{1 - yz} \, dy \right) \, dz \\
-        &= \int_{0}^{1} \\
-        &= \int_{0}^{1}\int_{0}^{1}\int_{0}^{1} \frac{\left(x-x^2\right)^n\left(y-y^2\right)^n\left(z-z^2\right)^n}{\{[1-(1-z) x](1-y z)\}^{n+1}} \, dx \, dy \, dz \\
-        &= \int_{0}^{1}\int_{0}^{1}\int_{0}^{1} \frac{g(x, y, z)^n}{[1-(1-z)x](1-yz)} \, dx \, dy \, dz \\
-        &< (\frac{1}{30})^n \int_{0}^{1}\int_{0}^{1}\int_{0}^{1} \frac{1}{[1-(1-z)x](1-yz)} \, dx \, dy \, dz \\
-        &< (\frac{1}{30})^n \int_{0}^{1}\int_{0}^{1}\int_{0}^{1} \frac{1}{[1-(1-z)x](1-(1-y)z)} \, dx \, dy \, dz \\
-        &= (\frac{1}{30})^n \int_{0}^{1}\int_{0}^{1}\int_{0}^{1} \frac{1}{1 - (1 - (1-x)y)z} \, dx \, dy \, dz \\
-        &= (\frac{1}{30})^n \int_{0}^{1}\int_{0}^{1}\int_{0}^{1} \frac{1}{1 - (1 - xy)z} \, dx \, dy \, dz \\
-        &= (\frac{1}{30})^n \int_{0}^{1}\int_{0}^{1} -\frac{{\rm ln}(xy)}{1 - xy} \, dx \, dy \\
-        &= (\frac{1}{30})^n \cdot 2\zeta(3)
+        JJ_n &= \int_{0}^{1}\int_{0}^{1} P_n(x)P_n(y)(\int_{0}^{1} \frac{1}{1 - (1 - xy)z} \, dz) \, dx \, dy \\
+        &=\int_{0}^{1}\int_{0}^{1}\int_{0}^{1} P_n(x)P_n(y) \frac{1}{1 - (1 - xy)z} \, dx \, dy \, dz \\
+        &=\int_{0}^{1}\int_{0}^{1}\int_{0}^{1} \frac{P_n(x)(xyz)^n(1-y)^n}{(1-(1-xy)z)^{n + 1}} \, dx \, dy \, dz \\
+        &=\int_{0}^{1}\int_{0}^{1}\int_{0}^{1} \frac{P_n(x)(1-z)^n(1-y)^n}{1-(1-xy)z}  \, dz \, dx \, dy  \\
+        &=\int_{0}^{1} (1-z)^n (\int_{0}^{1}\int_{0}^{1} \frac{P_n(x)(1-y)^n}{1-(1-xy)z}  \, dx \, dy) \, dz \\
+        &=\int_{0}^{1} (1-z)^n (\int_{0}^{1}\int_{0}^{1} \frac{(xyz(1-x)(1-y))^n}{(1-(1-xy)z)^{n+1}} \, dx \, dy) \, dz \\
+        &=\int_{0}^{1}\int_{0}^{1}\int_{0}^{1} \frac{(xyz(1-x)(1-y)(1-z))^n}{(1-(1-xy)z)^{n+1}} \, dz \, dx \, dy
+        &=JJ'_n
+    \end{align*}
+\end{proof}
+
+\begin{theorem}\label{JJ_pos}
+    \uses{JJ_eq_form}
+    \[ 0 < JJ_n \]
+\end{theorem}
+\begin{proof}
+    \leanok
+    Every point is positive.
+\end{proof}
+
+
+\begin{lemma}\label{J_eq_triple}
+    \uses{J, integral1}
+    For $r, s \in \mathbb{N}$, one has
+    \[ J_rs = \int_{0}^{1}\int_{0}^{1}\int_{0}^{1} \frac{y^rz^s}{1-(1-yz)x} \, dz \, dy \, dx \]
+\end{lemma}
+\begin{proof}
+    \leanok
+    \begin{align*}
+        &\int_{0}^{1}\int_{0}^{1}\int_{0}^{1} \frac{y^rz^s}{1-(1-yz)x} \, dz \, dy \, dx \\
+        =& \int_{0}^{1}\int_{0}^{1}(\int_{0}^{1} \frac{y^rz^s}{1-(1-yz)x} \, dx) \, dy \, dz \\
+        =& \int_{0}^{1}\int_{0}^{1}(-\frac{{\rm ln}(yz)}{1 - yz}y^rz^s \, dx) \, dy \, dz \\
+        =& J_rs
+    \end{align*}
+\end{proof}
+
+\begin{theorem}\label{JJ_upper}
+    \uses{JJ_eq_form, JJ', J_eq_triple, integral_zeta_3}
+    \[ JJ_n \leqslant (\frac{1}{24})^n\cdot 2\zeta(3) \]
+\end{theorem}
+\begin{proof}
+    \begin{align*}
+        JJ_n &= JJ'_n \\
+        &\leqslant (\frac{1}{24})^n \int_{0}^{1}\int_{0}^{1}\int_{0}^{1} \frac{1}{1-(1-yz)x} \, dx \, dy \, dz \\
+        &= (\frac{1}{24})^n J_{00} \\
+        &= (\frac{1}{24})^n \cdot 2\zeta(3)
     \end{align*}
 \end{proof}
 
@@ -300,7 +363,7 @@ Cause if $\xi$ is rational number $\frac{p}{q}$, then the sequence has a low bou
 \end{theorem}
 \begin{proof}
     \leanok
-    \uses{J_n_integers_an_bn, Jn_abs_upper, dn_asymptotic}
+    \uses{J_n_integers_an_bn, JJ_upper, dn_asymptotic}
     \[ 0 \neq |J_n| \leqslant (\frac{1}{30})^n\cdot 2\zeta(3) \]
     Then 
     \[ 0 < |\frac{a_n}{d_n^3} + b_n\zeta(3)| \leqslant (\frac{1}{30})^n\cdot 2\zeta(3) \]
