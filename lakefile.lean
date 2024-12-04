@@ -16,11 +16,11 @@ lean_lib «Zeta3Irrational» where
 require checkdecls from git "https://github.com/PatrickMassot/checkdecls.git"
 
 require mathlib from git
-  "https://github.com/leanprover-community/mathlib4.git" @ "v4.11.0"
+  "https://github.com/leanprover-community/mathlib4.git" @ "e348a4c"
 
 require «PrimeNumberTheoremAnd» from git
-  "https://github.com/AlexKontorovich/PrimeNumberTheoremAnd.git"
+  "https://github.com/AlexKontorovich/PrimeNumberTheoremAnd.git" @ "main"
 
--- meta if get_config? env = some "dev" then
+meta if get_config? env = some "dev" then
 require «doc-gen4» from git
-  "https://github.com/leanprover/doc-gen4" @ "e490631"
+  "https://github.com/leanprover/doc-gen4" @ "b6ae1cf"

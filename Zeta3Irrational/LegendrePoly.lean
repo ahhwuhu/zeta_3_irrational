@@ -148,12 +148,12 @@ theorem differentiableAt_inv_special {x a : ℝ} {n : ℕ}
         linarith
       _ < q := by linarith
     specialize qqq this
-    rw [div_lt_iff] at qqq
+    rw [div_lt_iff₀] at qqq
     · have : 1 <  |1 - a * (a * q / 2 * q + x)| ^ (n + 1) := by
         rwa [← mul_lt_mul_left (a := ↑n ! * |a| ^ n) h₁, mul_one]
       rw [mul_add, add_comm, ← sub_sub, hx, zero_sub, abs_neg] at this
       have : |a * (a * q / 2 * q)| ^ (n + 1) < 1 := by
-        apply pow_lt_one (by simp) _ (by omega)
+        apply pow_lt_one₀ (by simp) _ (by omega)
         · nth_rewrite 2 [mul_comm]
           rw [← mul_assoc, ← mul_div_assoc, ← pow_two]
           rw [show |((a * q) ^ 2 / 2 : ℝ)| = ((a * q) ^ 2 / 2 : ℝ) by exact abs_eq_self.2 (by positivity)]
@@ -173,14 +173,14 @@ theorem differentiableAt_inv_special {x a : ℝ} {n : ℕ}
       rw [show |(q / 2 : ℝ)| = (q / 2 : ℝ) by exact abs_eq_self.2 (by linarith)]
       linarith
     specialize qqq this
-    rw [div_lt_iff] at qqq
+    rw [div_lt_iff₀] at qqq
     · have : 1 <  |1 - a * (q / 2 + x)| ^ (n + 1) := by
         rwa [← mul_lt_mul_left (a := ↑n ! * |a| ^ n) h₁, mul_one]
       rw [mul_add, add_comm, ← sub_sub, hx, zero_sub, abs_neg, ← mul_div_assoc, h2] at this
       have : 1 < (1 / 2 : ℝ) := by
         suffices (1 : ℝ) ≥ |(1 / 2 : ℝ)| ^ (n + 1) by linarith
         rw [show |(1 / 2 : ℝ)| = (1 / 2 : ℝ) by exact abs_eq_self.2 (by linarith)]
-        apply pow_le_one <;> linarith
+        apply pow_le_one₀ <;> linarith
       linarith
     · apply pow_pos
       rw [abs_pos]
@@ -191,9 +191,9 @@ theorem differentiableAt_inv_special {x a : ℝ} {n : ℕ}
       have : |(1 / a : ℝ)| = (1 / a : ℝ) := by
         rw [abs_eq_self, one_div_nonneg]
         linarith
-      rw [this, div_lt_iff] <;> linarith
+      rw [this, div_lt_iff₀] <;> linarith
     specialize qqq this
-    rw [div_lt_iff] at qqq
+    rw [div_lt_iff₀] at qqq
     · have : 1 <  |1 - a * (1 / a + x)| ^ (n + 1) := by
         rwa [← mul_lt_mul_left (a := ↑n ! * |a| ^ n) h₁, mul_one]
       rw [mul_add, add_comm, ← sub_sub, hx, zero_sub, abs_neg, ← mul_div_assoc, mul_one,
@@ -272,7 +272,7 @@ theorem differentiableAt_inv_special' (c x y z : ℝ) (n : ℕ) (hc : c ≠ 0) (
     simp only [one_div, inv_pos, abs_pos, ne_eq, mul_eq_zero, not_or]
     constructor <;> linarith
   specialize qqq hd
-  rw [div_lt_iff] at qqq
+  rw [div_lt_iff₀] at qqq
   · rw [lt_mul_iff_one_lt_right h₁, h', show 1 - (1 - x * (d' + y)) * z =
       1 - (1 - x * y) * z + x * z * d' by ring, h1, zero_add,
       one_lt_pow_iff_of_nonneg (by positivity) (by norm_num)] at qqq
@@ -582,7 +582,7 @@ lemma legendre_integral_special {x z : ℝ} (n : ℕ) (hx : x ∈ Set.Ioo 0 1) (
   rw [integral_legendre_mul_smooth_eq n hx hz, ← intervalIntegral.integral_const_mul,
     intervalIntegral.integral_of_le (by norm_num), intervalIntegral.integral_of_le (by norm_num),
     ← MeasureTheory.integral_Icc_eq_integral_Ioc, ← MeasureTheory.integral_Icc_eq_integral_Ioc]
-  apply MeasureTheory.setIntegral_congr (by simp)
+  apply MeasureTheory.setIntegral_congr_fun (by simp)
   intro y hy
   simp only
   rw [n_derivative' n hx hz]

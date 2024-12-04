@@ -96,8 +96,8 @@ lemma JJENN_upper (n : ℕ) : JJENN n ≤
   calc
   _ ≤ ∫⁻ (x : ℝ × ℝ × ℝ) in Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1,
     ENNReal.ofReal ((1 / 24) ^ n / (1 - (1 - x.2.1 * x.2.2) * x.1)) := by
-    rw [JJENN, ← MeasureTheory.lintegral_indicator _ (by measurability),
-        ← MeasureTheory.lintegral_indicator _ (by measurability)]
+    rw [JJENN, ← MeasureTheory.lintegral_indicator (by measurability),
+        ← MeasureTheory.lintegral_indicator (by measurability)]
     apply MeasureTheory.lintegral_mono
     intro x
     rw [Set.indicator_apply, Set.indicator_apply]
@@ -122,8 +122,8 @@ lemma JJENN_upper (n : ℕ) : JJENN n ≤
   _ = ENNReal.ofReal ((1 / 24) ^ n) * ∫⁻ (x : ℝ × ℝ × ℝ) in Set.Ioo 0 1 ×ˢ Set.Ioo 0 1 ×ˢ Set.Ioo 0 1,
     ENNReal.ofReal (1 / (1 - (1 - x.2.1 * x.2.2) * x.1)) := by
     rw [← MeasureTheory.lintegral_const_mul]
-    · rw [← MeasureTheory.lintegral_indicator _ (by measurability),
-        ← MeasureTheory.lintegral_indicator _ (by measurability)]
+    · rw [← MeasureTheory.lintegral_indicator (by measurability),
+        ← MeasureTheory.lintegral_indicator (by measurability)]
       congr
       ext x
       rw [Set.indicator_apply, Set.indicator_apply]
@@ -189,8 +189,8 @@ lemma integrableOn_JJ' (n : ℕ) : MeasureTheory.Integrable (fun (x : ℝ × ℝ
     change k < ⊤
     have : k = JJENN n := by
       simp only [k, JJENN]
-      rw [← MeasureTheory.lintegral_indicator _ (by measurability),
-        ← MeasureTheory.lintegral_indicator _ (by measurability)]
+      rw [← MeasureTheory.lintegral_indicator (by measurability),
+        ← MeasureTheory.lintegral_indicator (by measurability)]
       congr
       ext x
       rw [Set.indicator_apply, Set.indicator_apply]
@@ -290,8 +290,8 @@ lemma integrableOn_JJ1 (n : ℕ) : MeasureTheory.Integrable
       ENNReal.ofReal (1 / (1 - (1 - x.2.1 * x.2.2) * x.1)) := by
       simp only [k]
       rw [← MeasureTheory.lintegral_const_mul _ Measurable_one_div_aux]
-      rw [← MeasureTheory.lintegral_indicator _ (by measurability),
-        ← MeasureTheory.lintegral_indicator _ (by measurability)]
+      rw [← MeasureTheory.lintegral_indicator (by measurability),
+        ← MeasureTheory.lintegral_indicator (by measurability)]
       apply MeasureTheory.lintegral_mono
       intro x
       rw [Set.indicator_apply, Set.indicator_apply]
@@ -365,8 +365,8 @@ lemma integrableOn_JJ2 (n : ℕ) : MeasureTheory.Integrable (Function.uncurry fu
       ENNReal.ofReal (1 / (1 - (1 - x.2.1 * x.2.2) * x.1)) := by
       simp only [k]
       rw [← MeasureTheory.lintegral_const_mul _ Measurable_one_div_aux]
-      rw [← MeasureTheory.lintegral_indicator _ (by measurability),
-        ← MeasureTheory.lintegral_indicator _ (by measurability)]
+      rw [← MeasureTheory.lintegral_indicator (by measurability),
+        ← MeasureTheory.lintegral_indicator (by measurability)]
       apply MeasureTheory.lintegral_mono
       intro x
       rw [Set.indicator_apply, Set.indicator_apply]
@@ -389,7 +389,7 @@ lemma integrableOn_JJ2 (n : ℕ) : MeasureTheory.Integrable (Function.uncurry fu
                   rcases hx with ⟨⟨hx0, hx1⟩, ⟨hy0, _⟩, ⟨hz0, hz1⟩⟩
                   rw [← div_pow, ← mul_pow, abs_pow]
                   suffices ineq1 : |y * z * x * ((1 - z) / (1 - (1 - y * z) * x))| ≤ 1 from
-                    pow_le_one _ (abs_nonneg _) ineq1
+                    pow_le_one₀ (abs_nonneg _) ineq1
                   rw [show (1 - (1 - y * z) * x) = 1 - x + y * z * x by ring]
                   by_cases ineq : 1 - x + y * z * x = 0
                   · rw [ineq]
@@ -488,8 +488,8 @@ lemma integrableOn_JJ3 (n : ℕ) : MeasureTheory.Integrable
       ENNReal.ofReal (1 / (1 - (1 - x.2.1 * x.2.2) * x.1)) := by
       simp only [k]
       rw [← MeasureTheory.lintegral_const_mul _ Measurable_one_div_aux]
-      rw [← MeasureTheory.lintegral_indicator _ (by measurability),
-        ← MeasureTheory.lintegral_indicator _ (by measurability)]
+      rw [← MeasureTheory.lintegral_indicator (by measurability),
+        ← MeasureTheory.lintegral_indicator (by measurability)]
       apply MeasureTheory.lintegral_mono
       intro x
       rw [Set.indicator_apply, Set.indicator_apply]
