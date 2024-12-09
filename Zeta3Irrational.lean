@@ -3,5 +3,3 @@
 import «Zeta3Irrational».Basic
 
 import «PrimeNumberTheoremAnd».Consequences
-
-#check pi_alt

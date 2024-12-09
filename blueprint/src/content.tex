@@ -21,6 +21,7 @@ Cause if $\xi$ is rational number $\frac{p}{q}$, then the sequence has a low bou
 \end{definition}
 
 \begin{lemma}\label{shiftedLegendre_eq_sum}
+    \uses{shiftedLegendre}
     \[ P_n(x)=\sum\limits_{k=0}^{n}(-1)^k\binom{n}{k}\binom{n+k}{n}x^k \]
     Hence $P_n(x)$ is integer polynomial.
 \end{lemma}
@@ -37,13 +38,13 @@ Cause if $\xi$ is rational number $\frac{p}{q}$, then the sequence has a low bou
     \end{align*}
 \end{proof}
 
-\begin{lemma}\label{shiftedLegendre_eval_symm}
-    \[ P_n(1-x)=(-1)^nP_n(x) \]
-\end{lemma}
-\begin{proof}
-    \leanok
-    By definition.
-\end{proof}
+% \begin{lemma}\label{shiftedLegendre_eval_symm}
+%     \[ P_n(1-x)=(-1)^nP_n(x) \]
+% \end{lemma}
+% \begin{proof}
+%     \leanok
+%     By definition.
+% \end{proof}
 
 \begin{lemma}\label{frac_partial_n}
     For $ 0 < x, z < 1$,,
@@ -55,7 +56,7 @@ Cause if $\xi$ is rational number $\frac{p}{q}$, then the sequence has a low bou
 \end{proof}
 
 \begin{lemma}\label{Legendre_poly_mul_frac_integral}
-    \uses{frac_partial_n}
+    \uses{frac_partial_n, shiftedLegendre}
     For all $ 0 < x, z < 1$, one has
     \[ \int_{0}^{1}\frac{P_n(y)}{1 - (1-xy)z} \, dx =(-1)^n \int_{0}^{1} \frac{(xyz)^n(1-y)^n}{(1 - (1-xy)z)^{n+1}} \, dx \]
 \end{lemma}
@@ -215,6 +216,7 @@ Cause if $\xi$ is rational number $\frac{p}{q}$, then the sequence has a low bou
 % \end{proof}
 
 \begin{definition}\label{JJ_n}
+    \uses{shiftedLegendre}
     \leanok
     \[ JJ_n := - \int_{0}^{1}\int_{0}^{1} P_n(x)P_n(y)\frac{{\rm ln}(xy)}{1-xy} \, dx \, dy \]
 \end{definition}
@@ -238,12 +240,13 @@ Cause if $\xi$ is rational number $\frac{p}{q}$, then the sequence has a low bou
     So $JJ_n \in \mathbb{Z}\zeta(3) + \frac{\mathbb{Z}}{d_n^3}$.
 \end{proof}
 
-\begin{definition}\label{fun1}
-    \leanok
-    \[ fun1_n := JJ_n * d_n^3 \]
-\end{definition}
+% \begin{definition}\label{fun1}
+%     \leanok
+%     \[ fun1_n := JJ_n * d_n^3 \]
+% \end{definition}
 
 \begin{definition}\label{JJ'_n}
+    \uses{shiftedLegendre}
     \leanok
     \[ JJ'_n := - \int_{0}^{1}\int_{0}^{1}\int_{0}^{1} (\frac{x(1-x)y(1-y)z(1-z)}{1-(1-yz)x})^n \frac{1}{1-(1-yz)x} \, dx \, dy \, dz \]
 \end{definition}
@@ -272,6 +275,7 @@ Cause if $\xi$ is rational number $\frac{p}{q}$, then the sequence has a low bou
 \end{proof}
 
 \begin{lemma}\label{double_integral_eq1}
+    \uses{Legendre_poly_mul_frac_integral}
     For $0 < z < 1$, 
     \[ \int_{0}^{1}\int_{0}^{1} P_n(x)P_n(y) \frac{1}{1 - (1 - xy)z} \, dx \, dy = \int_{0}^{1}\int_{0}^{1} \frac{P_n(x)(xyz)^n(1-y)^n}{(1-(1-xy)z)^{n + 1}} \, dx \, dy \]
 \end{lemma}
@@ -280,6 +284,7 @@ Cause if $\xi$ is rational number $\frac{p}{q}$, then the sequence has a low bou
 \end{proof}
 
 \begin{lemma}\label{double_integral_eq2}
+    \uses{Legendre_poly_mul_frac_integral}
     For $0 < x, y < 1$, 
     \[ \int_{0}^{1} \frac{P_n(x)(xyz)^n(1-y)^n}{(1-(1-xy)z)^{n + 1}} \, dz = \int_{0}^{1} \frac{P_n(x)(1-z)^n(1-y)^n}{1-(1-xy)z}  \, dz \]
 \end{lemma}
@@ -288,6 +293,7 @@ Cause if $\xi$ is rational number $\frac{p}{q}$, then the sequence has a low bou
 \end{proof}
 
 \begin{lemma}\label{double_integral_eq3}
+    \uses{Legendre_poly_mul_frac_integral}
     For $0 < z < 1$, 
     \[ \int_{0}^{1}\int_{0}^{1} \frac{P_n(x)(1-y)^n}{1-(1-xy)z} \, dx \, dy = \int_{0}^{1}\int_{0}^{1} \frac{(xyz(1-x)(1-y))^n}{(1-(1-xy)z)^{n+1}} \, dx \, dy \]
 \end{lemma}
@@ -339,10 +345,11 @@ Cause if $\xi$ is rational number $\frac{p}{q}$, then the sequence has a low bou
 \end{proof}
 
 \begin{theorem}\label{JJ_upper}
-    \uses{JJ_eq_form, JJ', J_eq_triple, integral_zeta_3}
+    \uses{JJ_eq_form, JJ', J_eq_triple, integral_zeta_3, bound}
     \[ JJ_n \leqslant (\frac{1}{24})^n\cdot 2\zeta(3) \]
 \end{theorem}
 \begin{proof}
+    \leanok
     \begin{align*}
         JJ_n &= JJ'_n \\
         &\leqslant (\frac{1}{24})^n \int_{0}^{1}\int_{0}^{1}\int_{0}^{1} \frac{1}{1-(1-yz)x} \, dx \, dy \, dz \\
@@ -351,19 +358,40 @@ Cause if $\xi$ is rational number $\frac{p}{q}$, then the sequence has a low bou
     \end{align*}
 \end{proof}
 
+\begin{lemma}\label{pi_asymp}
+  One has
+  $$ \pi(x) = (1+o(1)) \int_2^x \frac{dt}{\log t}$$
+  as $x \to \infty$.
+\end{lemma}
+\begin{proof}
+    \leanok
+\end{proof}
+
+\begin{lemma}\label{pi_alt}
+    \uses{pi_asymp}
+    One has 
+    \[ \pi(x) = (1 + o(1))\frac{x}{\log x}\]
+    as $x \rightarrow \infty$.
+\end{lemma}
+\begin{proof}
+    \leanok
+\end{proof}
+
 \begin{lemma}\label{dn_asymptotic}
+    \uses{pi_alt}
     Let $n$ be a positive integer. Define $\pi(n)$ as the number of primes less than (or equal to) $n$. Then, $d_n \leqslant n^{\pi(n)} \sim e^n$.
 \end{lemma}
 \begin{proof}
+    \leanok
     use Prime Number Theorem. 
 \end{proof}
 
 \begin{theorem}\label{zeta_3_irrational}
+    \uses{J_n_integers_an_bn, JJ_upper, dn_asymptotic}
     $\zeta(3)$ is irrational.
 \end{theorem}
 \begin{proof}
     \leanok
-    \uses{J_n_integers_an_bn, JJ_upper, dn_asymptotic}
     \[ 0 \neq |J_n| \leqslant (\frac{1}{30})^n\cdot 2\zeta(3) \]
     Then 
     \[ 0 < |\frac{a_n}{d_n^3} + b_n\zeta(3)| \leqslant (\frac{1}{30})^n\cdot 2\zeta(3) \]
