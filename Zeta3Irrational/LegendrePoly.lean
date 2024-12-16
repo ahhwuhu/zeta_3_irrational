@@ -94,32 +94,32 @@ lemma deriv_one_sub_X {n i : ℕ} : (⇑derivative)^[i] ((1 - X) ^ n : ℝ[X]) =
   simp
 
 /-- The values ​​of the shiftedLegendre polynomial at x and 1-x differ by a factor (-1)ⁿ. -/
-lemma shiftedLegendre_eval_symm (n : ℕ) (x : ℝ) :
-    eval x (shiftedLegendre n) = (-1) ^ n * eval (1 - x) (shiftedLegendre n) := by
-  rw [mul_comm]
-  simp only [shiftedLegendre, eval_mul, one_div, eval_C]
-  rw [mul_assoc]
-  simp only [mul_eq_mul_left_iff, inv_eq_zero, Nat.cast_eq_zero]; left
-  rw [Polynomial.iterate_derivative_mul]
-  simp only [Nat.succ_eq_add_one, nsmul_eq_mul]
-  rw [Polynomial.eval_finset_sum, Polynomial.eval_finset_sum, ← Finset.sum_flip, Finset.sum_mul]
-  congr! 1 with i hi
-  simp only [Polynomial.iterate_derivative_X_pow_eq_smul, eval_mul, eval_natCast,
-    Algebra.smul_mul_assoc, eval_smul, eval_mul, eval_pow, eval_X, smul_eq_mul]
-  simp only [Finset.mem_range, Nat.lt_add_one_iff] at hi
-  rw [Nat.choose_symm hi, deriv_one_sub_X, deriv_one_sub_X]
-  simp only [nsmul_eq_mul, eval_mul, eval_pow, eval_neg, eval_one, eval_natCast, eval_sub, eval_X,
-    sub_sub_cancel]
-  rw [mul_assoc]
-  simp only [mul_eq_mul_left_iff, Nat.cast_eq_zero]; left
-  rw [show n - (n - i) = i by omega, ← mul_assoc, ← mul_assoc, mul_comm, ← mul_assoc]
-  symm
-  rw [← mul_assoc]
-  nth_rewrite 4 [mul_comm]
-  rw [← mul_assoc, ← mul_assoc, mul_assoc]
-  congr 1
-  rw [← pow_add, show i + n = n - i + 2 * i by omega, pow_add]
-  simp only [even_two, Even.mul_right, Even.neg_pow, one_pow, mul_one]
+-- lemma shiftedLegendre_eval_symm (n : ℕ) (x : ℝ) :
+--     eval x (shiftedLegendre n) = (-1) ^ n * eval (1 - x) (shiftedLegendre n) := by
+--   rw [mul_comm]
+--   simp only [shiftedLegendre, eval_mul, one_div, eval_C]
+--   rw [mul_assoc]
+--   simp only [mul_eq_mul_left_iff, inv_eq_zero, Nat.cast_eq_zero]; left
+--   rw [Polynomial.iterate_derivative_mul]
+--   simp only [Nat.succ_eq_add_one, nsmul_eq_mul]
+--   rw [Polynomial.eval_finset_sum, Polynomial.eval_finset_sum, ← Finset.sum_flip, Finset.sum_mul]
+--   congr! 1 with i hi
+--   simp only [Polynomial.iterate_derivative_X_pow_eq_smul, eval_mul, eval_natCast,
+--     Algebra.smul_mul_assoc, eval_smul, eval_mul, eval_pow, eval_X, smul_eq_mul]
+--   simp only [Finset.mem_range, Nat.lt_add_one_iff] at hi
+--   rw [Nat.choose_symm hi, deriv_one_sub_X, deriv_one_sub_X]
+--   simp only [nsmul_eq_mul, eval_mul, eval_pow, eval_neg, eval_one, eval_natCast, eval_sub, eval_X,
+--     sub_sub_cancel]
+--   rw [mul_assoc]
+--   simp only [mul_eq_mul_left_iff, Nat.cast_eq_zero]; left
+--   rw [show n - (n - i) = i by omega, ← mul_assoc, ← mul_assoc, mul_comm, ← mul_assoc]
+--   symm
+--   rw [← mul_assoc]
+--   nth_rewrite 4 [mul_comm]
+--   rw [← mul_assoc, ← mul_assoc, mul_assoc]
+--   congr 1
+--   rw [← pow_add, show i + n = n - i + 2 * i by omega, pow_add]
+--   simp only [even_two, Even.mul_right, Even.neg_pow, one_pow, mul_one]
 
 theorem differentiableAt_inv_special {x a : ℝ} {n : ℕ}
     (ha : a > 0) (hx : 1 - a * x = 0) :

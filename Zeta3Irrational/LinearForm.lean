@@ -134,7 +134,7 @@ lemma multi_integral_mul_const (c d : ℕ) (p q : ℝ): ∫ (x : ℝ × ℝ) in 
   simp only [J]
   symm
   rw [mul_comm, ← smul_eq_mul, ← integral_smul_const]
-  apply MeasureTheory.setIntegral_congr (by measurability)
+  apply MeasureTheory.setIntegral_congr_fun (by measurability)
   intro x _
   simp only [smul_eq_mul]
   ring
