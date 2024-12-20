@@ -360,11 +360,90 @@ Cause if $\xi$ is rational number $\frac{p}{q}$, then the sequence has a low bou
 
 \begin{lemma}\label{pi_asymp}
   One has
-  $$ \pi(x) = (1+o(1)) \int_2^x \frac{dt}{\log t}$$
+  \[
+  \pi(x) = \left(1 + o(1)\right)\int_2^{x}\frac{1}{\log x} \mathsf{d} x.
+  \]
   as $x \to \infty$.
 \end{lemma}
 \begin{proof}
     \leanok
+    We need a precise description of auxiliary constants involved in $o(1)$ and ``sufficiently large'' for the purpose of formalisation, we write down the proof in an excruciatingly detailed manner so that each step could be transcribed to Lean4 with relative ease.
+    \begin{proof}[Prime Number Theorem]
+    We want to show that $\frac{\pi\left(x\right)}{{ \int_{2}^{x}\frac{\mathsf{d}t}{\log t}}}-1$
+    is $o\left(1\right)$, that is for every $\epsilon$, there exists
+    $M_{\epsilon}\in\mathbb{R}$ such that $\left|\frac{\pi\left(x\right)}{{ \int_{2}^{x}\frac{\mathsf{d}t}{\log t}}}-1\right|\le\epsilon$.
+    We know that for all $2\le x$, 
+    
+    \[
+    \pi\left(x\right)={\frac{1}{\log x}\sum_{p\le\lfloor x\rfloor}\log p+{\int_{2}^{x}\frac{\sum_{p\le\lfloor t\rfloor}\log p}{t\log^{2}t}}\mathsf{d}t}.
+    \]
+    
+    We also know that for all $0<\epsilon$, there exists a function $f_{\epsilon}:\mathbb{R}\to\mathbb{R}$
+    such that $f_{\epsilon}=o\left(\epsilon\right)$ and $f$ is integrable
+    on $\left(2,x\right)$ for all $2\le x$ and for $x$ sufficiently
+    large, say $x>N_{\epsilon}\ge2$
+    
+    \[
+    \sum_{p\le\lfloor x\rfloor}\log p=x+xf_{\epsilon}\left(x\right).
+    \]
+    Hence for all $0<\epsilon$, such an $f$ satisfies: for $x$ sufficiently
+    large
+    \[
+    \pi\left(x\right)=\frac{x+xf_{\epsilon}\left(x\right)}{\log x}+\int_{2}^{N_{\epsilon}}\frac{\sum_{p\le\lfloor x\rfloor}\log p}{t\log^{2}t}\mathsf{d}t+\int_{N_{\epsilon}}^{x}\frac{t+tf_{\epsilon}\left(t\right)}{t\log^{2}t}\mathsf{d}t,
+    \]
+    which simplifies to
+    \[
+    \pi\left(x\right)=\left(\frac{x}{\log x}+\int_{N_{\epsilon}}^{x}\frac{\mathsf{d}t}{\log^{2}t}\right)+\left(\frac{xf_{\epsilon}\left(x\right)}{\log x}+\int_{N_{\epsilon}}^{x}\frac{f_{\epsilon}\left(t\right)}{\log^{2}t}\mathsf{d}t\right)+\int_{2}^{N_{\epsilon}}\frac{\sum_{p\le\lfloor x\rfloor}\log p}{t\log^{2}t}\mathsf{d}t.
+    \]
+    Integration by parts tells us that
+    \[
+    \frac{x}{\log x}+\int_{N_{\epsilon}}^{x}\frac{\mathsf{d}t}{\log^{2}t}=\int_{N_{\epsilon}}^{x}\frac{\mathsf{d}t}{\log t}+\frac{N_{\epsilon}}{\log N_{\epsilon}}=\int_{2}^{x}\frac{\mathsf{d}t}{\log t}+\left(\frac{N_{\epsilon}}{\log N_{\epsilon}}-\int_{2}^{N_{\epsilon}}\frac{\mathsf{d}t}{\log t}\right).
+    \]
+    Hence
+    \[
+    \pi\left(x\right)=\int_{2}^{x}\frac{\mathsf{d}t}{\log t}+\left(\frac{xf_{\epsilon}\left(x\right)}{\log x}+\int_{N_{\epsilon}}^{x}\frac{f_{\epsilon}\left(t\right)}{\log^{2}t}\mathsf{d}t\right)+C_{\epsilon},
+    \]
+    for some constant $C_{\epsilon}\in\mathbb{R}$.
+    \[
+    \frac{\pi\left(x\right)}{\int_{2}^{x}\frac{\mathsf{d}t}{\log t}}-1=\left(\frac{xf_{\epsilon}\left(x\right)}{\log x}+\int_{N_{\epsilon}}^{x}\frac{f_{\epsilon}\left(t\right)}{\log^{2}t}\mathsf{d}t\right)/\int_{2}^{x}\frac{\mathsf{d}t}{\log t}+\frac{C_{\epsilon}}{\int_{2}^{x}\frac{\mathsf{d}t}{\log t}}.
+    \]
+    
+    Remember that $f_{\epsilon}=o\left(\epsilon\right)$, so we know for
+    all $0<c$, there exists $M_{c,\epsilon}$ such that for all $M_{c,\epsilon}<x$,$\left|f_{\epsilon}\left(x\right)\right|\le c\epsilon$.
+    Then for $2<M_{c,\epsilon}<x$, we have
+    \[
+    \begin{aligned}\frac{xf_{\epsilon}\left(x\right)}{\log x} & \le\frac{c\epsilon\cdot x}{\log x}\\
+    \left|\int_{N_{\epsilon}}^{x}\frac{f_{\epsilon}\left(t\right)}{\log^{2}t}\mathsf{d}t\right| & \le\int_{N_{\epsilon}}^{M_{c,\epsilon}}\left|\frac{f_{\epsilon}\left(t\right)}{\log^{2}t}\right|\mathsf{d}t+\int_{M_{c,\epsilon}}^{x}\left|\frac{f_{\epsilon}\left(t\right)}{\log^{2}t}\right|\mathsf{d}t\\
+     & \le\int_{N_{\epsilon}}^{M_{c,\epsilon}}\frac{\left|f_{\epsilon}\left(t\right)\right|}{\log^{2}t}\mathsf{d}t+c\epsilon\int_{M_{c,\epsilon}}^{x}\frac{\mathsf{d}t}{\log^{2}t}\\
+     & =\int_{N_{\epsilon}}^{M_{c,\epsilon}}\frac{\left|f_{\epsilon}\left(t\right)\right|}{\log^{2}t}\mathsf{d}t+c\epsilon\left(\int_{M_{c,\epsilon}}^{x}\frac{\mathsf{d}t}{\log t}+\frac{M_{c,\epsilon}}{\log M_{c,\epsilon}}-\frac{x}{\log x}\right),
+    \end{aligned}
+    \]
+    hence for $M_{c,\epsilon}<x$, we have
+    \[
+    \begin{aligned}\left|\frac{xf_{\epsilon}\left(x\right)}{\log x}+\int_{N_{\epsilon}}^{x}\frac{f_{\epsilon}\left(t\right)}{\log^{2}t}\mathsf{d}t\right| & \le\int_{N_{\epsilon}}^{M_{c,\epsilon}}\frac{\left|f_{\epsilon}\left(t\right)\right|}{\log^{2}t}\mathsf{d}t+c\epsilon\left(\int_{M_{c,\epsilon}}^{x}\frac{\mathsf{d}t}{\log t}+\frac{M_{c,\epsilon}}{\log M_{c,\epsilon}}\right)\\
+     & =\int_{N_{\epsilon}}^{M_{c,\epsilon}}\frac{\left|f_{\epsilon}\left(t\right)\right|}{\log^{2}t}\mathsf{d}t+c\epsilon\left(\int_{2}^{x}\frac{\mathsf{d}t}{\log t}+\frac{M_{c,\epsilon}}{\log M_{c,\epsilon}}-\int_{M_{c,\epsilon}}^{2}\frac{\mathsf{d}t}{\log t}\right).
+    \end{aligned}
+    \]
+    Denote $D_{c,\epsilon}$ to be $\int_{N_{\epsilon}}^{M_{c,\epsilon}}\frac{\left|f_{\epsilon}\left(t\right)\right|}{\log^{2}t}\mathsf{d}t+c\epsilon\frac{M_{c,\epsilon}}{\log M_{c,\epsilon}}-c\epsilon\int_{M_{c,\epsilon}}^{2}\frac{\mathsf{d}t}{\log t}$, we notice
+    \[
+    \begin{aligned}\left|\frac{\pi\left(x\right)}{\int_{2}^{x}\frac{\mathsf{d}t}{\log t}}-1\right| & \le\left(c\epsilon\int_{2}^{x}\frac{\mathsf{d}t}{\log t}+D_{c,\epsilon}\right)/\int_{2}^{x}\frac{\mathsf{d}t}{\log t}+\frac{C_{\epsilon}}{\int_{2}^{x}\frac{\mathsf{d}t}{\log t}}\\
+     & =c\epsilon+\frac{D_{c,\epsilon}}{\int_{2}^{x}\frac{\mathsf{d}t}{\log t}}+\frac{C_{\epsilon}}{\int_{2}^{x}\frac{\mathsf{d}t}{\log t}}.
+    \end{aligned}
+    \]
+    In particular, there exists a constant $D$ such that for all $\max\left(M_{\frac{1}{2},\epsilon},N_{\epsilon}\right)<x$,
+    \[
+    \left|\frac{\pi\left(x\right)}{\int_{2}^{x}\frac{\mathsf{d}t}{\log t}}-1\right|\le\frac{\epsilon}{2}+\frac{D}{\int_{2}^{x}\frac{\mathsf{d}t}{\log t}}.
+    \]
+    
+    We now bound $\int_2^x\frac{\mathsf{d}t}{\log t}$. Note that $\int_{2}^{x}\frac{\mathsf{d}t}{\log t}\ge\frac{\left(x-2\right)}{\log x}$.
+    Hence for $x>e^{s}$ with $s>1$, $\int_{2}^{x}\frac{\mathsf{d}t}{\log t}\ge\frac{e^{s}-2}{s}$
+    , consequently $\frac{D}{\int_{2}^{x}\frac{\mathsf{d}t}{\log t}}\le\frac{sD}{e^{s}-2}\le\frac{sD}{e^{s}}\le\frac{\epsilon}{2}$
+    for $s$ sufficiently large, say $s>A_{\epsilon}>1$.
+    Thus for all $x>\max\left(M_{\frac{1}{2},\epsilon},N_{\epsilon},e^{A_{\epsilon}}\right)$,
+    $\left|\frac{\pi\left(x\right)}{\int_{2}^{x}\frac{\mathsf{d}t}{\log t}}-1\right|\le\epsilon$.
+    This proves $\frac{\pi\left(x\right)}{\int_{2}^{x}\frac{\mathsf{d}t}{\log t}}-1$
+    is $o\left(1\right)$ for sufficiently large $x$.
+    \end{proof}
 \end{proof}
 
 \begin{lemma}\label{pi_alt}
