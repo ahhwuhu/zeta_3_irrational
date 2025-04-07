@@ -1,5 +1,7 @@
--- This module serves as the root of the `Zeta3Irrational` library.
--- Import modules here that should be built as part of the library.
-import «Zeta3Irrational».Basic
-
-import «PrimeNumberTheoremAnd».Consequences
+import Zeta3Irrational.Basic
+import Zeta3Irrational.Bound
+import Zeta3Irrational.Equality
+import Zeta3Irrational.Integral
+import Zeta3Irrational.LegendrePoly
+import Zeta3Irrational.LinearForm
+import Zeta3Irrational.d
