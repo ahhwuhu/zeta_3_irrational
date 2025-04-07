@@ -1,4 +1,10 @@
-import Mathlib
+import Mathlib.Algebra.Lie.OfAssociative
+import Mathlib.Algebra.Polynomial.Derivative
+import Mathlib.Algebra.Polynomial.Eval.SMul
+import Mathlib.Analysis.Calculus.Deriv.Inv
+import Mathlib.Analysis.Calculus.Deriv.Pow
+import Mathlib.Data.Real.StarOrdered
+import Mathlib.MeasureTheory.Integral.IntegrationByParts
 
 /-!
 # Legendre Polynomials
@@ -20,8 +26,8 @@ noncomputable def shiftedLegendre (n : ℕ) : ℝ[X] :=
   C (n ! : ℝ)⁻¹ * derivative^[n] (X ^ n * (1 - X) ^ n)
 
 lemma Finsum_iterate_deriv [CommRing R] (k : ℕ) (h : ℕ → ℕ) :
-    derivative^[k] (∑ m in Finset.range (k + 1), (h m) • ((- 1) ^ m : R[X]) * X ^ (k + m)) =
-    ∑ m in Finset.range (k + 1), (h m) • (- 1) ^ m * derivative^[k] (X ^ (k + m)) := by
+    derivative^[k] (∑ m ∈ Finset.range (k + 1), (h m) • ((-1) ^ m : R[X]) * X ^ (k + m)) =
+    ∑ m ∈ Finset.range (k + 1), (h m) • (-1) ^ m * derivative^[k] (X ^ (k + m)) := by
   induction' k + 1 with n hn
   · simp only [Nat.zero_eq, Finset.range_zero, Finset.sum_empty, iterate_map_zero]
   · rw[Finset.sum_range, Finset.sum_range, Fin.sum_univ_castSucc, Fin.sum_univ_castSucc] at *
@@ -35,8 +41,8 @@ lemma Finsum_iterate_deriv [CommRing R] (k : ℕ) (h : ℕ → ℕ) :
       exact_mod_cast hn2
 
 /-- The expand of `shiftedLegendre n`. -/
-theorem shiftedLegendre_eq_sum (n : ℕ) : shiftedLegendre n = ∑ k in Finset.range (n + 1),
-    C ((- 1) ^ k : ℝ) * (Nat.choose n k : ℝ[X]) * (Nat.choose (n + k) n : ℝ[X]) * X ^ k := by
+theorem shiftedLegendre_eq_sum (n : ℕ) : shiftedLegendre n = ∑ k ∈ Finset.range (n + 1),
+  C ((-1) ^ k : ℝ) * (Nat.choose n k : ℝ[X]) * (Nat.choose (n + k) n : ℝ[X]) * X ^ k := by
   have h : ((X : ℝ[X]) - X ^ 2) ^ n =
     ∑ m ∈ range (n + 1), n.choose m • (- 1) ^ m * X ^ (n + m) := by
     rw[sub_eq_add_neg, add_comm, add_pow]
@@ -80,7 +86,7 @@ theorem shiftedLegendre_eq_sum (n : ℕ) : shiftedLegendre n = ∑ k in Finset.r
 
 /-- `shiftedLegendre n` is an integer polynomial. -/
 lemma shiftedLegendre_eq_int_poly (n : ℕ) : ∃ a : ℕ → ℤ, shiftedLegendre n =
-    ∑ k in Finset.range (n + 1), (a k : ℝ[X]) * X ^ k := by
+    ∑ k ∈ Finset.range (n + 1), (a k : ℝ[X]) * X ^ k := by
   simp_rw [shiftedLegendre_eq_sum]
   use fun k => (- 1) ^ k * (Nat.choose n k) * (Nat.choose (n + k) n)
   congr! 1 with x
@@ -158,8 +164,8 @@ theorem differentiableAt_inv_special {x a : ℝ} {n : ℕ}
           rw [← mul_assoc, ← mul_div_assoc, ← pow_two]
           rw [show |((a * q) ^ 2 / 2 : ℝ)| = ((a * q) ^ 2 / 2 : ℝ) by exact abs_eq_self.2 (by positivity)]
           trans 1 / 2
-          · rw [div_lt_div_right (by norm_num), ← one_pow (n := 2)]
-            apply pow_lt_pow_left <;> nlinarith
+          · rw [div_lt_div_iff_of_pos_right (by norm_num), ← one_pow (n := 2)]
+            apply pow_lt_pow_left₀ <;> nlinarith
           · linarith
       linarith
     · apply pow_pos

@@ -2,12 +2,13 @@
 A formal proof of the irrationality of Riemann-Zeta(3).
 Author: Junqi Liu and Jujian Zhang.
 -/
-import Mathlib
-import Zeta3Irrational.d
-import Zeta3Irrational.Integral
-import Zeta3Irrational.Equality
-import Zeta3Irrational.LegendrePoly
+import Mathlib.Data.Int.Star
+import Mathlib.NumberTheory.LSeries.HurwitzZetaValues
+import Mathlib.Order.CompletePartialOrder
+import Mathlib.RingTheory.DedekindDomain.Dvr
+import PrimeNumberTheoremAnd.Consequences
 import Zeta3Irrational.Bound
+import Zeta3Irrational.LegendrePoly
 import Zeta3Irrational.LinearForm
 
 open scoped Nat
@@ -105,8 +106,8 @@ lemma JJENN_upper (n : ℕ) : JJENN n ≤
     · simp only [h, ↓reduceIte]
       simp only [Set.mem_prod, Set.mem_Ioo] at h
       apply ENNReal.ofReal_le_ofReal
-      rw [div_le_div_right]
-      · apply pow_le_pow_left
+      rw [div_le_div_iff_of_pos_right]
+      · apply pow_le_pow_left₀
         · apply div_nonneg
           · apply mul_nonneg _ (by linarith)
             apply mul_nonneg _ (by linarith)
@@ -300,7 +301,7 @@ lemma integrableOn_JJ1 (n : ℕ) : MeasureTheory.Integrable
         simp only [Set.mem_prod, Set.mem_Ioo] at hx
         rw [← ENNReal.ofReal_mul]
         · rw [ENNReal.ofReal_le_ofReal_iff]
-          · rw [Function.uncurry_apply_pair, mul_one_div, mul_one_div, abs_div, div_le_div_iff]
+          · rw [Function.uncurry_apply_pair, mul_one_div, mul_one_div, abs_div, div_le_div_iff₀]
             · apply mul_le_mul _ _ (by linarith [pos_aux x hx]) (by positivity)
               · rw [abs_mul, pow_two]
                 apply mul_le_mul _ _ (by positivity) (by positivity)
@@ -375,7 +376,7 @@ lemma integrableOn_JJ2 (n : ℕ) : MeasureTheory.Integrable (Function.uncurry fu
         simp only [Set.mem_prod, Set.mem_Ioo] at hx
         rw [← ENNReal.ofReal_mul]
         · rw [ENNReal.ofReal_le_ofReal_iff]
-          · rw [Function.uncurry_apply_pair, pow_add, ← div_div, abs_div,mul_one_div, div_le_div_iff]
+          · rw [Function.uncurry_apply_pair, pow_add, ← div_div, abs_div,mul_one_div, div_le_div_iff₀]
             · apply mul_le_mul _ _ (by linarith [pos_aux x hx]) (by positivity)
               · rw [← mul_div, mul_assoc, abs_mul, ← mul_one (a := |C|)]
                 apply mul_le_mul _ _ (by positivity) (by positivity)
@@ -498,7 +499,7 @@ lemma integrableOn_JJ3 (n : ℕ) : MeasureTheory.Integrable
         simp only [Set.mem_prod, Set.mem_Ioo] at hx
         rw [← ENNReal.ofReal_mul]
         · rw [ENNReal.ofReal_le_ofReal_iff]
-          · rw [Function.uncurry_apply_pair, mul_one_div, abs_div, div_le_div_iff]
+          · rw [Function.uncurry_apply_pair, mul_one_div, abs_div, div_le_div_iff₀]
             · apply mul_le_mul _ _ (by linarith [pos_aux x hx]) (by positivity)
               · rw [abs_mul, ← mul_one (a := |C|)]
                 apply mul_le_mul _ _ (by positivity) (by positivity)
@@ -666,19 +667,15 @@ lemma ineq_aux (x : ℝ × ℝ) (z : ℝ) (hx : (0 < x.1 ∧ x.1 < 1) ∧ 0 < x.
           exact h0 this
     · simp only [sub_pos]
       rw [mul_comm]
-      apply mul_lt_of_le_one_of_lt_of_nonneg hz.2
-      · simp only [sub_lt_self_iff]; nlinarith
-      · simp only [sub_nonneg]
-        apply mul_le_one₀ (by linarith) (by linarith) (by linarith)
+      suffices z * (1 - x.1 * x.2) ≤ (1 - x.1 * x.2) by nlinarith
+      apply mul_le_of_le_one_left (by nlinarith) hz.2
 
 lemma ineq_aux1 (x : ℝ × ℝ) (z : ℝ) (hx : (0 < x.1 ∧ x.1 < 1) ∧ 0 < x.2 ∧ x.2 < 1) (hz : 0 ≤ z ∧ z ≤ 1) :
     1 - (1 - x.1 * x.2) * z ≠ 0 := by
   suffices (1 - x.1 * x.2) * z < 1 by linarith
   rw [mul_comm]
-  apply mul_lt_of_le_one_of_lt_of_nonneg hz.2
-  · simp only [sub_lt_self_iff]; nlinarith
-  · simp only [sub_nonneg]
-    apply mul_le_one₀ (by linarith) (by linarith) (by linarith)
+  suffices z * (1 - x.1 * x.2) ≤ (1 - x.1 * x.2) by nlinarith
+  apply mul_le_of_le_one_left (by nlinarith) hz.2
 
 lemma fun_eq_aux (x : ℝ × ℝ) (y : ℝ) (hx : (0 < x.1 ∧ x.1 < 1) ∧ 0 < x.2 ∧ x.2 < 1) (hy : 0 ≤ y ∧ y ≤ 1) :
     deriv (fun z => (1 - z) / (1 - (1 - x.1 * x.2) * z)) y =
@@ -1088,7 +1085,7 @@ lemma zeta_3_pos : 0 < ∑' (n : ℕ), 1 / ((n : ℝ) + 1) ^ 3 := by
     · intro n
       suffices ∑ i ∈ Finset.range n, 1 / ((i : ℝ) + 1) ^ 3 ≤ ∑ i ∈ Finset.range n, 1 / ((i : ℝ) + 1) ^ 2 by
         have : ∑ i ∈ Finset.range n, 1 / ((i : ℝ) + 1) ^ 2 ≤ Real.pi ^ 2 / 6 := by
-          suffices ∑ i in Finset.range n, 1 / ((i : ℝ) + 1) ^ 2 ≤ ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 2 by
+          suffices ∑ i ∈ Finset.range n, 1 / ((i : ℝ) + 1) ^ 2 ≤ ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 2 by
             have h : ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 2 = (riemannZeta 2).re := by
               rw [zeta_eq_tsum_one_div_nat_add_one_cpow (by simp)]
               simp_rw [← Complex.ofReal_natCast]
@@ -1102,7 +1099,7 @@ lemma zeta_3_pos : 0 < ∑' (n : ℕ), 1 / ((n : ℝ) + 1) ^ 3 := by
         linarith
       apply Finset.sum_le_sum
       intro i _
-      rw [div_le_div_iff, one_mul, one_mul]
+      rw [div_le_div_iff₀, one_mul, one_mul]
       · apply pow_le_pow_right₀ <;> linarith
       · positivity
       · positivity
@@ -1178,7 +1175,7 @@ lemma zeta3_le_zeta2 : ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 < ∑' n : ℕ , 1
   · intro n
     positivity
   · intro n
-    rw [div_le_div_iff, one_mul, one_mul]
+    rw [div_le_div_iff₀, one_mul, one_mul]
     · apply pow_le_pow_right₀ <;> linarith
     · positivity
     · positivity
@@ -1215,7 +1212,7 @@ lemma ε_N_def_of_pi_alt : ∀ ε > (0 : ℝ), ∃ N : ℕ, ∀ n : ℕ, n ≥ N
 lemma eventuallyN_of_le : ∃ N : ℕ, ∀ n : ℕ, n ≥ N → ↑(d (Finset.Icc 1 n)) ^ 3 ≤ (21 : ℝ) ^ n := by
     have h1 : (Real.exp 1) ^ 3 < (21 : ℝ) := by
       suffices (2.7182818286) ^ 3 < (21 : ℝ) by
-        exact pow_lt_pow_left Real.exp_one_lt_d9 (n := 3) (by linarith [Real.exp_pos 1]) (by simp) |>.trans this
+        exact pow_lt_pow_left₀ Real.exp_one_lt_d9 (n := 3) (by linarith [Real.exp_pos 1]) (by simp) |>.trans this
       norm_num
     have h : Real.log (21 ^ (1 / 3 : ℝ)) - 1 > 0 := by
       simp only [gt_iff_lt, sub_pos]
@@ -1230,10 +1227,10 @@ lemma eventuallyN_of_le : ∃ N : ℕ, ∀ n : ℕ, n ≥ N → ↑(d (Finset.Ic
     calc
     _ ≤ ((n : ℝ) ^ (n.primeCounting)) ^ 3 := by
       norm_cast
-      apply pow_le_pow_left (by simp)
+      apply pow_le_pow_left₀ (by simp)
       exact d_le_pow_counting n
     _ ≤ (n ^ (1 / 3 * Real.log 21 * ↑n / Real.log ↑n)) ^ 3 := by
-      apply pow_le_pow_left (by simp)
+      apply pow_le_pow_left₀ (by simp)
       rw [← Real.rpow_natCast, Real.rpow_le_rpow_left_iff]
       exact hN
       simp only [Nat.one_lt_cast]
@@ -1318,8 +1315,8 @@ theorem zeta_3_irratoinal : ¬ ∃ r : ℚ , r = riemannZeta 3 := by
       rw [mul_comm, ← mul_assoc]
       refine mul_pos ?_ (JJ_pos n)
       norm_cast
-      simp only [CanonicallyOrderedCommSemiring.mul_pos]
-      exact ⟨by omega, pow_pos (fin_d_neq_zero n) 3⟩
+      apply mul_pos (by omega)
+      exact pow_pos (fin_d_neq_zero n) 3
     rw [h, add_mul, mul_assoc, ← hr] at this ⊢
     simp only [ge_iff_le, q] at this ⊢
     norm_cast at this ⊢
@@ -1340,7 +1337,7 @@ theorem zeta_3_irratoinal : ¬ ∃ r : ℚ , r = riemannZeta 3 := by
       derivative_mul, derivative_X_pow, Nat.cast_add, Nat.cast_one, map_add, map_natCast, map_one,
       add_tsub_cancel_right, iterate_map_add, eval_add, lt_self_iff_false] at this
     rw [show ENNReal.ofReal ↑q = (q : ENNReal) by simp only [ENNReal.ofReal_natCast],
-      show ENNReal.ofReal (1 / 2) = 1 / 2 by rw [← Real.ennnorm_eq_ofReal (by simp)]; simp] at prop2
+      show ENNReal.ofReal (1 / 2) = 1 / 2 by rw [ENNReal.ofReal_div_of_pos (by norm_num)]; simp] at prop2
     apply LE.le.trans_lt (b := (1 / 2 : ENNReal)) ha prop2
   · apply mul_pos _ (by simp; omega)
     apply mul_pos _ (JJ_pos (a + 1))

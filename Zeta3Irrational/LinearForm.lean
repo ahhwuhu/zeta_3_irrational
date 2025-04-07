@@ -1,9 +1,5 @@
-import Mathlib
-import Zeta3Irrational.d
 import Zeta3Irrational.Integral
-import Zeta3Irrational.Equality
-import Zeta3Irrational.LegendrePoly
-import Zeta3Irrational.Bound
+import Zeta3Irrational.d
 
 open scoped Nat
 open BigOperators
@@ -37,7 +33,7 @@ lemma J_rr_linear (r : ℕ) :
       not_false_eq_true, pow_eq_zero_iff, Nat.cast_eq_zero]
       linarith
 
-lemma Icc_diff_Icc {r s : ℕ} (h : r > s) (g : ¬s = 0) : Finset.Icc 1 r \ Finset.Icc 1 s = Finset.Icc (s + 1) r := by
+lemma Icc_diff_Icc {r s : ℕ} (_ : r > s) (_ : ¬s = 0) : Finset.Icc 1 r \ Finset.Icc 1 s = Finset.Icc (s + 1) r := by
   ext x
   constructor
   · intro hx
@@ -81,7 +77,7 @@ lemma J_rs_linear {r s : ℕ} (h : r > s) : ∃ a : ℤ, J r s = a / (d (Finset.
       rw [d_sq']
       apply dvd_d_of_mem
       simp_all only [gt_iff_lt, Finset.mem_Icc, Finset.mem_image, ge_iff_le, zero_le, ne_eq,
-        OfNat.ofNat_ne_zero, not_false_eq_true, pow_left_inj, exists_eq_right]
+        OfNat.ofNat_ne_zero, not_false_eq_true, pow_left_inj₀, exists_eq_right]
       omega
     · simp_all only [gt_iff_lt, Finset.mem_Icc, Int.cast_pow, Int.cast_add, Int.cast_natCast,
       ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, pow_eq_zero_iff]

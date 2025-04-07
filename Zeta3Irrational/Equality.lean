@@ -1,5 +1,3 @@
-import Mathlib
-import Zeta3Irrational.LegendrePoly
 import Zeta3Irrational.Integral
 
 open scoped Nat

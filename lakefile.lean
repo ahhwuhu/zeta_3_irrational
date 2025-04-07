@@ -13,14 +13,19 @@ package «Zeta3Irrational» where
 lean_lib «Zeta3Irrational» where
   -- add any library configuration options here
 
-require checkdecls from git "https://github.com/PatrickMassot/checkdecls.git"
-
-require mathlib from git
-  "https://github.com/leanprover-community/mathlib4.git" @ "e348a4c"
-
 require «PrimeNumberTheoremAnd» from git
   "https://github.com/AlexKontorovich/PrimeNumberTheoremAnd.git" @ "main"
 
--- meta if get_config? env = some "dev" then
-require «doc-gen4» from git
-  "https://github.com/leanprover/doc-gen4" @ "b6ae1cf"
+require mathlib from git
+  "https://github.com/leanprover-community/mathlib4.git" @ "v4.18.0"
+
+meta if get_config? env = some "dev" then require «doc-gen4» from git
+  "https://github.com/leanprover/doc-gen4.git" @ "v4.18.0"
+
+-- meta if get_config? env = some "dev" then -- dev is so not everyone has to build it
+-- require «doc-gen4» from git "https://github.com/leanprover/doc-gen4" @ "main"
+
+lean_exe «decls» where
+  root := `exe.Decls
+
+require checkdecls from git "https://github.com/PatrickMassot/checkdecls.git"

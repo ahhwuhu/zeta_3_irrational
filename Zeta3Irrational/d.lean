@@ -3,15 +3,11 @@ A formal proof of the irrationality of Riemann-Zeta(3).
 Author: Junqi Liu and Jujian Zhang.
 -/
 import Mathlib.Algebra.GCDMonoid.Finset
-import Mathlib.Order.Interval.Finset.Defs
-import Mathlib.Data.Nat.Lattice
-import Mathlib.Algebra.Ring.Nat
-import Mathlib.Data.Nat.Factorization.Basic
-import Mathlib.NumberTheory.SmoothNumbers
-import Mathlib.NumberTheory.PrimeCounting
-import Mathlib.Analysis.SpecialFunctions.Log.Basic
-import PrimeNumberTheoremAnd.Consequences
+import Mathlib.Algebra.GCDMonoid.Nat
+import Mathlib.Analysis.SpecialFunctions.Log.Base
 import Mathlib.Data.Nat.Choose.Factorization
+import Mathlib.Data.Real.StarOrdered
+import Mathlib.NumberTheory.PrimeCounting
 
 open scoped Nat
 open BigOperators
@@ -581,3 +577,5 @@ theorem d_le_pow_counting (n : ℕ) : d (Finset.Icc 1 n) ≤ n ^ (n.primeCountin
       rw [Finset.prod_const]
       suffices ((n + 1).primesBelow).card = n.primeCounting by apply Nat.pow_le_pow_right <;> linarith
       rw [Nat.primeCounting, ← Nat.primesBelow_card_eq_primeCounting']
+
+#min_imports

@@ -2,7 +2,14 @@
 A formal proof of the irrationality of Riemann-Zeta(3).
 Author: Junqi Liu and Jujian Zhang.
 -/
-import Mathlib
+import Mathlib.Analysis.Normed.Field.Instances
+import Mathlib.Analysis.PSeries
+import Mathlib.Analysis.SpecialFunctions.Integrals
+import Mathlib.Data.Real.StarOrdered
+import Mathlib.MeasureTheory.Function.AEEqOfIntegral
+import Mathlib.MeasureTheory.Integral.IntegralEqImproper
+import Mathlib.Topology.Algebra.Module.ModuleTopology
+import Mathlib.Topology.Compactness.PseudometrizableLindelof
 
 open scoped Nat
 open BigOperators Finset
@@ -132,7 +139,7 @@ lemma log_rpow_integrable (n : ℝ) (hn : n > -1) : IntervalIntegrable (fun x �
         change _ - k ≤ _
         simp only [Real.log_inv, tsub_le_iff_right, le_add_iff_nonneg_right,
           sub_nonneg, k]
-        rw [div_le_div_iff (by linarith) (by nlinarith), mul_assoc, mul_le_mul_iff_of_pos_left]
+        rw [div_le_div_iff₀ (by linarith) (by nlinarith), mul_assoc, mul_le_mul_iff_of_pos_left]
         · trans 0
           · rw [mul_nonpos_iff]
             right
@@ -207,7 +214,7 @@ lemma log_rpow_integral (n : ℝ) (hn : n > -1) :
       simp [← mul_assoc, ← mul_rotate (c := n + 1)]
       nth_rw 3 [show (0 : ℝ) = 0 * (n + 1) by simp]
       apply Filter.Tendsto.mul_const
-      apply tendsto_log_mul_rpow_nhds_zero
+      apply tendsto_log_mul_rpow_nhdsGT_zero
       linarith
   · apply tendsto_nhds_of_tendsto_nhdsWithin (s := ⊤)
     apply ContinuousWithinAt.tendsto_nhdsWithin
@@ -705,7 +712,7 @@ lemma J_ENN_rs_eq_tsum (r s : ℕ) : J_ENN r s = ∑' (k : ℕ), ENNReal.ofReal
     simp_rw [J_ENN_rs_eq_tsum_aux_intergal r s]
 
 lemma J_ENN_rr (r : ℕ) : J_ENN r r = ENNReal.ofReal
-    (2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 - 2 * ∑ m in Finset.Icc 1 r, 1 / (m : ℝ) ^ 3) := by
+    (2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 - 2 * ∑ m ∈ Finset.Icc 1 r, 1 / (m : ℝ) ^ 3) := by
   have h : J_ENN r r = ∑' (k : ℕ), ENNReal.ofReal (2 / ((k + r + 1) ^ 3)) := by
     rw [J_ENN_rs_eq_tsum r r]
     congr
@@ -714,7 +721,7 @@ lemma J_ENN_rr (r : ℕ) : J_ENN r r = ENNReal.ofReal
     simp only [Nat.reduceAdd, pow_one, ← two_mul, mul_one_div]
   rw [h]
   have h1 : ∑' (k : ℕ), 2 / (((k : ℝ) + r + 1) ^ 3) =
-    2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 - 2 * ∑ m in Finset.Icc 1 r, 1 / (m : ℝ) ^ 3 := by
+    2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 - 2 * ∑ m ∈ Finset.Icc 1 r, 1 / (m : ℝ) ^ 3 := by
     symm
     apply sub_eq_of_eq_add
     rw [← sum_add_tsum_nat_add' (k := r) (f := fun k => 1 / ((k : ℝ) + 1) ^ 3), mul_add, add_comm,
@@ -802,7 +809,7 @@ lemma integrableOn_J_rr (r : ℕ) : MeasureTheory.IntegrableOn
     simp only [one_div, ENNReal.ofReal_lt_top]
 
 theorem J_rr (r : ℕ) :
-    J r r = 2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 - 2 * ∑ m in Finset.Icc 1 r, 1 / (m : ℝ) ^ 3 := by
+    J r r = 2 * ∑' n : ℕ , 1 / ((n : ℝ) + 1) ^ 3 - 2 * ∑ m ∈ Finset.Icc 1 r, 1 / (m : ℝ) ^ 3 := by
   have h := J_ENN_rr r
   simp only [J_ENN] at h
   rw [J, MeasureTheory.integral_eq_lintegral_of_nonneg_ae, h, ENNReal.toReal_ofReal_eq_iff]
@@ -847,9 +854,9 @@ lemma positivity_aux (r s : ℕ) (h : r > s) :
   apply mul_nonneg
   · simp only [one_div, inv_nonneg, sub_nonneg, Nat.cast_le]; linarith
   · simp only [sub_nonneg]
-    rw [div_le_div_iff (by positivity) (by positivity)]
+    rw [div_le_div_iff₀ (by positivity) (by positivity)]
     simp only [one_mul]
-    apply pow_le_pow_left (by linarith)
+    apply pow_le_pow_left₀ (by linarith)
     simp only [add_le_add_iff_right, add_le_add_iff_left, Nat.cast_le]
     linarith
 
@@ -861,7 +868,7 @@ lemma summable_aux (r : ℕ) : Summable fun (b : ℕ) ↦ 1 / ((b : ℝ) + r + 1
   norm_num
 
 lemma J_ENN_rs (r s : ℕ) (h : r > s) :
-    J_ENN r s = ENNReal.ofReal ((∑ k in Finset.Ioc s r, 1 / (k : ℝ) ^ 2) / (r - s)) := by
+    J_ENN r s = ENNReal.ofReal ((∑ k ∈ Finset.Ioc s r, 1 / (k : ℝ) ^ 2) / (r - s)) := by
   calc
   _ = ∑' (k : ℕ), ENNReal.ofReal (1 / (r - s) * (1 / (k + s + 1) ^ 2 - 1 / (k + r + 1) ^ 2)) := by
     rw [J_ENN_rs_eq_tsum]
@@ -892,10 +899,10 @@ lemma J_ENN_rs (r s : ℕ) (h : r > s) :
     · positivity
     · apply mul_nonneg (by positivity)
       simp only [sub_nonneg]
-      rw [div_le_div_iff (by positivity) (by positivity)]
+      rw [div_le_div_iff₀ (by positivity) (by positivity)]
       simp only [one_mul]
-      apply pow_le_pow_left (by linarith) (by linarith)
-  _ = ENNReal.ofReal ((∑ k in Finset.Ioc s r, 1 / (k : ℝ) ^ 2) / (r - s)) := by
+      apply pow_le_pow_left₀ (by linarith) (by linarith)
+  _ = ENNReal.ofReal ((∑ k ∈ Finset.Ioc s r, 1 / (k : ℝ) ^ 2) / (r - s)) := by
     rw [← ENNReal.ofReal_tsum_of_nonneg]
     · rw [ENNReal.ofReal_eq_ofReal_iff]
       · simp only [mul_sub]
@@ -986,7 +993,7 @@ lemma integrableOn_J_rs' (r s : ℕ) (h : r > s) : MeasureTheory.IntegrableOn
     simp only [one_div, ENNReal.ofReal_lt_top]
 
 lemma J_rs' (r s : ℕ) (h : r > s) :
-    J r s = (∑ k in Finset.Ioc s r, 1 / (k : ℝ) ^ 2) / (r - s) := by
+    J r s = (∑ k ∈ Finset.Ioc s r, 1 / (k : ℝ) ^ 2) / (r - s) := by
   have h₀ := J_ENN_rs r s h
   simp only [J_ENN] at h₀
   rw [J, MeasureTheory.integral_eq_lintegral_of_nonneg_ae, h₀, ENNReal.toReal_ofReal_eq_iff]
@@ -1095,7 +1102,7 @@ lemma J_rs_symm (r s : ℕ) : J r s = J s r := by
   rw [J_eq_toReal_J_ENN, J_eq_toReal_J_ENN, J_ENN_rs_symm]
 
 theorem J_rs {r s : ℕ} (h : r ≠ s) : J r s =
-    (∑ m in Icc 1 r, 1 / (m : ℝ) ^ 2 - ∑ m in Icc 1 s, 1 / (m : ℝ) ^ 2) / (r - s) := by
+    (∑ m ∈ Icc 1 r, 1 / (m : ℝ) ^ 2 - ∑ m ∈ Icc 1 s, 1 / (m : ℝ) ^ 2) / (r - s) := by
   by_cases h1 : r > s
   · simp only [J_rs' r s h1, sub_div, sum_div]
     rw [← Nat.Ico_succ_succ, Finset.sum_Ico_eq_sub]
