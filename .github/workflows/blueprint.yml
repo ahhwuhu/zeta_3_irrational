@@ -15,12 +15,15 @@ jobs:
     name: Build project
     steps:
       - name: Checkout project
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Install elan
-        run: curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain leanprover/lean4:4.5.0
+        run: curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
+        
+      # - name: Install elan
+      #   run: curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain leanprover/lean4:4.5.0
 
       - name: Update checkdecls
         run: ~/.elan/bin/lake update checkdecls
@@ -32,7 +35,7 @@ jobs:
         run: ~/.elan/bin/lake -Kenv=dev build Zeta3Irrational
 
       - name: Cache mathlib docs
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             .lake/build/doc/Init
@@ -79,13 +82,13 @@ jobs:
           cp -r .lake/build/doc docs/docs
 
       - name: Upload docs & blueprint artifact
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-pages-artifact@v3
         with:
           path: docs/
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v3
+        uses: actions/deploy-pages@v4
 
       - name: Make sure the cache works
         run: |
