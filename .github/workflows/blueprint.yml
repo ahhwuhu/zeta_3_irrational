@@ -50,7 +50,7 @@ jobs:
             MathlibDoc-
 
       - name: Build documentation
-        run: ~/.elan/bin/lake -Kenv=dev build Zeta3Irrational
+        run: ~/.elan/bin/lake -Kenv=dev build Zeta3Irrational:docs
 
       - name: Build blueprint and copy to `docs/blueprint`
         uses: xu-cheng/texlive-action@v2
