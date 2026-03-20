@@ -6,482 +6,851 @@
 % the current file can be a simple sequence of \input. Otherwise It
 % can start with a \section or \chapter for instance.
 
-\chapter{Introduction}
+% \chapter{Introduction}
 
-To show a real number $\xi$ is irrational, we usually construct a non-zero sequence 
-$\{a_n + b_n\xi\} \rightarrow 0$, when $n \rightarrow \infty$, where$a_n, b_n \in \mathbb{Z}$.
+% To show a real number $\xi$ is irrational, we usually construct a non-zero sequence 
+% $\{a_n + b_n\xi\} \rightarrow 0$, when $n \rightarrow \infty$, where$a_n, b_n \in \mathbb{Z}$.
 
-Cause if $\xi$ is rational number $\frac{p}{q}$, then the sequence has a low bound $\frac{1}{q}$.
+% Cause if $\xi$ is rational number $\frac{p}{q}$, then the sequence has a low bound $\frac{1}{q}$.
 
-\chapter{Proof}
+% \chapter{Proof}
 
-\begin{definition}\label{shiftedLegendre}
-    \leanok
-    \[ P_n(x):=\frac{1}{n!}\frac{d^n}{dx^n}[x^n(1-x)^n] \]
-\end{definition}
+% \begin{definition}\label{shiftedLegendre}
+%     \leanok
+%     \[ P_n(x):=\frac{1}{n!}\frac{d^n}{dx^n}[x^n(1-x)^n] \]
+% \end{definition}
 
-\begin{lemma}\label{shiftedLegendre_eq_sum}
-    \uses{shiftedLegendre}
-    \[ P_n(x)=\sum\limits_{k=0}^{n}(-1)^k\binom{n}{k}\binom{n+k}{n}x^k \]
-    Hence $P_n(x)$ is integer polynomial.
-\end{lemma}
-\begin{proof}
-    \leanok
-    \begin{align*}
-        \frac{1}{n!}\frac{d^n}{dx^n}[x^n(1-x)^n] &= \frac{1}{n!}\frac{d^n}{dx^n}[(x-x^2)^n]\\
-        &= \frac{1}{n!}\frac{d^n}{dx^n}[\sum\limits_{k=0}^{n} \binom{n}{k}(-1)^k x^{n-k}x^{2k}]\\
-        &= \frac{1}{n!}\frac{d^n}{dx^n}[\sum\limits_{k=0}^{n} \binom{n}{k}(-1)^k x^{n+k}]\\
-        &= \frac{1}{n!}\sum\limits_{k=0}^{n} \binom{n}{k}(-1)^k \frac{d^n}{dx^n}[x^{n+k}]\\
-        &= \frac{1}{n!}\sum\limits_{k=0}^{n} \binom{n}{k}(-1)^k \frac{(n+k)!}{k!}x^{k}\\
-        &= \sum\limits_{k=0}^{n} \binom{n}{k}(-1)^k \frac{1}{n!}\frac{(n+k)!}{k!}x^{k}\\
-        &= \sum\limits_{k=0}^{n} (-1)^k \binom{n}{k}\binom{n+k}{n}x^{k}
-    \end{align*}
-\end{proof}
+% \begin{lemma}\label{shiftedLegendre_eq_sum}
+%     \uses{shiftedLegendre}
+%     \[ P_n(x)=\sum\limits_{k=0}^{n}(-1)^k\binom{n}{k}\binom{n+k}{n}x^k \]
+%     Hence $P_n(x)$ is integer polynomial.
+% \end{lemma}
+% \begin{proof}
+%     \leanok
+%     \begin{align*}
+%         \frac{1}{n!}\frac{d^n}{dx^n}[x^n(1-x)^n] &= \frac{1}{n!}\frac{d^n}{dx^n}[(x-x^2)^n]\\
+%         &= \frac{1}{n!}\frac{d^n}{dx^n}[\sum\limits_{k=0}^{n} \binom{n}{k}(-1)^k x^{n-k}x^{2k}]\\
+%         &= \frac{1}{n!}\frac{d^n}{dx^n}[\sum\limits_{k=0}^{n} \binom{n}{k}(-1)^k x^{n+k}]\\
+%         &= \frac{1}{n!}\sum\limits_{k=0}^{n} \binom{n}{k}(-1)^k \frac{d^n}{dx^n}[x^{n+k}]\\
+%         &= \frac{1}{n!}\sum\limits_{k=0}^{n} \binom{n}{k}(-1)^k \frac{(n+k)!}{k!}x^{k}\\
+%         &= \sum\limits_{k=0}^{n} \binom{n}{k}(-1)^k \frac{1}{n!}\frac{(n+k)!}{k!}x^{k}\\
+%         &= \sum\limits_{k=0}^{n} (-1)^k \binom{n}{k}\binom{n+k}{n}x^{k}
+%     \end{align*}
+% \end{proof}
 
-% \begin{lemma}\label{shiftedLegendre_eval_symm}
-%     \[ P_n(1-x)=(-1)^nP_n(x) \]
+% % \begin{lemma}\label{shiftedLegendre_eval_symm}
+% %     \[ P_n(1-x)=(-1)^nP_n(x) \]
+% % \end{lemma}
+% % \begin{proof}
+% %     \leanok
+% %     By definition.
+% % \end{proof}
+
+% \begin{lemma}\label{frac_partial_n}
+%     For $ 0 < x, z < 1$,,
+%     \[ \frac{\partial^n}{\partial y^n}(\frac{1}{1 - (1-xy)z}) = \frac{(-1)^nn!(xz)^n}{(1 - (1-xy)z)^{n+1}} \]
 % \end{lemma}
 % \begin{proof}
 %     \leanok
 %     By definition.
 % \end{proof}
 
-\begin{lemma}\label{frac_partial_n}
-    For $ 0 < x, z < 1$,,
-    \[ \frac{\partial^n}{\partial y^n}(\frac{1}{1 - (1-xy)z}) = \frac{(-1)^nn!(xz)^n}{(1 - (1-xy)z)^{n+1}} \]
-\end{lemma}
-\begin{proof}
-    \leanok
-    By definition.
-\end{proof}
-
-\begin{lemma}\label{Legendre_poly_mul_frac_integral}
-    \uses{frac_partial_n, shiftedLegendre}
-    For all $ 0 < x, z < 1$, one has
-    \[ \int_{0}^{1}\frac{P_n(y)}{1 - (1-xy)z} \, dx =(-1)^n \int_{0}^{1} \frac{(xyz)^n(1-y)^n}{(1 - (1-xy)z)^{n+1}} \, dx \]
-\end{lemma}
-\begin{proof}
-    \leanok
-    By induction and integration by parts.
-\end{proof}
-
-\begin{lemma}\label{log_pow_integral}
-    For all $n \in \mathbb{R}, n > -1$,
-    \[ \int_{0}^{1} -{\rm ln}(x) x^n = \frac{1}{(n + 1)^2} \, dx \]
-\end{lemma}
-\begin{proof}
-    \leanok
-    \begin{align*}
-        \int_{0}^{1} -{\rm ln}(x)\cdot x^n =& \frac{x^{n+1}}{(n+1)^2} - \frac{{\rm ln}(x) x^{n+1}}{n+1} |_0^1 \\
-        =& \frac{1}{(n+1)^2}
-    \end{align*}
-\end{proof}
-
-\begin{lemma}\label{J_rs_eq_sum_aux}
-    \uses{log_pow_integral}
-    For all $k,s,r \in \mathbb{N}$,
-    \[-\int_{0}^{1}\int_{0}^{1} {\rm ln}(xy)x^{k+r}y^{k+s}\, dx \, dy = \frac{1}{((k+r+1)^2(k+s+1))}+\frac{1}{((k+r+1)(k+s+1)^2)}\]
-\end{lemma}
-\begin{proof}
-    \leanok
-    \begin{align*}
-         &-\int_{0}^{1}\int_{0}^{1} {\rm ln}(xy)x^{k+r}y^{k+s}\, dx \, dy \\
-        =& \int_{0}^{1}\int_{0}^{1} -{\rm ln}(x)x^{k+r}y^{k+s}\, dx \, dy + \int_{0}^{1}\int_{0}^{1} -{\rm ln}(y)x^{k+r}y^{k+s}\, dx \, dy \\
-        =& \int_{0}^{1} \frac{-{\rm ln}(x)x^{k+r}}{k+s+1} \, dx + \int_{0}^{1}\int_{0}^{1} \frac{x^{k+r}}{(k+s+1)^2}\, dx\\
-        =& \frac{1}{((k+r+1)^2(k+s+1))} + \frac{1}{((k+r+1)(k+s+1)^2)}
-    \end{align*}
-\end{proof}
-
-\begin{lemma}\label{J_rs_eq_tsum}
-    \uses{J_rs_eq_sum_aux}
-    For all $r,s \in \mathbb{N}$,
-    \[ J_rs = \sum_{k \in \mathbb{N}} \frac{1}{((k+r+1)^2(k+s+1))}+\frac{1}{((k+r+1)(k+s+1)^2)}\]
-\end{lemma}
-\begin{proof}
-    \leanok
-    \begin{align*}
-        J_rs =& -\int_{0}^{1}\int_{0}^{1} x^ry^s{\rm ln}(xy) \sum_{k=0}^{\infty} (xy)^k \, dx \, dy \\
-       =& \sum_{k=0}^{\infty} -\int_{0}^{1}\int_{0}^{1} x^ry^s{\rm ln}(xy)(xy)^k \, dx \, dy \\
-       =& \sum_{k=0}^{\infty} -\int_{0}^{1}\int_{0}^{1} {\rm ln}(xy)x^{k+r}y^{k+s} \, dx \, dy \\
-       =& \sum_{n \in \mathbb{N}} \frac{1}{((k+r+1)^2(k+s+1))}+\frac{1}{((k+r+1)(k+s+1)^2)}
-   \end{align*}
-\end{proof}
-
-\begin{lemma}\label{integral_zeta_3}
-    \uses{J_rs_eq_tsum}
-    \[ J_{00} := -\int_{0}^{1}\int_{0}^{1} \frac{{\rm ln}(xy)}{1-xy} \, dx \, dy = 2\zeta(3) \]
-\end{lemma}
-\begin{proof}
-    \leanok
-    Obvious.
-\end{proof}
-
-\begin{lemma}\label{J_rr}
-    \uses{J_rs_eq_tsum}
-    for all integers $r > 0$
-    \[ J_{rr} := -\int_{0}^{1}\int_{0}^{1} x^ry^r\frac{{\rm ln}(xy)}{1-xy} \, dx \, dy = 2\zeta(3) - 2 \sum\limits_{m = 1}^{r}\frac{1}{m^3} \]
-\end{lemma}
-\begin{proof}
-    \leanok
-    By Simplification.
-\end{proof}
-
-\begin{lemma}\label{J_rs}
-    \uses{J_rs_eq_tsum}
-    Let $r$ and $s$ be non-negative integers, with $r \neq s$, then
-    \[ J_{rs} := -\int_{0}^{1}\int_{0}^{1} x^ry^s\frac{{\rm ln}(xy)}{1-xy} \, dx \, dy = \frac{\sum\limits_{m = 1}^{r}\frac{1}{m^2} - \sum\limits_{m = 1}^{s}\frac{1}{m^2}}{r - s} \]
-\end{lemma}
-\begin{proof}
-    \leanok
-    By Simplification.
-\end{proof}
-
-\begin{lemma}\label{d_r_3}
-    For all $r \in \mathbb{N}^*, d_n$ is lcm of $\{1, 2, \ldots, n\}.$ 
-    \[ d_{r^3} = (d_r)^3 \]
-\end{lemma}
-\begin{proof}
-    \leanok
-    By prime factor expand.
-\end{proof}
-
-\begin{lemma}\label{Jrr_linear_form}
-    \uses{J_rr, d_r_3}
-    For all $r \in \mathbb{N}^*$,
-    \[ J_{rr} = 2 \zeta(3) - \frac{z_r}{(d_r)^3} \]
-    for some $z_r \in \mathbb{Z}$.
-\end{lemma}
-\begin{proof}
-    \leanok
-    By computing.
-\end{proof}
-
-\begin{lemma}\label{d_r_2}
-    For all $r \in \mathbb{N}^*, d_n$ is lcm of $\{1, 2, \ldots, n\}.$ 
-    \[ d_{r^2} = (d_r)^2 \]
-\end{lemma}
-\begin{proof}
-    \leanok
-    By prime factor expand.
-\end{proof}
-
-\begin{lemma}\label{Jrs_postive_rational}
-    \uses{J_rs, d_r_2, d_r_3}
-    For all $r \in \mathbb{N}, r \neq s$,
-    \[ J_{rs} = \frac{z_{rs}}{(d_r)^3}\]
-    for some $z_{rs} \in \mathbb{Z}$.
-\end{lemma}
-\begin{proof}
-    \leanok
-    By computing.
-\end{proof}
-
-\begin{lemma}\label{integral1}
-    \[ \int_{0}^{1} \frac{1}{1 - (1 - x)z} \, dz= -\frac{{\rm ln}x}{1 - x} \]
-\end{lemma}
-\begin{proof}
-    \leanok
-    Substitute $y = (1 - x)z$ in the integral, and we also have $dy = (1-x)dz$. Then we deduce that
-    \begin{align*}
-        \int_{0}^{1} \frac{1}{1 - (1 - x)z} \, dz =& \int_{0}^{1-x} \frac{1}{(1 - y)(1-x)} \, dy \\
-        =&\frac{1}{1-x}\int_{0}^{1-x} \frac{1}{1 - y} \, dy\\
-        =&\frac{1}{1-x}[-{\rm ln}(1-y)]_0^{1-x} \\
-        =&\frac{1}{1-x}[-{\rm ln}(x) + {\rm ln}(1)] \\
-        =&-\frac{{\rm ln}x}{1 - x}
-    \end{align*}
-\end{proof}
-
-% \begin{lemma}\label{two_var_substitution}
-%     \uses{one_var_substitution}
-%     Given $s, t \in \mathbb{R}_{(0,1)}$, the following equality holds:
-%     \[ \int_{0}^{1} \frac{1}{1 - [1 - (1 - s)t]u} \, du = \int_{0}^{1} \frac{1}{[1 - (1 - u)s][1 - (1 - t)u]} \, du \]
+% \begin{lemma}\label{Legendre_poly_mul_frac_integral}
+%     \uses{frac_partial_n, shiftedLegendre}
+%     For all $ 0 < x, z < 1$, one has
+%     \[ \int_{0}^{1}\frac{P_n(y)}{1 - (1-xy)z} \, dx =(-1)^n \int_{0}^{1} \frac{(xyz)^n(1-y)^n}{(1 - (1-xy)z)^{n+1}} \, dx \]
 % \end{lemma}
 % \begin{proof}
 %     \leanok
-%     Let $x = (1 - s)t$ in the previous lemma, then we can get 
-%     \[ \int_{0}^{1} \frac{1}{1 - [1 - (1 - s)t]u} \, du = -\frac{{\rm ln}[(1 - s)t]}{1 - (1 - s)t}\]
-%     We can also find that
-%     \[ \frac{1}{[1 - (1 - u)s][1 - (1 - t)u]} = \frac{1}{1 - (1 - s)t}\left[\frac{s}{1 - (1 - u)s} + \frac{1-t}{1 - (1 - t)u} \right] \]
-%     Then we can see the integral on the right side of the equal:
-%     \begin{align*}
-%         &\int_{0}^{1} \frac{1}{[1 - (1 - u)s][1 - (1 - t)u]} \, du \\
-%         =&\frac{1}{1 - (1 - s)t}\int_{0}^{1} \left[\frac{s}{1 - (1 - u)s} + \frac{1-t}{1 - (1 - t)u} \right] \, du \\
-%         =&\frac{1}{1 - (1 - s)t}\int_{0}^{1} \left[\frac{s}{1 - us} + \frac{1-t}{1 - (1 - t)u} \right] \, du \\
-%         =&\frac{1}{1 - (1 - s)t}\left[-{\rm ln}(1-su)-{\rm ln}(1-(1-t)u) \right]_{0}^{1}\\
-%         =&\frac{1}{1 - (1 - s)t}\left[-{\rm ln}(1-s)-{\rm ln}(t)+{\rm ln}(1)-{\rm ln}(1) \right]\\
-%         =&\frac{1}{1 - (1 - s)t}\left[-{\rm ln}(1-s)-{\rm ln}(t) \right]\\
-%         =&-\frac{{\rm ln}[(1 - s)t]}{1 - (1 - s)t}
-%     \end{align*}
-%     Immediately we can see the lemma.
+%     By induction and integration by parts.
 % \end{proof}
 
-\begin{definition}\label{JJ_n}
-    \uses{shiftedLegendre}
-    \leanok
-    \[ JJ_n := - \int_{0}^{1}\int_{0}^{1} P_n(x)P_n(y)\frac{{\rm ln}(xy)}{1-xy} \, dx \, dy \]
-\end{definition}
-
-\begin{lemma}\label{J_n_integers_an_bn}
-    \uses{JJ_n, integral_zeta_3, Jrr_linear_form, Jrs_postive_rational, shiftedLegendre_eq_sum}
-    For some integers $a_n$ and $b_n$,
-    \[ JJ_n = \frac{a_n}{d_n^3} + b_n\zeta(3) \]
-\end{lemma}
-\begin{proof}
-    \leanok
-    Since $P_n(x) \in \mathbb{Z}[x]$. Suppose $P_n(x) = \sum\limits_{k=0}^{n}a_kx^k$, where $a_k \in \mathbb{Z}$.\\
-    Then 
-    \begin{align*}
-        JJ_n &= -\int_{0}^{1}\int_{0}^{1} P_n(x)P_n(y)\frac{{\rm ln}(xy)}{1-xy} \, dx \, dy \\
-        &= -\int_{0}^{1}\int_{0}^{1} \sum\limits_{i=0}^{n}a_ix^i \sum\limits_{j=0}^{n}a_jy^j \frac{{\rm ln}(xy)}{1-xy} \, dx \, dy\\
-        &= \sum\limits_{i=0}^{n}\sum\limits_{j=0}^{n}a_i a_j -\int_{0}^{1}\int_{0}^{1} x^i y^j \frac{{\rm ln}(xy)}{1-xy} \, dx \, dy\\
-        &= \sum\limits_{i=0}^{n}\sum\limits_{j=0}^{n}a_i a_j J_{ij}\\
-    \end{align*}
-    We have $J_{rr}$ and $J_{rs} \in \mathbb{Z}\zeta(3) + \frac{\mathbb{Z}}{d_n^3}$.\\
-    So $JJ_n \in \mathbb{Z}\zeta(3) + \frac{\mathbb{Z}}{d_n^3}$.
-\end{proof}
-
-% \begin{definition}\label{fun1}
+% \begin{lemma}\label{log_pow_integral}
+%     For all $n \in \mathbb{R}, n > -1$,
+%     \[ \int_{0}^{1} -{\rm ln}(x) x^n = \frac{1}{(n + 1)^2} \, dx \]
+% \end{lemma}
+% \begin{proof}
 %     \leanok
-%     \[ fun1_n := JJ_n * d_n^3 \]
+%     \begin{align*}
+%         \int_{0}^{1} -{\rm ln}(x)\cdot x^n =& \frac{x^{n+1}}{(n+1)^2} - \frac{{\rm ln}(x) x^{n+1}}{n+1} |_0^1 \\
+%         =& \frac{1}{(n+1)^2}
+%     \end{align*}
+% \end{proof}
+
+% \begin{lemma}\label{J_rs_eq_sum_aux}
+%     \uses{log_pow_integral}
+%     For all $k,s,r \in \mathbb{N}$,
+%     \[-\int_{0}^{1}\int_{0}^{1} {\rm ln}(xy)x^{k+r}y^{k+s}\, dx \, dy = \frac{1}{((k+r+1)^2(k+s+1))}+\frac{1}{((k+r+1)(k+s+1)^2)}\]
+% \end{lemma}
+% \begin{proof}
+%     \leanok
+%     \begin{align*}
+%          &-\int_{0}^{1}\int_{0}^{1} {\rm ln}(xy)x^{k+r}y^{k+s}\, dx \, dy \\
+%         =& \int_{0}^{1}\int_{0}^{1} -{\rm ln}(x)x^{k+r}y^{k+s}\, dx \, dy + \int_{0}^{1}\int_{0}^{1} -{\rm ln}(y)x^{k+r}y^{k+s}\, dx \, dy \\
+%         =& \int_{0}^{1} \frac{-{\rm ln}(x)x^{k+r}}{k+s+1} \, dx + \int_{0}^{1}\int_{0}^{1} \frac{x^{k+r}}{(k+s+1)^2}\, dx\\
+%         =& \frac{1}{((k+r+1)^2(k+s+1))} + \frac{1}{((k+r+1)(k+s+1)^2)}
+%     \end{align*}
+% \end{proof}
+
+% \begin{lemma}\label{J_rs_eq_tsum}
+%     \uses{J_rs_eq_sum_aux}
+%     For all $r,s \in \mathbb{N}$,
+%     \[ J_rs = \sum_{k \in \mathbb{N}} \frac{1}{((k+r+1)^2(k+s+1))}+\frac{1}{((k+r+1)(k+s+1)^2)}\]
+% \end{lemma}
+% \begin{proof}
+%     \leanok
+%     \begin{align*}
+%         J_rs =& -\int_{0}^{1}\int_{0}^{1} x^ry^s{\rm ln}(xy) \sum_{k=0}^{\infty} (xy)^k \, dx \, dy \\
+%        =& \sum_{k=0}^{\infty} -\int_{0}^{1}\int_{0}^{1} x^ry^s{\rm ln}(xy)(xy)^k \, dx \, dy \\
+%        =& \sum_{k=0}^{\infty} -\int_{0}^{1}\int_{0}^{1} {\rm ln}(xy)x^{k+r}y^{k+s} \, dx \, dy \\
+%        =& \sum_{n \in \mathbb{N}} \frac{1}{((k+r+1)^2(k+s+1))}+\frac{1}{((k+r+1)(k+s+1)^2)}
+%    \end{align*}
+% \end{proof}
+
+% \begin{lemma}\label{integral_zeta_3}
+%     \uses{J_rs_eq_tsum}
+%     \[ J_{00} := -\int_{0}^{1}\int_{0}^{1} \frac{{\rm ln}(xy)}{1-xy} \, dx \, dy = 2\zeta(3) \]
+% \end{lemma}
+% \begin{proof}
+%     \leanok
+%     Obvious.
+% \end{proof}
+
+% \begin{lemma}\label{J_rr}
+%     \uses{J_rs_eq_tsum}
+%     for all integers $r > 0$
+%     \[ J_{rr} := -\int_{0}^{1}\int_{0}^{1} x^ry^r\frac{{\rm ln}(xy)}{1-xy} \, dx \, dy = 2\zeta(3) - 2 \sum\limits_{m = 1}^{r}\frac{1}{m^3} \]
+% \end{lemma}
+% \begin{proof}
+%     \leanok
+%     By Simplification.
+% \end{proof}
+
+% \begin{lemma}\label{J_rs}
+%     \uses{J_rs_eq_tsum}
+%     Let $r$ and $s$ be non-negative integers, with $r \neq s$, then
+%     \[ J_{rs} := -\int_{0}^{1}\int_{0}^{1} x^ry^s\frac{{\rm ln}(xy)}{1-xy} \, dx \, dy = \frac{\sum\limits_{m = 1}^{r}\frac{1}{m^2} - \sum\limits_{m = 1}^{s}\frac{1}{m^2}}{r - s} \]
+% \end{lemma}
+% \begin{proof}
+%     \leanok
+%     By Simplification.
+% \end{proof}
+
+% \begin{lemma}\label{d_r_3}
+%     For all $r \in \mathbb{N}^*, d_n$ is lcm of $\{1, 2, \ldots, n\}.$ 
+%     \[ d_{r^3} = (d_r)^3 \]
+% \end{lemma}
+% \begin{proof}
+%     \leanok
+%     By prime factor expand.
+% \end{proof}
+
+% \begin{lemma}\label{Jrr_linear_form}
+%     \uses{J_rr, d_r_3}
+%     For all $r \in \mathbb{N}^*$,
+%     \[ J_{rr} = 2 \zeta(3) - \frac{z_r}{(d_r)^3} \]
+%     for some $z_r \in \mathbb{Z}$.
+% \end{lemma}
+% \begin{proof}
+%     \leanok
+%     By computing.
+% \end{proof}
+
+% \begin{lemma}\label{d_r_2}
+%     For all $r \in \mathbb{N}^*, d_n$ is lcm of $\{1, 2, \ldots, n\}.$ 
+%     \[ d_{r^2} = (d_r)^2 \]
+% \end{lemma}
+% \begin{proof}
+%     \leanok
+%     By prime factor expand.
+% \end{proof}
+
+% \begin{lemma}\label{Jrs_postive_rational}
+%     \uses{J_rs, d_r_2, d_r_3}
+%     For all $r \in \mathbb{N}, r \neq s$,
+%     \[ J_{rs} = \frac{z_{rs}}{(d_r)^3}\]
+%     for some $z_{rs} \in \mathbb{Z}$.
+% \end{lemma}
+% \begin{proof}
+%     \leanok
+%     By computing.
+% \end{proof}
+
+% \begin{lemma}\label{integral1}
+%     \[ \int_{0}^{1} \frac{1}{1 - (1 - x)z} \, dz= -\frac{{\rm ln}x}{1 - x} \]
+% \end{lemma}
+% \begin{proof}
+%     \leanok
+%     Substitute $y = (1 - x)z$ in the integral, and we also have $dy = (1-x)dz$. Then we deduce that
+%     \begin{align*}
+%         \int_{0}^{1} \frac{1}{1 - (1 - x)z} \, dz =& \int_{0}^{1-x} \frac{1}{(1 - y)(1-x)} \, dy \\
+%         =&\frac{1}{1-x}\int_{0}^{1-x} \frac{1}{1 - y} \, dy\\
+%         =&\frac{1}{1-x}[-{\rm ln}(1-y)]_0^{1-x} \\
+%         =&\frac{1}{1-x}[-{\rm ln}(x) + {\rm ln}(1)] \\
+%         =&-\frac{{\rm ln}x}{1 - x}
+%     \end{align*}
+% \end{proof}
+
+% % \begin{lemma}\label{two_var_substitution}
+% %     \uses{one_var_substitution}
+% %     Given $s, t \in \mathbb{R}_{(0,1)}$, the following equality holds:
+% %     \[ \int_{0}^{1} \frac{1}{1 - [1 - (1 - s)t]u} \, du = \int_{0}^{1} \frac{1}{[1 - (1 - u)s][1 - (1 - t)u]} \, du \]
+% % \end{lemma}
+% % \begin{proof}
+% %     \leanok
+% %     Let $x = (1 - s)t$ in the previous lemma, then we can get 
+% %     \[ \int_{0}^{1} \frac{1}{1 - [1 - (1 - s)t]u} \, du = -\frac{{\rm ln}[(1 - s)t]}{1 - (1 - s)t}\]
+% %     We can also find that
+% %     \[ \frac{1}{[1 - (1 - u)s][1 - (1 - t)u]} = \frac{1}{1 - (1 - s)t}\left[\frac{s}{1 - (1 - u)s} + \frac{1-t}{1 - (1 - t)u} \right] \]
+% %     Then we can see the integral on the right side of the equal:
+% %     \begin{align*}
+% %         &\int_{0}^{1} \frac{1}{[1 - (1 - u)s][1 - (1 - t)u]} \, du \\
+% %         =&\frac{1}{1 - (1 - s)t}\int_{0}^{1} \left[\frac{s}{1 - (1 - u)s} + \frac{1-t}{1 - (1 - t)u} \right] \, du \\
+% %         =&\frac{1}{1 - (1 - s)t}\int_{0}^{1} \left[\frac{s}{1 - us} + \frac{1-t}{1 - (1 - t)u} \right] \, du \\
+% %         =&\frac{1}{1 - (1 - s)t}\left[-{\rm ln}(1-su)-{\rm ln}(1-(1-t)u) \right]_{0}^{1}\\
+% %         =&\frac{1}{1 - (1 - s)t}\left[-{\rm ln}(1-s)-{\rm ln}(t)+{\rm ln}(1)-{\rm ln}(1) \right]\\
+% %         =&\frac{1}{1 - (1 - s)t}\left[-{\rm ln}(1-s)-{\rm ln}(t) \right]\\
+% %         =&-\frac{{\rm ln}[(1 - s)t]}{1 - (1 - s)t}
+% %     \end{align*}
+% %     Immediately we can see the lemma.
+% % \end{proof}
+
+% \begin{definition}\label{JJ_n}
+%     \uses{shiftedLegendre}
+%     \leanok
+%     \[ JJ_n := - \int_{0}^{1}\int_{0}^{1} P_n(x)P_n(y)\frac{{\rm ln}(xy)}{1-xy} \, dx \, dy \]
 % \end{definition}
 
-\begin{definition}\label{JJ'_n}
-    \uses{shiftedLegendre}
-    \leanok
-    \[ JJ'_n := - \int_{0}^{1}\int_{0}^{1}\int_{0}^{1} (\frac{x(1-x)y(1-y)z(1-z)}{1-(1-yz)x})^n \frac{1}{1-(1-yz)x} \, dx \, dy \, dz \]
+% \begin{lemma}\label{J_n_integers_an_bn}
+%     \uses{JJ_n, integral_zeta_3, Jrr_linear_form, Jrs_postive_rational, shiftedLegendre_eq_sum}
+%     For some integers $a_n$ and $b_n$,
+%     \[ JJ_n = \frac{a_n}{d_n^3} + b_n\zeta(3) \]
+% \end{lemma}
+% \begin{proof}
+%     \leanok
+%     Since $P_n(x) \in \mathbb{Z}[x]$. Suppose $P_n(x) = \sum\limits_{k=0}^{n}a_kx^k$, where $a_k \in \mathbb{Z}$.\\
+%     Then 
+%     \begin{align*}
+%         JJ_n &= -\int_{0}^{1}\int_{0}^{1} P_n(x)P_n(y)\frac{{\rm ln}(xy)}{1-xy} \, dx \, dy \\
+%         &= -\int_{0}^{1}\int_{0}^{1} \sum\limits_{i=0}^{n}a_ix^i \sum\limits_{j=0}^{n}a_jy^j \frac{{\rm ln}(xy)}{1-xy} \, dx \, dy\\
+%         &= \sum\limits_{i=0}^{n}\sum\limits_{j=0}^{n}a_i a_j -\int_{0}^{1}\int_{0}^{1} x^i y^j \frac{{\rm ln}(xy)}{1-xy} \, dx \, dy\\
+%         &= \sum\limits_{i=0}^{n}\sum\limits_{j=0}^{n}a_i a_j J_{ij}\\
+%     \end{align*}
+%     We have $J_{rr}$ and $J_{rs} \in \mathbb{Z}\zeta(3) + \frac{\mathbb{Z}}{d_n^3}$.\\
+%     So $JJ_n \in \mathbb{Z}\zeta(3) + \frac{\mathbb{Z}}{d_n^3}$.
+% \end{proof}
+
+% % \begin{definition}\label{fun1}
+% %     \leanok
+% %     \[ fun1_n := JJ_n * d_n^3 \]
+% % \end{definition}
+
+% \begin{definition}\label{JJ'_n}
+%     \uses{shiftedLegendre}
+%     \leanok
+%     \[ JJ'_n := - \int_{0}^{1}\int_{0}^{1}\int_{0}^{1} (\frac{x(1-x)y(1-y)z(1-z)}{1-(1-yz)x})^n \frac{1}{1-(1-yz)x} \, dx \, dy \, dz \]
+% \end{definition}
+
+% \begin{lemma}\label{bound}
+%     Let $D = \{(x,y,z)|x,y,z\in (0,1)\}$, then
+%     \[ \frac{x(1-x)y(1-y)z(1-z)}{(1-(1-xy)z)} < \frac{1}{24} \]
+% \end{lemma}
+% \begin{proof}
+%     \leanok
+%     We have an inequality
+%     \[ 1-(1-xy)z = 1-z + xyz \geqslant 2\sqrt{1-z}\sqrt{xyz} \]
+%     Then we can deduce that for $(x,y,z) \in D$,
+%     \begin{align*}
+%         \frac{x(1-x)y(1-y)z(1-z)}{(1-(1-xy)z)} \leqslant& \frac{x(1-x)y(1-y)z(1-z)}{2\sqrt{1-z}\sqrt{xyz}}\\
+%         =&\frac{\sqrt{x}(1-x)\sqrt{y}(1-y)\sqrt{z}\sqrt{1-z}}{2}
+%     \end{align*}
+%     For $z\in (0,1)$, the max value of $\sqrt{z}\sqrt{1-z} = \sqrt{z(1-z)}$ is got at $z=\frac{1}{2}$.
+%     And for $y \in (0,1)$, we have $y(1-y)^2 - \frac{4}{27} = (y - \frac{4}{3})(y - \frac{1}{3})^2 \leqslant 0$. Then
+%     \[ \sqrt{y}(1-y) = \sqrt{y(1-y)^2} \leqslant \sqrt{\frac{4}{27}} \leqslant \sqrt{\frac{4}{25}} = \frac{2}{5}\]
+%     Then we have
+%     \begin{align*}
+%         \frac{x(1-x)y(1-y)z(1-z)}{(1-(1-xy)z)} \leqslant& \frac{2}{5}\cdot\frac{2}{5}\cdot\frac{1}{2}\cdot\frac{1}{2} \\
+%         =& \frac{1}{25} < \frac{1}{24} 
+%     \end{align*}
+% \end{proof}
+
+% \begin{lemma}\label{double_integral_eq1}
+%     \uses{Legendre_poly_mul_frac_integral}
+%     For $0 < z < 1$, 
+%     \[ \int_{0}^{1}\int_{0}^{1} P_n(x)P_n(y) \frac{1}{1 - (1 - xy)z} \, dx \, dy = \int_{0}^{1}\int_{0}^{1} \frac{P_n(x)(xyz)^n(1-y)^n}{(1-(1-xy)z)^{n + 1}} \, dx \, dy \]
+% \end{lemma}
+% \begin{proof}
+%     \leanok
+% \end{proof}
+
+% \begin{lemma}\label{double_integral_eq2}
+%     \uses{Legendre_poly_mul_frac_integral}
+%     For $0 < x, y < 1$, 
+%     \[ \int_{0}^{1} \frac{P_n(x)(xyz)^n(1-y)^n}{(1-(1-xy)z)^{n + 1}} \, dz = \int_{0}^{1} \frac{P_n(x)(1-z)^n(1-y)^n}{1-(1-xy)z}  \, dz \]
+% \end{lemma}
+% \begin{proof}
+%     \leanok
+% \end{proof}
+
+% \begin{lemma}\label{double_integral_eq3}
+%     \uses{Legendre_poly_mul_frac_integral}
+%     For $0 < z < 1$, 
+%     \[ \int_{0}^{1}\int_{0}^{1} \frac{P_n(x)(1-y)^n}{1-(1-xy)z} \, dx \, dy = \int_{0}^{1}\int_{0}^{1} \frac{(xyz(1-x)(1-y))^n}{(1-(1-xy)z)^{n+1}} \, dx \, dy \]
+% \end{lemma}
+% \begin{proof}
+%     \leanok
+% \end{proof}
+
+% \begin{theorem}\label{JJ_eq_form}
+%     \uses{JJ_n, integral1, double_integral_eq1, double_integral_eq2, double_integral_eq3, JJ'_n}
+%     \[ JJ_n = JJ'_n \]
+% \end{theorem}
+% \begin{proof}
+%     \leanok
+%     \begin{align*}
+%         JJ_n &= \int_{0}^{1}\int_{0}^{1} P_n(x)P_n(y)(\int_{0}^{1} \frac{1}{1 - (1 - xy)z} \, dz) \, dx \, dy \\
+%         &=\int_{0}^{1}\int_{0}^{1}\int_{0}^{1} P_n(x)P_n(y) \frac{1}{1 - (1 - xy)z} \, dx \, dy \, dz \\
+%         &=\int_{0}^{1}\int_{0}^{1}\int_{0}^{1} \frac{P_n(x)(xyz)^n(1-y)^n}{(1-(1-xy)z)^{n + 1}} \, dx \, dy \, dz \\
+%         &=\int_{0}^{1}\int_{0}^{1}\int_{0}^{1} \frac{P_n(x)(1-z)^n(1-y)^n}{1-(1-xy)z}  \, dz \, dx \, dy  \\
+%         &=\int_{0}^{1} (1-z)^n (\int_{0}^{1}\int_{0}^{1} \frac{P_n(x)(1-y)^n}{1-(1-xy)z}  \, dx \, dy) \, dz \\
+%         &=\int_{0}^{1} (1-z)^n (\int_{0}^{1}\int_{0}^{1} \frac{(xyz(1-x)(1-y))^n}{(1-(1-xy)z)^{n+1}} \, dx \, dy) \, dz \\
+%         &=\int_{0}^{1}\int_{0}^{1}\int_{0}^{1} \frac{(xyz(1-x)(1-y)(1-z))^n}{(1-(1-xy)z)^{n+1}} \, dz \, dx \, dy
+%         &=JJ'_n
+%     \end{align*}
+% \end{proof}
+
+% \begin{theorem}\label{JJ_pos}
+%     \uses{JJ_eq_form}
+%     \[ 0 < JJ_n \]
+% \end{theorem}
+% \begin{proof}
+%     \leanok
+%     Every point is positive.
+% \end{proof}
+
+
+% \begin{lemma}\label{J_eq_triple}
+%     \uses{J, integral1}
+%     For $r, s \in \mathbb{N}$, one has
+%     \[ J_rs = \int_{0}^{1}\int_{0}^{1}\int_{0}^{1} \frac{y^rz^s}{1-(1-yz)x} \, dz \, dy \, dx \]
+% \end{lemma}
+% \begin{proof}
+%     \leanok
+%     \begin{align*}
+%         &\int_{0}^{1}\int_{0}^{1}\int_{0}^{1} \frac{y^rz^s}{1-(1-yz)x} \, dz \, dy \, dx \\
+%         =& \int_{0}^{1}\int_{0}^{1}(\int_{0}^{1} \frac{y^rz^s}{1-(1-yz)x} \, dx) \, dy \, dz \\
+%         =& \int_{0}^{1}\int_{0}^{1}(-\frac{{\rm ln}(yz)}{1 - yz}y^rz^s \, dx) \, dy \, dz \\
+%         =& J_rs
+%     \end{align*}
+% \end{proof}
+
+% \begin{theorem}\label{JJ_upper}
+%     \uses{JJ_eq_form, JJ', J_eq_triple, integral_zeta_3, bound}
+%     \[ JJ_n \leqslant (\frac{1}{24})^n\cdot 2\zeta(3) \]
+% \end{theorem}
+% \begin{proof}
+%     \leanok
+%     \begin{align*}
+%         JJ_n &= JJ'_n \\
+%         &\leqslant (\frac{1}{24})^n \int_{0}^{1}\int_{0}^{1}\int_{0}^{1} \frac{1}{1-(1-yz)x} \, dx \, dy \, dz \\
+%         &= (\frac{1}{24})^n J_{00} \\
+%         &= (\frac{1}{24})^n \cdot 2\zeta(3)
+%     \end{align*}
+% \end{proof}
+
+% \begin{lemma}\label{pi_asymp}
+%   One has
+%   \[
+%   \pi(x) = \left(1 + o(1)\right)\int_2^{x}\frac{1}{\log x} \mathsf{d} x.
+%   \]
+%   as $x \to \infty$.
+% \end{lemma}
+% \begin{proof}
+%     \leanok
+%     We need a precise description of auxiliary constants involved in $o(1)$ and ``sufficiently large'' for the purpose of formalisation, we write down the proof in an excruciatingly detailed manner so that each step could be transcribed to Lean4 with relative ease.
+%     \begin{proof}[Prime Number Theorem]
+%     We want to show that $\frac{\pi\left(x\right)}{{ \int_{2}^{x}\frac{\mathsf{d}t}{\log t}}}-1$
+%     is $o\left(1\right)$, that is for every $\epsilon$, there exists
+%     $M_{\epsilon}\in\mathbb{R}$ such that $\left|\frac{\pi\left(x\right)}{{ \int_{2}^{x}\frac{\mathsf{d}t}{\log t}}}-1\right|\le\epsilon$.
+%     We know that for all $2\le x$, 
+    
+%     \[
+%     \pi\left(x\right)={\frac{1}{\log x}\sum_{p\le\lfloor x\rfloor}\log p+{\int_{2}^{x}\frac{\sum_{p\le\lfloor t\rfloor}\log p}{t\log^{2}t}}\mathsf{d}t}.
+%     \]
+    
+%     We also know that for all $0<\epsilon$, there exists a function $f_{\epsilon}:\mathbb{R}\to\mathbb{R}$
+%     such that $f_{\epsilon}=o\left(\epsilon\right)$ and $f$ is integrable
+%     on $\left(2,x\right)$ for all $2\le x$ and for $x$ sufficiently
+%     large, say $x>N_{\epsilon}\ge2$
+    
+%     \[
+%     \sum_{p\le\lfloor x\rfloor}\log p=x+xf_{\epsilon}\left(x\right).
+%     \]
+%     Hence for all $0<\epsilon$, such an $f$ satisfies: for $x$ sufficiently
+%     large
+%     \[
+%     \pi\left(x\right)=\frac{x+xf_{\epsilon}\left(x\right)}{\log x}+\int_{2}^{N_{\epsilon}}\frac{\sum_{p\le\lfloor x\rfloor}\log p}{t\log^{2}t}\mathsf{d}t+\int_{N_{\epsilon}}^{x}\frac{t+tf_{\epsilon}\left(t\right)}{t\log^{2}t}\mathsf{d}t,
+%     \]
+%     which simplifies to
+%     \[
+%     \pi\left(x\right)=\left(\frac{x}{\log x}+\int_{N_{\epsilon}}^{x}\frac{\mathsf{d}t}{\log^{2}t}\right)+\left(\frac{xf_{\epsilon}\left(x\right)}{\log x}+\int_{N_{\epsilon}}^{x}\frac{f_{\epsilon}\left(t\right)}{\log^{2}t}\mathsf{d}t\right)+\int_{2}^{N_{\epsilon}}\frac{\sum_{p\le\lfloor x\rfloor}\log p}{t\log^{2}t}\mathsf{d}t.
+%     \]
+%     Integration by parts tells us that
+%     \[
+%     \frac{x}{\log x}+\int_{N_{\epsilon}}^{x}\frac{\mathsf{d}t}{\log^{2}t}=\int_{N_{\epsilon}}^{x}\frac{\mathsf{d}t}{\log t}+\frac{N_{\epsilon}}{\log N_{\epsilon}}=\int_{2}^{x}\frac{\mathsf{d}t}{\log t}+\left(\frac{N_{\epsilon}}{\log N_{\epsilon}}-\int_{2}^{N_{\epsilon}}\frac{\mathsf{d}t}{\log t}\right).
+%     \]
+%     Hence
+%     \[
+%     \pi\left(x\right)=\int_{2}^{x}\frac{\mathsf{d}t}{\log t}+\left(\frac{xf_{\epsilon}\left(x\right)}{\log x}+\int_{N_{\epsilon}}^{x}\frac{f_{\epsilon}\left(t\right)}{\log^{2}t}\mathsf{d}t\right)+C_{\epsilon},
+%     \]
+%     for some constant $C_{\epsilon}\in\mathbb{R}$.
+%     \[
+%     \frac{\pi\left(x\right)}{\int_{2}^{x}\frac{\mathsf{d}t}{\log t}}-1=\left(\frac{xf_{\epsilon}\left(x\right)}{\log x}+\int_{N_{\epsilon}}^{x}\frac{f_{\epsilon}\left(t\right)}{\log^{2}t}\mathsf{d}t\right)/\int_{2}^{x}\frac{\mathsf{d}t}{\log t}+\frac{C_{\epsilon}}{\int_{2}^{x}\frac{\mathsf{d}t}{\log t}}.
+%     \]
+    
+%     Remember that $f_{\epsilon}=o\left(\epsilon\right)$, so we know for
+%     all $0<c$, there exists $M_{c,\epsilon}$ such that for all $M_{c,\epsilon}<x$,$\left|f_{\epsilon}\left(x\right)\right|\le c\epsilon$.
+%     Then for $2<M_{c,\epsilon}<x$, we have
+%     \[
+%     \begin{aligned}\frac{xf_{\epsilon}\left(x\right)}{\log x} & \le\frac{c\epsilon\cdot x}{\log x}\\
+%     \left|\int_{N_{\epsilon}}^{x}\frac{f_{\epsilon}\left(t\right)}{\log^{2}t}\mathsf{d}t\right| & \le\int_{N_{\epsilon}}^{M_{c,\epsilon}}\left|\frac{f_{\epsilon}\left(t\right)}{\log^{2}t}\right|\mathsf{d}t+\int_{M_{c,\epsilon}}^{x}\left|\frac{f_{\epsilon}\left(t\right)}{\log^{2}t}\right|\mathsf{d}t\\
+%      & \le\int_{N_{\epsilon}}^{M_{c,\epsilon}}\frac{\left|f_{\epsilon}\left(t\right)\right|}{\log^{2}t}\mathsf{d}t+c\epsilon\int_{M_{c,\epsilon}}^{x}\frac{\mathsf{d}t}{\log^{2}t}\\
+%      & =\int_{N_{\epsilon}}^{M_{c,\epsilon}}\frac{\left|f_{\epsilon}\left(t\right)\right|}{\log^{2}t}\mathsf{d}t+c\epsilon\left(\int_{M_{c,\epsilon}}^{x}\frac{\mathsf{d}t}{\log t}+\frac{M_{c,\epsilon}}{\log M_{c,\epsilon}}-\frac{x}{\log x}\right),
+%     \end{aligned}
+%     \]
+%     hence for $M_{c,\epsilon}<x$, we have
+%     \[
+%     \begin{aligned}\left|\frac{xf_{\epsilon}\left(x\right)}{\log x}+\int_{N_{\epsilon}}^{x}\frac{f_{\epsilon}\left(t\right)}{\log^{2}t}\mathsf{d}t\right| & \le\int_{N_{\epsilon}}^{M_{c,\epsilon}}\frac{\left|f_{\epsilon}\left(t\right)\right|}{\log^{2}t}\mathsf{d}t+c\epsilon\left(\int_{M_{c,\epsilon}}^{x}\frac{\mathsf{d}t}{\log t}+\frac{M_{c,\epsilon}}{\log M_{c,\epsilon}}\right)\\
+%      & =\int_{N_{\epsilon}}^{M_{c,\epsilon}}\frac{\left|f_{\epsilon}\left(t\right)\right|}{\log^{2}t}\mathsf{d}t+c\epsilon\left(\int_{2}^{x}\frac{\mathsf{d}t}{\log t}+\frac{M_{c,\epsilon}}{\log M_{c,\epsilon}}-\int_{M_{c,\epsilon}}^{2}\frac{\mathsf{d}t}{\log t}\right).
+%     \end{aligned}
+%     \]
+%     Denote $D_{c,\epsilon}$ to be $\int_{N_{\epsilon}}^{M_{c,\epsilon}}\frac{\left|f_{\epsilon}\left(t\right)\right|}{\log^{2}t}\mathsf{d}t+c\epsilon\frac{M_{c,\epsilon}}{\log M_{c,\epsilon}}-c\epsilon\int_{M_{c,\epsilon}}^{2}\frac{\mathsf{d}t}{\log t}$, we notice
+%     \[
+%     \begin{aligned}\left|\frac{\pi\left(x\right)}{\int_{2}^{x}\frac{\mathsf{d}t}{\log t}}-1\right| & \le\left(c\epsilon\int_{2}^{x}\frac{\mathsf{d}t}{\log t}+D_{c,\epsilon}\right)/\int_{2}^{x}\frac{\mathsf{d}t}{\log t}+\frac{C_{\epsilon}}{\int_{2}^{x}\frac{\mathsf{d}t}{\log t}}\\
+%      & =c\epsilon+\frac{D_{c,\epsilon}}{\int_{2}^{x}\frac{\mathsf{d}t}{\log t}}+\frac{C_{\epsilon}}{\int_{2}^{x}\frac{\mathsf{d}t}{\log t}}.
+%     \end{aligned}
+%     \]
+%     In particular, there exists a constant $D$ such that for all $\max\left(M_{\frac{1}{2},\epsilon},N_{\epsilon}\right)<x$,
+%     \[
+%     \left|\frac{\pi\left(x\right)}{\int_{2}^{x}\frac{\mathsf{d}t}{\log t}}-1\right|\le\frac{\epsilon}{2}+\frac{D}{\int_{2}^{x}\frac{\mathsf{d}t}{\log t}}.
+%     \]
+    
+%     We now bound $\int_2^x\frac{\mathsf{d}t}{\log t}$. Note that $\int_{2}^{x}\frac{\mathsf{d}t}{\log t}\ge\frac{\left(x-2\right)}{\log x}$.
+%     Hence for $x>e^{s}$ with $s>1$, $\int_{2}^{x}\frac{\mathsf{d}t}{\log t}\ge\frac{e^{s}-2}{s}$
+%     , consequently $\frac{D}{\int_{2}^{x}\frac{\mathsf{d}t}{\log t}}\le\frac{sD}{e^{s}-2}\le\frac{sD}{e^{s}}\le\frac{\epsilon}{2}$
+%     for $s$ sufficiently large, say $s>A_{\epsilon}>1$.
+%     Thus for all $x>\max\left(M_{\frac{1}{2},\epsilon},N_{\epsilon},e^{A_{\epsilon}}\right)$,
+%     $\left|\frac{\pi\left(x\right)}{\int_{2}^{x}\frac{\mathsf{d}t}{\log t}}-1\right|\le\epsilon$.
+%     This proves $\frac{\pi\left(x\right)}{\int_{2}^{x}\frac{\mathsf{d}t}{\log t}}-1$
+%     is $o\left(1\right)$ for sufficiently large $x$.
+%     \end{proof}
+% \end{proof}
+
+% \begin{lemma}\label{pi_alt}
+%     \uses{pi_asymp}
+%     One has 
+%     \[ \pi(x) = (1 + o(1))\frac{x}{\log x}\]
+%     as $x \rightarrow \infty$.
+% \end{lemma}
+% \begin{proof}
+%     \leanok
+% \end{proof}
+
+% \begin{lemma}\label{dn_asymptotic}
+%     \uses{pi_alt}
+%     Let $n$ be a positive integer. Define $\pi(n)$ as the number of primes less than (or equal to) $n$. Then, $d_n \leqslant n^{\pi(n)} \sim e^n$.
+% \end{lemma}
+% \begin{proof}
+%     \leanok
+%     use Prime Number Theorem. 
+% \end{proof}
+
+% \begin{theorem}\label{zeta_3_irrational}
+%     \uses{J_n_integers_an_bn, JJ_upper, dn_asymptotic}
+%     $\zeta(3)$ is irrational.
+% \end{theorem}
+% \begin{proof}
+%     \leanok
+%     \[ 0 \neq |J_n| \leqslant (\frac{1}{30})^n\cdot 2\zeta(3) \]
+%     Then 
+%     \[ 0 < |\frac{a_n}{d_n^3} + b_n\zeta(3)| \leqslant (\frac{1}{30})^n\cdot 2\zeta(3) \]
+%     which means that 
+%     \[ 0 < |a_n + d_n^3 b_n\zeta(3)| \leqslant d_n^3(\frac{1}{30})^n\cdot 2\zeta(3) \] 
+%     Since $d_n \leqslant n^{\pi(n)} \sim e^n$ and $e^3 < 21$, we have
+%     \[ 0 < |a_n + c_n\zeta(3)| < 21^n (\frac{1}{30})^n\cdot 2\zeta(3) = 2(\frac{7}{10})^n \zeta(3) \]
+%     where$c_n = d_n^3 b_n$ is integer.\\
+%     Assume $\zeta(3) = \frac{p}{q}, (p,q)=1$ and $p,q>0$. Then 
+%     \[ 0 < |qa_n + pc_n| < 2p (\frac{7}{10})^n \]
+%     So $n \rightarrow \infty, |qa_n + pc_n| \rightarrow 0$.\\
+%     Since $|qa_n + pc_n|$ is a integer, so $|qa_n + pc_n| \geqslant 1$. Contradiction! \\
+%     So $\zeta(3)$ is irrational!
+% \end{proof}
+
+% Definitions
+
+\begin{definition}
+  \label{def:S}
+  \lean{IMO2025P4.S}
+  \leanok
+  1
 \end{definition}
 
-\begin{lemma}\label{bound}
-    Let $D = \{(x,y,z)|x,y,z\in (0,1)\}$, then
-    \[ \frac{x(1-x)y(1-y)z(1-z)}{(1-(1-xy)z)} < \frac{1}{24} \]
+\begin{definition}
+  \label{def:R}
+  \lean{IMO2025P4.R}
+  \leanok
+  \uses{def:S}
+  1
+\end{definition}
+
+\begin{definition}
+  \label{def:c_k}
+  \lean{IMO2025P4.c_k}
+  \leanok
+  1
+\end{definition}
+
+\begin{definition}
+  \label{def:IsSequence}
+  \lean{IMO2025P4.IsSequence}
+  \leanok
+  \uses{def:S}
+  1
+\end{definition}
+
+% Lemmas
+
+\begin{lemma}
+  \label{lem:odd_successor_is_odd}
+  \lean{IMO2025P4.lem_odd_successor_is_odd}
+  \leanok
+  \uses{def:S}
+  1
 \end{lemma}
 \begin{proof}
-    \leanok
-    We have an inequality
-    \[ 1-(1-xy)z = 1-z + xyz \geqslant 2\sqrt{1-z}\sqrt{xyz} \]
-    Then we can deduce that for $(x,y,z) \in D$,
-    \begin{align*}
-        \frac{x(1-x)y(1-y)z(1-z)}{(1-(1-xy)z)} \leqslant& \frac{x(1-x)y(1-y)z(1-z)}{2\sqrt{1-z}\sqrt{xyz}}\\
-        =&\frac{\sqrt{x}(1-x)\sqrt{y}(1-y)\sqrt{z}\sqrt{1-z}}{2}
-    \end{align*}
-    For $z\in (0,1)$, the max value of $\sqrt{z}\sqrt{1-z} = \sqrt{z(1-z)}$ is got at $z=\frac{1}{2}$.
-    And for $y \in (0,1)$, we have $y(1-y)^2 - \frac{4}{27} = (y - \frac{4}{3})(y - \frac{1}{3})^2 \leqslant 0$. Then
-    \[ \sqrt{y}(1-y) = \sqrt{y(1-y)^2} \leqslant \sqrt{\frac{4}{27}} \leqslant \sqrt{\frac{4}{25}} = \frac{2}{5}\]
-    Then we have
-    \begin{align*}
-        \frac{x(1-x)y(1-y)z(1-z)}{(1-(1-xy)z)} \leqslant& \frac{2}{5}\cdot\frac{2}{5}\cdot\frac{1}{2}\cdot\frac{1}{2} \\
-        =& \frac{1}{25} < \frac{1}{24} 
-    \end{align*}
+  \leanok
+  1
 \end{proof}
 
-\begin{lemma}\label{double_integral_eq1}
-    \uses{Legendre_poly_mul_frac_integral}
-    For $0 < z < 1$, 
-    \[ \int_{0}^{1}\int_{0}^{1} P_n(x)P_n(y) \frac{1}{1 - (1 - xy)z} \, dx \, dy = \int_{0}^{1}\int_{0}^{1} \frac{P_n(x)(xyz)^n(1-y)^n}{(1-(1-xy)z)^{n + 1}} \, dx \, dy \]
+\begin{lemma}
+  \label{lem:odd_implies_all_odd}
+  \lean{IMO2025P4.lem_odd_implies_all_odd}
+  \leanok
+  \uses{def:IsSequence, lem:odd_successor_is_odd}
+  1
 \end{lemma}
 \begin{proof}
-    \leanok
+  \leanok
+  \uses{lem:odd_successor_is_odd}
+  1
 \end{proof}
 
-\begin{lemma}\label{double_integral_eq2}
-    \uses{Legendre_poly_mul_frac_integral}
-    For $0 < x, y < 1$, 
-    \[ \int_{0}^{1} \frac{P_n(x)(xyz)^n(1-y)^n}{(1-(1-xy)z)^{n + 1}} \, dz = \int_{0}^{1} \frac{P_n(x)(1-z)^n(1-y)^n}{1-(1-xy)z}  \, dz \]
+\begin{lemma}
+  \label{lem:ratio_for_odd}
+  \lean{IMO2025P4.lem_ratio_for_odd}
+  \leanok
+  \uses{def:R}
+  1
 \end{lemma}
 \begin{proof}
-    \leanok
+  \leanok
+  1
 \end{proof}
 
-\begin{lemma}\label{double_integral_eq3}
-    \uses{Legendre_poly_mul_frac_integral}
-    For $0 < z < 1$, 
-    \[ \int_{0}^{1}\int_{0}^{1} \frac{P_n(x)(1-y)^n}{1-(1-xy)z} \, dx \, dy = \int_{0}^{1}\int_{0}^{1} \frac{(xyz(1-x)(1-y))^n}{(1-(1-xy)z)^{n+1}} \, dx \, dy \]
+\begin{lemma}
+  \label{lem:odd_implies_decreasing}
+  \lean{IMO2025P4.lem_odd_implies_decreasing}
+  \leanok
+  \uses{def:IsSequence, def:R}
+  1
 \end{lemma}
 \begin{proof}
-    \leanok
+  \leanok
+  \uses{lem:ratio_for_odd, lem:odd_implies_all_odd}
+  1
 \end{proof}
 
-\begin{theorem}\label{JJ_eq_form}
-    \uses{JJ_n, integral1, double_integral_eq1, double_integral_eq2, double_integral_eq3, JJ'_n}
-    \[ JJ_n = JJ'_n \]
+\begin{lemma}
+  \label{lem:no_odd_terms}
+  \lean{IMO2025P4.lem_no_odd_terms}
+  \leanok
+  \uses{def:IsSequence}
+  1
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{lem:odd_implies_decreasing}
+  1
+\end{proof}
+
+\begin{lemma}
+  \label{lem:all_terms_even}
+  \lean{IMO2025P4.lem_all_terms_even}
+  \leanok
+  \uses{def:IsSequence}
+  1
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{lem:no_odd_terms}
+  1
+\end{proof}
+
+\begin{lemma}
+  \label{lem:c2_is_2}
+  \lean{IMO2025P4.lem_c2_is_2}
+  \leanok
+  \uses{def:IsSequence, def:c_k}
+  1
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{lem:all_terms_even}
+  1
+\end{proof}
+
+\begin{lemma}
+  \label{lem:fixed_point_condition}
+  \lean{IMO2025P4.lem_fixed_point_condition}
+  \leanok
+  \uses{def:S, def:R}
+  1
+\end{lemma}
+\begin{proof}
+  \leanok
+  1
+\end{proof}
+
+\begin{lemma}
+  \label{lem:structure_of_fixed_points}
+  \lean{IMO2025P4.lem_structure_of_fixed_points}
+  \leanok
+  \uses{def:c_k}
+  1
+\end{lemma}
+\begin{proof}
+  \leanok
+  1
+\end{proof}
+
+\begin{lemma}
+  \label{lem:ratio_for_even}
+  \lean{IMO2025P4.lem_ratio_for_even}
+  \leanok
+  \uses{def:R, def:c_k, def:S}
+  1
+\end{lemma}
+\begin{proof}
+  \leanok
+  1
+\end{proof}
+
+\begin{lemma}
+  \label{lem:growth_condition}
+  \lean{IMO2025P4.lem_growth_condition}
+  \leanok
+  \uses{def:R, def:c_k}
+  1
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{lem:ratio_for_even}
+  1
+\end{proof}
+
+\begin{lemma}
+  \label{lem:decreasing_condition}
+  \lean{IMO2025P4.lem_decreasing_condition}
+  \leanok
+  \uses{def:R, def:c_k}
+  1
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{lem:ratio_for_even}
+  1
+\end{proof}
+
+\begin{lemma}
+  \label{lem:v3_transition_condition}
+  \lean{IMO2025P4.lem_v3_transition_condition}
+  \leanok
+  \uses{def:S, def:c_k}
+  1
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{lem:ratio_for_even}
+  1
+\end{proof}
+
+\begin{lemma}
+  \label{lem:growth_c4_is_5_impossible}
+  \lean{IMO2025P4.lem_growth_c4_is_5_impossible}
+  \leanok
+  \uses{def:IsSequence, def:S, def:c_k}
+  1
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{lem:all_terms_even, lem:ratio_for_even}
+  1
+\end{proof}
+
+\begin{lemma}
+  \label{lem:v3_transition_v2_is_1}
+  \lean{IMO2025P4.lem_v3_transition_v2_is_1}
+  \leanok
+  \uses{def:S}
+  1
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{lem:v3_transition_condition}
+  1
+\end{proof}
+
+\begin{lemma}
+  \label{lem:fixed_point_divisors}
+  \lean{IMO2025P4.lem_fixed_point_divisors}
+  \leanok
+  \uses{def:S, def:c_k}
+  1
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{lem:ratio_for_even, lem:ratio_for_odd}
+  1
+\end{proof}
+
+\begin{lemma}
+  \label{lem:fixed_point_form}
+  \lean{IMO2025P4.lem_fixed_point_form}
+  \leanok
+  \uses{def:S}
+  1
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{lem:fixed_point_divisors, lem:structure_of_fixed_points}
+  1
+\end{proof}
+
+\begin{lemma}
+  \label{lem:verification_of_form}
+  \lean{IMO2025P4.lem_verification_of_form}
+  \leanok
+  \uses{def:IsSequence}
+  1
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{lem:fixed_point_form}
+  1
+\end{proof}
+
+\begin{lemma}
+  \label{lem:v3_transition_c3_c4_are_odd}
+  \lean{IMO2025P4.lem_v3_transition_c3_c4_are_odd}
+  \leanok
+  \uses{def:S, def:c_k}
+  1
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{lem:v3_transition_condition}
+  1
+\end{proof}
+
+\begin{lemma}
+  \label{lem:transition_to_v3_positive_is_odd}
+  \lean{IMO2025P4.lem_transition_to_v3_positive_is_odd}
+  \leanok
+  \uses{def:S}
+  1
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{lem:v3_transition_v2_is_1, lem:v3_transition_c3_c4_are_odd}
+  1
+\end{proof}
+
+\begin{lemma}
+  \label{lem:no_v3_zero_terms}
+  \lean{IMO2025P4.lem_no_v3_zero_terms}
+  \leanok
+  \uses{def:IsSequence}
+  1
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{lem:decreasing_condition, lem:all_terms_even, lem:transition_to_v3_positive_is_odd, lem:no_odd_terms}
+  1
+\end{proof}
+
+\begin{lemma}
+  \label{lem:all_terms_divisible_by_3}
+  \lean{IMO2025P4.lem_all_terms_divisible_by_3}
+  \leanok
+  \uses{def:IsSequence, def:c_k}
+  1
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{lem:no_v3_zero_terms}
+  1
+\end{proof}
+
+\begin{lemma}
+  \label{lem:c4_ge_7_impossible}
+  \lean{IMO2025P4.lem_c4_ge_7_impossible}
+  \leanok
+  \uses{def:IsSequence, def:c_k}
+  1
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{lem:all_terms_divisible_by_3, lem:all_terms_even, lem:ratio_for_even}
+  1
+\end{proof}
+
+\begin{lemma}
+  \label{lem:non_fixed_must_grow}
+  \lean{IMO2025P4.lem_non_fixed_must_grow}
+  \leanok
+  \uses{def:IsSequence, def:S, def:R}
+  1
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{lem:all_terms_divisible_by_3, lem:c4_ge_7_impossible, lem:ratio_for_even, lem:all_terms_even, lem:growth_condition, lem:growth_c4_is_5_impossible, lem:c2_is_2, lem:fixed_point_condition}
+  1
+\end{proof}
+
+\begin{lemma}
+  \label{lem:a1_structure}
+  \lean{IMO2025P4.lem_a1_structure}
+  \leanok
+  \uses{def:IsSequence}
+  1
+\end{lemma}
+\begin{proof}
+  \leanok
+  \uses{lem:non_fixed_must_grow, lem:all_terms_divisible_by_3, lem:c4_ge_7_impossible, lem:ratio_for_even, lem:all_terms_even, lem:growth_condition, lem:growth_c4_is_5_impossible, lem:c2_is_2, lem:fixed_point_form}
+  1
+\end{proof}
+
+% Main theorem
+
+\begin{theorem}
+  \label{thm:main_theorem}
+  \lean{IMO2025P4.main_theorem}
+  \leanok
+  \uses{def:IsSequence, def:S}
+  1
 \end{theorem}
 \begin{proof}
-    \leanok
-    \begin{align*}
-        JJ_n &= \int_{0}^{1}\int_{0}^{1} P_n(x)P_n(y)(\int_{0}^{1} \frac{1}{1 - (1 - xy)z} \, dz) \, dx \, dy \\
-        &=\int_{0}^{1}\int_{0}^{1}\int_{0}^{1} P_n(x)P_n(y) \frac{1}{1 - (1 - xy)z} \, dx \, dy \, dz \\
-        &=\int_{0}^{1}\int_{0}^{1}\int_{0}^{1} \frac{P_n(x)(xyz)^n(1-y)^n}{(1-(1-xy)z)^{n + 1}} \, dx \, dy \, dz \\
-        &=\int_{0}^{1}\int_{0}^{1}\int_{0}^{1} \frac{P_n(x)(1-z)^n(1-y)^n}{1-(1-xy)z}  \, dz \, dx \, dy  \\
-        &=\int_{0}^{1} (1-z)^n (\int_{0}^{1}\int_{0}^{1} \frac{P_n(x)(1-y)^n}{1-(1-xy)z}  \, dx \, dy) \, dz \\
-        &=\int_{0}^{1} (1-z)^n (\int_{0}^{1}\int_{0}^{1} \frac{(xyz(1-x)(1-y))^n}{(1-(1-xy)z)^{n+1}} \, dx \, dy) \, dz \\
-        &=\int_{0}^{1}\int_{0}^{1}\int_{0}^{1} \frac{(xyz(1-x)(1-y)(1-z))^n}{(1-(1-xy)z)^{n+1}} \, dz \, dx \, dy
-        &=JJ'_n
-    \end{align*}
-\end{proof}
-
-\begin{theorem}\label{JJ_pos}
-    \uses{JJ_eq_form}
-    \[ 0 < JJ_n \]
-\end{theorem}
-\begin{proof}
-    \leanok
-    Every point is positive.
-\end{proof}
-
-
-\begin{lemma}\label{J_eq_triple}
-    \uses{J, integral1}
-    For $r, s \in \mathbb{N}$, one has
-    \[ J_rs = \int_{0}^{1}\int_{0}^{1}\int_{0}^{1} \frac{y^rz^s}{1-(1-yz)x} \, dz \, dy \, dx \]
-\end{lemma}
-\begin{proof}
-    \leanok
-    \begin{align*}
-        &\int_{0}^{1}\int_{0}^{1}\int_{0}^{1} \frac{y^rz^s}{1-(1-yz)x} \, dz \, dy \, dx \\
-        =& \int_{0}^{1}\int_{0}^{1}(\int_{0}^{1} \frac{y^rz^s}{1-(1-yz)x} \, dx) \, dy \, dz \\
-        =& \int_{0}^{1}\int_{0}^{1}(-\frac{{\rm ln}(yz)}{1 - yz}y^rz^s \, dx) \, dy \, dz \\
-        =& J_rs
-    \end{align*}
-\end{proof}
-
-\begin{theorem}\label{JJ_upper}
-    \uses{JJ_eq_form, JJ', J_eq_triple, integral_zeta_3, bound}
-    \[ JJ_n \leqslant (\frac{1}{24})^n\cdot 2\zeta(3) \]
-\end{theorem}
-\begin{proof}
-    \leanok
-    \begin{align*}
-        JJ_n &= JJ'_n \\
-        &\leqslant (\frac{1}{24})^n \int_{0}^{1}\int_{0}^{1}\int_{0}^{1} \frac{1}{1-(1-yz)x} \, dx \, dy \, dz \\
-        &= (\frac{1}{24})^n J_{00} \\
-        &= (\frac{1}{24})^n \cdot 2\zeta(3)
-    \end{align*}
-\end{proof}
-
-\begin{lemma}\label{pi_asymp}
-  One has
-  \[
-  \pi(x) = \left(1 + o(1)\right)\int_2^{x}\frac{1}{\log x} \mathsf{d} x.
-  \]
-  as $x \to \infty$.
-\end{lemma}
-\begin{proof}
-    \leanok
-    We need a precise description of auxiliary constants involved in $o(1)$ and ``sufficiently large'' for the purpose of formalisation, we write down the proof in an excruciatingly detailed manner so that each step could be transcribed to Lean4 with relative ease.
-    \begin{proof}[Prime Number Theorem]
-    We want to show that $\frac{\pi\left(x\right)}{{ \int_{2}^{x}\frac{\mathsf{d}t}{\log t}}}-1$
-    is $o\left(1\right)$, that is for every $\epsilon$, there exists
-    $M_{\epsilon}\in\mathbb{R}$ such that $\left|\frac{\pi\left(x\right)}{{ \int_{2}^{x}\frac{\mathsf{d}t}{\log t}}}-1\right|\le\epsilon$.
-    We know that for all $2\le x$, 
-    
-    \[
-    \pi\left(x\right)={\frac{1}{\log x}\sum_{p\le\lfloor x\rfloor}\log p+{\int_{2}^{x}\frac{\sum_{p\le\lfloor t\rfloor}\log p}{t\log^{2}t}}\mathsf{d}t}.
-    \]
-    
-    We also know that for all $0<\epsilon$, there exists a function $f_{\epsilon}:\mathbb{R}\to\mathbb{R}$
-    such that $f_{\epsilon}=o\left(\epsilon\right)$ and $f$ is integrable
-    on $\left(2,x\right)$ for all $2\le x$ and for $x$ sufficiently
-    large, say $x>N_{\epsilon}\ge2$
-    
-    \[
-    \sum_{p\le\lfloor x\rfloor}\log p=x+xf_{\epsilon}\left(x\right).
-    \]
-    Hence for all $0<\epsilon$, such an $f$ satisfies: for $x$ sufficiently
-    large
-    \[
-    \pi\left(x\right)=\frac{x+xf_{\epsilon}\left(x\right)}{\log x}+\int_{2}^{N_{\epsilon}}\frac{\sum_{p\le\lfloor x\rfloor}\log p}{t\log^{2}t}\mathsf{d}t+\int_{N_{\epsilon}}^{x}\frac{t+tf_{\epsilon}\left(t\right)}{t\log^{2}t}\mathsf{d}t,
-    \]
-    which simplifies to
-    \[
-    \pi\left(x\right)=\left(\frac{x}{\log x}+\int_{N_{\epsilon}}^{x}\frac{\mathsf{d}t}{\log^{2}t}\right)+\left(\frac{xf_{\epsilon}\left(x\right)}{\log x}+\int_{N_{\epsilon}}^{x}\frac{f_{\epsilon}\left(t\right)}{\log^{2}t}\mathsf{d}t\right)+\int_{2}^{N_{\epsilon}}\frac{\sum_{p\le\lfloor x\rfloor}\log p}{t\log^{2}t}\mathsf{d}t.
-    \]
-    Integration by parts tells us that
-    \[
-    \frac{x}{\log x}+\int_{N_{\epsilon}}^{x}\frac{\mathsf{d}t}{\log^{2}t}=\int_{N_{\epsilon}}^{x}\frac{\mathsf{d}t}{\log t}+\frac{N_{\epsilon}}{\log N_{\epsilon}}=\int_{2}^{x}\frac{\mathsf{d}t}{\log t}+\left(\frac{N_{\epsilon}}{\log N_{\epsilon}}-\int_{2}^{N_{\epsilon}}\frac{\mathsf{d}t}{\log t}\right).
-    \]
-    Hence
-    \[
-    \pi\left(x\right)=\int_{2}^{x}\frac{\mathsf{d}t}{\log t}+\left(\frac{xf_{\epsilon}\left(x\right)}{\log x}+\int_{N_{\epsilon}}^{x}\frac{f_{\epsilon}\left(t\right)}{\log^{2}t}\mathsf{d}t\right)+C_{\epsilon},
-    \]
-    for some constant $C_{\epsilon}\in\mathbb{R}$.
-    \[
-    \frac{\pi\left(x\right)}{\int_{2}^{x}\frac{\mathsf{d}t}{\log t}}-1=\left(\frac{xf_{\epsilon}\left(x\right)}{\log x}+\int_{N_{\epsilon}}^{x}\frac{f_{\epsilon}\left(t\right)}{\log^{2}t}\mathsf{d}t\right)/\int_{2}^{x}\frac{\mathsf{d}t}{\log t}+\frac{C_{\epsilon}}{\int_{2}^{x}\frac{\mathsf{d}t}{\log t}}.
-    \]
-    
-    Remember that $f_{\epsilon}=o\left(\epsilon\right)$, so we know for
-    all $0<c$, there exists $M_{c,\epsilon}$ such that for all $M_{c,\epsilon}<x$,$\left|f_{\epsilon}\left(x\right)\right|\le c\epsilon$.
-    Then for $2<M_{c,\epsilon}<x$, we have
-    \[
-    \begin{aligned}\frac{xf_{\epsilon}\left(x\right)}{\log x} & \le\frac{c\epsilon\cdot x}{\log x}\\
-    \left|\int_{N_{\epsilon}}^{x}\frac{f_{\epsilon}\left(t\right)}{\log^{2}t}\mathsf{d}t\right| & \le\int_{N_{\epsilon}}^{M_{c,\epsilon}}\left|\frac{f_{\epsilon}\left(t\right)}{\log^{2}t}\right|\mathsf{d}t+\int_{M_{c,\epsilon}}^{x}\left|\frac{f_{\epsilon}\left(t\right)}{\log^{2}t}\right|\mathsf{d}t\\
-     & \le\int_{N_{\epsilon}}^{M_{c,\epsilon}}\frac{\left|f_{\epsilon}\left(t\right)\right|}{\log^{2}t}\mathsf{d}t+c\epsilon\int_{M_{c,\epsilon}}^{x}\frac{\mathsf{d}t}{\log^{2}t}\\
-     & =\int_{N_{\epsilon}}^{M_{c,\epsilon}}\frac{\left|f_{\epsilon}\left(t\right)\right|}{\log^{2}t}\mathsf{d}t+c\epsilon\left(\int_{M_{c,\epsilon}}^{x}\frac{\mathsf{d}t}{\log t}+\frac{M_{c,\epsilon}}{\log M_{c,\epsilon}}-\frac{x}{\log x}\right),
-    \end{aligned}
-    \]
-    hence for $M_{c,\epsilon}<x$, we have
-    \[
-    \begin{aligned}\left|\frac{xf_{\epsilon}\left(x\right)}{\log x}+\int_{N_{\epsilon}}^{x}\frac{f_{\epsilon}\left(t\right)}{\log^{2}t}\mathsf{d}t\right| & \le\int_{N_{\epsilon}}^{M_{c,\epsilon}}\frac{\left|f_{\epsilon}\left(t\right)\right|}{\log^{2}t}\mathsf{d}t+c\epsilon\left(\int_{M_{c,\epsilon}}^{x}\frac{\mathsf{d}t}{\log t}+\frac{M_{c,\epsilon}}{\log M_{c,\epsilon}}\right)\\
-     & =\int_{N_{\epsilon}}^{M_{c,\epsilon}}\frac{\left|f_{\epsilon}\left(t\right)\right|}{\log^{2}t}\mathsf{d}t+c\epsilon\left(\int_{2}^{x}\frac{\mathsf{d}t}{\log t}+\frac{M_{c,\epsilon}}{\log M_{c,\epsilon}}-\int_{M_{c,\epsilon}}^{2}\frac{\mathsf{d}t}{\log t}\right).
-    \end{aligned}
-    \]
-    Denote $D_{c,\epsilon}$ to be $\int_{N_{\epsilon}}^{M_{c,\epsilon}}\frac{\left|f_{\epsilon}\left(t\right)\right|}{\log^{2}t}\mathsf{d}t+c\epsilon\frac{M_{c,\epsilon}}{\log M_{c,\epsilon}}-c\epsilon\int_{M_{c,\epsilon}}^{2}\frac{\mathsf{d}t}{\log t}$, we notice
-    \[
-    \begin{aligned}\left|\frac{\pi\left(x\right)}{\int_{2}^{x}\frac{\mathsf{d}t}{\log t}}-1\right| & \le\left(c\epsilon\int_{2}^{x}\frac{\mathsf{d}t}{\log t}+D_{c,\epsilon}\right)/\int_{2}^{x}\frac{\mathsf{d}t}{\log t}+\frac{C_{\epsilon}}{\int_{2}^{x}\frac{\mathsf{d}t}{\log t}}\\
-     & =c\epsilon+\frac{D_{c,\epsilon}}{\int_{2}^{x}\frac{\mathsf{d}t}{\log t}}+\frac{C_{\epsilon}}{\int_{2}^{x}\frac{\mathsf{d}t}{\log t}}.
-    \end{aligned}
-    \]
-    In particular, there exists a constant $D$ such that for all $\max\left(M_{\frac{1}{2},\epsilon},N_{\epsilon}\right)<x$,
-    \[
-    \left|\frac{\pi\left(x\right)}{\int_{2}^{x}\frac{\mathsf{d}t}{\log t}}-1\right|\le\frac{\epsilon}{2}+\frac{D}{\int_{2}^{x}\frac{\mathsf{d}t}{\log t}}.
-    \]
-    
-    We now bound $\int_2^x\frac{\mathsf{d}t}{\log t}$. Note that $\int_{2}^{x}\frac{\mathsf{d}t}{\log t}\ge\frac{\left(x-2\right)}{\log x}$.
-    Hence for $x>e^{s}$ with $s>1$, $\int_{2}^{x}\frac{\mathsf{d}t}{\log t}\ge\frac{e^{s}-2}{s}$
-    , consequently $\frac{D}{\int_{2}^{x}\frac{\mathsf{d}t}{\log t}}\le\frac{sD}{e^{s}-2}\le\frac{sD}{e^{s}}\le\frac{\epsilon}{2}$
-    for $s$ sufficiently large, say $s>A_{\epsilon}>1$.
-    Thus for all $x>\max\left(M_{\frac{1}{2},\epsilon},N_{\epsilon},e^{A_{\epsilon}}\right)$,
-    $\left|\frac{\pi\left(x\right)}{\int_{2}^{x}\frac{\mathsf{d}t}{\log t}}-1\right|\le\epsilon$.
-    This proves $\frac{\pi\left(x\right)}{\int_{2}^{x}\frac{\mathsf{d}t}{\log t}}-1$
-    is $o\left(1\right)$ for sufficiently large $x$.
-    \end{proof}
-\end{proof}
-
-\begin{lemma}\label{pi_alt}
-    \uses{pi_asymp}
-    One has 
-    \[ \pi(x) = (1 + o(1))\frac{x}{\log x}\]
-    as $x \rightarrow \infty$.
-\end{lemma}
-\begin{proof}
-    \leanok
-\end{proof}
-
-\begin{lemma}\label{dn_asymptotic}
-    \uses{pi_alt}
-    Let $n$ be a positive integer. Define $\pi(n)$ as the number of primes less than (or equal to) $n$. Then, $d_n \leqslant n^{\pi(n)} \sim e^n$.
-\end{lemma}
-\begin{proof}
-    \leanok
-    use Prime Number Theorem. 
-\end{proof}
-
-\begin{theorem}\label{zeta_3_irrational}
-    \uses{J_n_integers_an_bn, JJ_upper, dn_asymptotic}
-    $\zeta(3)$ is irrational.
-\end{theorem}
-\begin{proof}
-    \leanok
-    \[ 0 \neq |J_n| \leqslant (\frac{1}{30})^n\cdot 2\zeta(3) \]
-    Then 
-    \[ 0 < |\frac{a_n}{d_n^3} + b_n\zeta(3)| \leqslant (\frac{1}{30})^n\cdot 2\zeta(3) \]
-    which means that 
-    \[ 0 < |a_n + d_n^3 b_n\zeta(3)| \leqslant d_n^3(\frac{1}{30})^n\cdot 2\zeta(3) \] 
-    Since $d_n \leqslant n^{\pi(n)} \sim e^n$ and $e^3 < 21$, we have
-    \[ 0 < |a_n + c_n\zeta(3)| < 21^n (\frac{1}{30})^n\cdot 2\zeta(3) = 2(\frac{7}{10})^n \zeta(3) \]
-    where$c_n = d_n^3 b_n$ is integer.\\
-    Assume $\zeta(3) = \frac{p}{q}, (p,q)=1$ and $p,q>0$. Then 
-    \[ 0 < |qa_n + pc_n| < 2p (\frac{7}{10})^n \]
-    So $n \rightarrow \infty, |qa_n + pc_n| \rightarrow 0$.\\
-    Since $|qa_n + pc_n|$ is a integer, so $|qa_n + pc_n| \geqslant 1$. Contradiction! \\
-    So $\zeta(3)$ is irrational!
+  \leanok
+  \uses{lem:a1_structure, lem:verification_of_form}
+  1
 \end{proof}
