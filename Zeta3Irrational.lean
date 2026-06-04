@@ -5,3 +5,9 @@ import Zeta3Irrational.Integral
 import Zeta3Irrational.LegendrePoly
 import Zeta3Irrational.LinearForm
 import Zeta3Irrational.d
+
+theorem infinite_primes : {p : ℕ | p.Prime}.Infinite :=
+  Nat.infinite_setOf_prime
+
+
+
